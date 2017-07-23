@@ -33,5 +33,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 set(SOURCE_FILES main.cpp string_algrithm.h boost_xpressive.cpp tokenizer.cpp spirit.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} gtest_main ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} gtest_main)
+#target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME})
