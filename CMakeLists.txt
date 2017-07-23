@@ -30,7 +30,7 @@ find_package(Boost REQUIRED
         COMPONENTS filesystem system)
 include_directories(${Boost_INCLUDE_DIRS})
 
-set(SOURCE_FILES main.cpp string_algrithm.h boost_xpressive.cpp tokenizer.cpp spirit.cpp)
+set(SOURCE_FILES main.cpp string_algrithm.h boost_xpressive.cpp tokenizer.cpp spirit.cpp multi_index.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} gtest_main)
