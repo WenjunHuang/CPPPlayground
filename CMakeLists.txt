@@ -33,7 +33,7 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 include_directories(~/github/boost)
-set(SOURCE_FILES main.cpp string_algrithm.h boost_xpressive.cpp)
+set(SOURCE_FILES main.cpp string_algrithm.h boost_xpressive.cpp tokenizer.cpp)
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} gtest_main)
 add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME})
