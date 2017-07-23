@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.7)
 project(BoostPlayground)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -25,15 +25,13 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
         ${CMAKE_BINARY_DIR}/googletest-build)
 
-# The gtest/gtest_main targets carry header search path
-# dependencies automatically when using CMake 2.8.11 or
-# later. Otherwise we have to add them here ourselves.
-if (CMAKE_VERSION VERSION_LESS 2.8.11)
-    include_directories("${gtest_SOURCE_DIR}/include")
-endif()
+set(BOOST_ROOT $ENV{BOOST_ROOT})
+find_package(Boost REQUIRED
+        COMPONENTS filesystem system)
+include_directories(${Boost_INCLUDE_DIRS})
 
-include_directories(~/github/boost)
-set(SOURCE_FILES main.cpp string_algrithm.h boost_xpressive.cpp tokenizer.cpp)
+set(SOURCE_FILES main.cpp string_algrithm.h boost_xpressive.cpp tokenizer.cpp spirit.cpp)
+
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} gtest_main)
+target_link_libraries(${PROJECT_NAME} gtest_main ${Boost_LIBRARIES})
 add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME})

@@ -66,3 +66,22 @@ TEST(Tokenizer, WideStrings) {
   for (const auto &t: tok)
     wcout << t << endl;
 }
+
+TEST(Tokenizer, CSV) {
+  using tokenizer = tokenizer<escaped_list_separator<char>>;
+  string s = "Boost,\"C++ Libraries\"";
+  tokenizer tok{s};
+  for (const auto &t:tok)
+    cout << t << endl;
+}
+
+
+TEST(Tokenizer, Offset) {
+  using tokenizer = tokenizer<offset_separator>;
+  string s = "Boost_C++_Libraries";
+  int offsets[] = {5, 5, 9};
+  offset_separator sep{offsets, offsets + 3};
+  tokenizer tok{s, sep};
+  for (const auto &t : tok)
+    cout << t << endl;
+}
