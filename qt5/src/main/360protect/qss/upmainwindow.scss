@@ -1,0 +1,119 @@
+@import "mixins";
+
+$mainColor: rgb(57, 196, 44);
+
+UpMainWindow {
+
+  background-color: $mainColor;
+  qproperty-maximumSize: 900px 440px;
+  qproperty-minimumSize: 900px 440px;
+
+  QLabel {
+    background: transparent;
+    color: white;
+  }
+
+  QPushButton {
+    background: transparent;
+  }
+
+  > #logoLabel {
+    border-image: url(:/image/360logo.png);
+    qproperty-position: 10px 5px;
+    qproperty-size: 16px 16px;
+  }
+
+  > #titleLabel {
+    qproperty-position: 30px 5px;
+    qproperty-size: 105px 16px;
+  }
+
+  > #updateBtn {
+    qproperty-position: 135px 5px;
+    qproperty-size: 16px 16px;
+    qproperty-pixmapUrl: ":/image/update_btn.png";
+  }
+
+  > #headBtn {
+    qproperty-position: 840px 50px;
+    qproperty-size: 52px 52px;
+  }
+
+  > #wordBtn {
+    qproperty-position: 760px 70px;
+    qproperty-size: 80px 20px;
+    background-color: transparent;
+    text-decoration: none;
+    color: white;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  > #examineBtn {
+    qproperty-position: 344px 285px;
+    qproperty-size: 212px 74px;
+    qproperty-pixmapUrl: ":/image/btn_examine_now.png";
+  }
+
+  > #securityBtn {
+    qproperty-position: 50px 360px;
+    qproperty-size: 37px 37px;
+    border-image: url(:/image/security_safe_normal.png);
+
+    &:hover {
+      border-image: url(:/image/security_safe_hover.png);
+    }
+  }
+
+  > #securityLabel {
+    qproperty-position: 30px 400px;
+    qproperty-size: 100px 16px;
+  }
+  > #quardlineLabel {
+    qproperty-position: 120px 360px;
+    qproperty-size: 1px 50px;
+    //background: transparent;
+    border-image: url(:/image/guardline.png);
+  }
+
+  > #payforLabel {
+    qproperty-position: 145px 400px;
+    qproperty-size: 60px 16px;
+  }
+
+  > #netPayforBtn {
+    qproperty-position: 150px 360px;
+    qproperty-size: 37px 37px;
+    background-image: url(:/image/payinsure_safe_normal.png);
+    &:hover {
+      background-image: url(:/image/payinsure_safe_hover.png);
+    }
+  }
+
+  @include titleBar();
+
+  > #scoreLabel {
+    qproperty-pixmap: url(:/image/100.png);
+    qproperty-size: 191px 191px;
+    qproperty-position: 30px 85px;
+  }
+
+  > #titleLabel1 {
+    color: white;
+    qproperty-size: 600px 40px;
+    qproperty-position: 240px 150px;
+    font: {
+      family: "Heiti SC";
+      size: 36px;
+    }
+  }
+  > #titleLabel2 {
+    color: white;
+    font-size: 14px;
+    qproperty-size: 400px 32px;
+    qproperty-position: 240px 200px;
+  }
+}
+

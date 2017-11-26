@@ -1,0 +1,15 @@
+BottomWidget {
+  qproperty-maximumSize: 900px 450px;
+  qproperty-minimumSize: 900px 450px;
+  background-color: rgb(252,252,252);
+
+  > #lowBar {
+    border-top: 1px solid rgb(218,218,218);
+  }
+
+  &[fillLowBar="true"] {
+    > #lowBar {
+      background-color: rgb(242,244,247);
+    }
+  }
+}

@@ -1,0 +1,29 @@
+CsxfWidget {
+  #logoLabel {
+    border-image: url(:/image/logo_normal.png);
+    qproperty-position: 40px 40px;
+    qproperty-size: 76px 75px;
+  }
+
+  #titleLabel {
+    qproperty-position: 150px 60px;
+    qproperty-size: 400px 32px;
+    color: white;
+    font: {
+      family: "Heiti SC";
+      size: 24px;
+    }
+  }
+
+  #titleLabel2 {
+    color: white;
+    qproperty-position: 150px 92px;
+    qproperty-size: 400px 32px;
+  }
+
+  #startScanBtn {
+    qproperty-pixmapUrl: ":/image/start_btn.png";
+    qproperty-position: 700px 50px;
+    qproperty-size: 164px 64px;
+  }
+}

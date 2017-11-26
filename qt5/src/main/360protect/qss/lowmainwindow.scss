@@ -1,0 +1,92 @@
+@import "mixins";
+
+LowMainWindow {
+  background-color: white;
+  qproperty-maximumSize: 900px 160px;
+  qproperty-minimumSize: 900px 160px;
+  $width: 95px;
+
+  @include buttonLabel("killAndFixLabel", ":/image/csxf.png");
+  @include animationButton("killAndFixBtn",
+          ":/image/safe.png",
+          ":/image/safe_Hover.png",
+          10, 600,
+          ":/image/safe_Leave.png",
+          8, 600,
+          $width);
+  > #killAndFixBtn {
+    qproperty-position: 30px 30px;
+  }
+  > #killAndFixLabel {
+    qproperty-position: 45px 130px;
+    qproperty-size: 70px 20px;
+  }
+  @include animationButton("cleanBtn",
+          ":/image/clean.png",
+          ":/image/clean_Hover.png",
+          10, 600,
+          ":/image/clean_Leave.png",
+          8, 600,
+          $width);
+  > #cleanBtn {
+    qproperty-position: 140px 30px;
+  }
+  @include buttonLabel("cleanLabel", ":/image/dnql.png");
+  > #cleanLabel {
+    qproperty-position: 155px 130px;
+    qproperty-size: 70px 20px;
+  }
+
+  @include animationButton("speedUpBtn",
+          ":/image/youhua.png",
+          ":/image/youhua_Hover.png",
+          10, 600,
+          ":/image/youhua_Leave.png",
+          8, 600,
+          $width);
+  > #speedUpBtn {
+    qproperty-position: 250px 30px;
+  }
+  @include buttonLabel("speedUpLabel", ":/image/yhjs.png");
+  > #speedUpLabel {
+    qproperty-position: 265px 130px;
+    qproperty-size: 70px 20px;
+  }
+
+  @each $index, $btn in (0, rjgj), (1, rgfw), (2, kdcsq), (3, 360 wd) {
+    > ##{$btn} {
+      $start: 525px;
+      $width: 76px;
+      $height: 70px;
+      qproperty-pixmap: url(:/image/#{$btn}.png);
+      qproperty-size: $width $height;
+      qproperty-position: ($start + $width * $index) 80px;
+    }
+  }
+
+  > #moreBtn {
+    qproperty-position: 840px 92px;
+    qproperty-size: 32px 32px;
+    qproperty-pixmapUrl: ":/image/btn_more.png";
+  }
+
+  > #more {
+    qproperty-position: 842px 128px;
+    qproperty-size: 32px 24px;
+    background: transparent;
+    color: rgb(0, 135, 255);
+  }
+
+  > #win10Btn {
+    qproperty-position: 701px 30px;
+    qproperty-size: 173px 32px;
+    background: transparent;
+    border-image: url(:/image/win10_normal.png);
+    &:hover {
+      border-image: url(:/image/win10_hover.png);
+    }
+    &:pressed {
+      border-image: url(:/image/win10_pressed.png);
+    }
+  }
+}

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>UpMainWindow</class>
+ <widget class="QWidget" name="upmainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>440</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>900</width>
+    <height>440</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>900</width>
+    <height>440</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="PositionableWidget&lt;QLabel&gt;" name="logoLabel">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>5</y>
+     <width>16</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="titleLabel">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>5</y>
+     <width>105</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>360安全卫士领航版</string>
+   </property>
+  </widget>
+  <widget class="ThreeStateButton" name="btnUpdate">
+   <property name="geometry">
+    <rect>
+     <x>135</x>
+     <y>5</y>
+     <width>16</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="pixmapUrl" stdset="0">
+    <string>:/image/update_btn.png</string>
+   </property>
+   <property name="index" stdset="0">
+    <number>0</number>
+   </property>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ThreeStateButton</class>
+   <extends>QPushButton</extends>
+   <header>ThreeStateButton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PositionableWidget&lt;QLabel&gt;</class>
+   <extends>QLabel</extends>
+   <header>PositionableWidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="centerwindres.qrc"/>
+  <include location="lowmainres.qrc"/>
+  <include location="trayiconmenures.qrc"/>
+  <include location="upmainres.qrc"/>
+ </resources>
+ <connections/>
+</ui>
