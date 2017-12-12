@@ -3,11 +3,14 @@
 
 #include <QMainWindow>
 #include <QStackedWidget>
+#include "MaskMainWidget.h"
+
+class MainWindowPrivate;
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
 public:
-  MainWindow(QWidget *parent = nullptr);
+  explicit MainWindow(QWidget *parent = nullptr);
 
   ~MainWindow();
 
@@ -23,8 +26,13 @@ protected:
 //  void paintEvent(QPaintEvent *) override;
 
 public slots:
+
 private:
-  QStackedWidget *_stackwid;
+  QScopedPointer<MainWindowPrivate> d_ptr;
+
+  Q_DECLARE_PRIVATE(MainWindow)
+
+  void initializeAnimations();
 };
 
 

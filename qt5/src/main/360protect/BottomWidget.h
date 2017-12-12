@@ -3,6 +3,10 @@
 
 #include <QWidget>
 
+namespace Ui{
+  class BottomWidget;
+}
+
 class BottomWidget : public QWidget {
   Q_OBJECT
   Q_PROPERTY(bool fillLowBar
@@ -15,6 +19,7 @@ class BottomWidget : public QWidget {
 
 public:
   BottomWidget(QWidget *parent = nullptr);
+  ~BottomWidget();
 
   bool fillLowBar() const { return _fillLowBar; }
 
@@ -34,6 +39,7 @@ protected:
 
 private:
   bool _fillLowBar;
+  QScopedPointer<Ui::BottomWidget> _ui;
 };
 
 

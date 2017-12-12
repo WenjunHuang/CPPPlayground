@@ -5,6 +5,7 @@
 #include "catch.hpp"
 #include "Counter.h"
 #include "Listener.h"
+#include "fixture.h"
 
 TEST_CASE("slots_signals","[SlotsSignals]") {
   Counter counter;
@@ -41,4 +42,19 @@ TEST_CASE("signal_mapper","[SlotsSignals]"){
   a.setValue(999);
 
   REQUIRE(l._sender == "a");
+}
+
+class MyCustomEvent:public QEvent {
+public:
+  MyCustomEvent():QEvent((QEvent::Type)(QEvent::User+ 1)){}
+  ~MyCustomEvent(){
+    qDebug() << "destroyed";
+  }
+
+};
+
+TEST_CASE_METHOD(TestFixture,"destroyed","[Destroyed]") {
+  auto event = new MyCustomEvent;
+  application.sendEvent(&application,event);
+  qDebug() << "about to quit";
 }

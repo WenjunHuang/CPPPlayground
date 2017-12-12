@@ -6,25 +6,24 @@
 #include "TwoStateButton.h"
 #include "ThreeStateButton.h"
 
-class LowMainWindow : public QWidget{
-  Q_OBJECT
+class LowMainWindow : public QWidget {
+Q_OBJECT
 public:
   LowMainWindow(QWidget *parent = nullptr);
+
+  QPushButton *killAndFixBtn() const { return _killAndFixBtn; }
+
+  QPushButton *cleanBtn() const { return _cleanBtn; }
+
+  QPushButton *speedUpBtn() const { return _speedUpBtn; }
+
 protected:
   void paintEvent(QPaintEvent *) override;
 
 private:
-  AnimationButton *_btn;
-  AnimationButton *_btn1;
-  AnimationButton *_btn2;
-  TwoStateButton *_btn3;
-  TwoStateButton *_btn4;
-  TwoStateButton *_btn5;
-  TwoStateButton *_btn6;
-  ThreeStateButton *_btn7;
-
-
-
+  QPushButton *_killAndFixBtn;
+  QPushButton *_cleanBtn;
+  QPushButton *_speedUpBtn;
 };
 
 

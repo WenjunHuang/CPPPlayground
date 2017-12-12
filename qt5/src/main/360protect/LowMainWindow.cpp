@@ -9,25 +9,25 @@
 #include "PositionableWidget.h"
 #include "wobjectimpl.h"
 
-W_OBJECT_IMPL(PositionableWidget<T>, template<typename T>)
+W_OBJECT_IMPL((PositionableWidget<T,S>), template <typename T,typename S>)
 
 LowMainWindow::LowMainWindow(QWidget *parent) : QWidget(parent) {
   setWindowFlags(Qt::FramelessWindowHint);
 
-  auto btn = new PositionableWidget<AnimationButton>(this);
-  btn->setObjectName("killAndFixBtn");
+  _killAndFixBtn = new PositionableWidget<AnimationButton>(this);
+  _killAndFixBtn->setObjectName("killAndFixBtn");
 
   auto label = new PositionableWidget<QLabel>(this);
   label->setObjectName("killAndFixLabel");
 
-  auto btn1 = new PositionableWidget<AnimationButton>(this);
-  btn1->setObjectName("cleanBtn");
+  _cleanBtn = new PositionableWidget<AnimationButton>(this);
+  _cleanBtn->setObjectName("cleanBtn");
 
   auto label1 = new PositionableWidget<QLabel>(this);
   label1->setObjectName("cleanLabel");
 
-  auto btn2 = new PositionableWidget<AnimationButton>(this);
-  btn2->setObjectName("speedUpBtn");
+  _speedUpBtn = new PositionableWidget<AnimationButton>(this);
+  _speedUpBtn->setObjectName("speedUpBtn");
 
   auto label2 = new PositionableWidget<QLabel>(this);
   label2->setObjectName("speedUpLabel");

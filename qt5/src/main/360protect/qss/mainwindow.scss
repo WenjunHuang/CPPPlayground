@@ -1,0 +1,16 @@
+MainWindow {
+  qproperty-minimumSize: 910px 610px;
+  qproperty-maximumSize: 910px 610px;
+  qproperty-icon: url(:/image/360logo.ico);
+
+  #stackedWidget {
+    qproperty-position: 5px 5px;
+    qproperty-size: 900px 600px;
+  }
+
+  #maskMainWidget {
+    qproperty-position: 5px 5px;
+    qproperty-size: 900px 600px;
+  }
+
+}

@@ -7,6 +7,22 @@
 
 TEST_CASE("decltype","[decltype]"){
   std::vector<int> d(10);
-  authAndAccess(d, 5) = 10;
+}
+
+class MyClass {
+public:
+  void myFunc();
+};
+
+#define METHOD(Class,Func) \
+  void Class::my##Func() { }
+
+#define Ide(name) i##name##Hello
+
+METHOD(MyClass,Func)
+
+TEST_CASE("macro","[macro]"){
+  auto Ide(tt) = 1;
+
 }
 

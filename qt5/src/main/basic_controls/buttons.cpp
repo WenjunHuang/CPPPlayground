@@ -2,7 +2,9 @@
 // Created by xxzyjy on 26/10/2017.
 //
 #include "catch.hpp"
+#include "MyButton.h"
 #include <QtWidgets>
+#include <QHBoxLayout>
 
 
 class TestsFixture {
@@ -56,5 +58,14 @@ TEST_CASE_METHOD(TestsFixture,"timer","[QTimer]"){
   window->setLayout(layout);
   window->show();
   app->exec();
+}
+
+TEST_CASE_METHOD(TestsFixture,"mybutton","[MyButton]"){
+  MyButton button;
+  button.setText("Hello");
+
+  button.show();
+  app->exec();
+
 }
 

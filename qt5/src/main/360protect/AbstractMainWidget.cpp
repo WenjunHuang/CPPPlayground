@@ -13,16 +13,12 @@ AbstractMainWidget::AbstractMainWidget(QWidget *parent) : QWidget(parent) {
   _bottomWidget->setObjectName("bottomWidget");
   _topWidget = new TopWidget(this);
   _topWidget->setObjectName("topWidget");
-
   auto vlayout = new QVBoxLayout(this);
   vlayout->addWidget(_topWidget);
   vlayout->addWidget(_bottomWidget);
   vlayout->setSpacing(0);
   vlayout->setContentsMargins(QMargins(0, 0, 0, 0));
   setLayout(vlayout);
-
-  auto btnUpdate = new PositionableWidget<ThreeStateButton>(this);
-  btnUpdate->setObjectName("updateBtn");
 
   auto btnMini = new PositionableWidget<ThreeStateButton>(this);
   btnMini->setObjectName("min");
@@ -39,6 +35,4 @@ AbstractMainWidget::AbstractMainWidget(QWidget *parent) : QWidget(parent) {
 
   auto btnSkin = new PositionableWidget<ThreeStateButton>(this);
   btnSkin->setObjectName("Skin");
-
-
 }

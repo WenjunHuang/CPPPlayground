@@ -10,6 +10,9 @@ class MaskMainWidget : public QWidget{
 public:
   MaskMainWidget(QWidget *parent = nullptr);
 
+  UpMainWindow* upmain() const {return _upmain;}
+  LowMainWindow* lowmain() const {return _lowmain;}
+
 private:
   UpMainWindow *_upmain;
   LowMainWindow *_lowmain;

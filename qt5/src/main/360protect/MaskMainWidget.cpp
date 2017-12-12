@@ -5,7 +5,7 @@
 #include "MaskMainWidget.h"
 
 MaskMainWidget::MaskMainWidget(QWidget *parent):QWidget(parent) {
-  setWindowFlags(Qt::FramelessWindowHint);
+//  setWindowFlags(Qt::FramelessWindowHint);
   setFixedSize(QSize(900,600));
 
   _upmain = new UpMainWindow(this);

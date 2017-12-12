@@ -4,13 +4,15 @@
 
 #include <QStyleOption>
 #include <QPainter>
+#include <QStyle>
 #include "TopWidget.h"
-#include "PositionableWidget.h"
-#include "ThreeStateButton.h"
+#include "ui_topwidget.h"
 
-TopWidget::TopWidget(QWidget *parent) {
-  auto btnReturn = new PositionableWidget<ThreeStateButton>(this);
-  btnReturn->setObjectName("returnBtn");
+TopWidget::TopWidget(QWidget *parent) : QWidget{parent},_ui{new Ui::TopWidget} {
+//  auto btnReturn = new PositionableWidget<ThreeStateButton>(this);
+//  btnReturn->setObjectName("returnBtn");
+  _ui->setupUi(this);
+//  connect(btnReturn, &QPushButton::clicked, this, &TopWidget::onReturn);
 }
 
 void TopWidget::paintEvent(QPaintEvent *) {
@@ -18,5 +20,7 @@ void TopWidget::paintEvent(QPaintEvent *) {
   option.initFrom(this);
 
   QPainter painter(this);
-  style()->drawPrimitive(QStyle::PE_Widget,&option,&painter,this);
+  style()->drawPrimitive(QStyle::PE_Widget, &option, &painter, this);
 }
+
+TopWidget::~TopWidget() =default;

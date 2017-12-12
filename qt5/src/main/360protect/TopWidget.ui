@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TopWidget</class>
+ <widget class="TopWidget" name="TopWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <widget class="PositionableWidget&lt;ThreeStateButton&gt;" name="returnBtn">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>113</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ThreeStateButton</class>
+   <extends>QPushButton</extends>
+   <header>ThreeStateButton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PositionableWidget&lt;ThreeStateButton&gt;</class>
+   <extends>ThreeStateButton</extends>
+   <header>PositionableWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TopWidget</class>
+   <extends>QWidget</extends>
+   <header>TopWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>returnBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>TopWidget</receiver>
+   <slot>onReturn()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>56</x>
+     <y>15</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onReturn()</slot>
+ </slots>
+</ui>

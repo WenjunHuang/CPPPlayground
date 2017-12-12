@@ -53,7 +53,7 @@ LowMainWindow {
     qproperty-size: 70px 20px;
   }
 
-  @each $index, $btn in (0, rjgj), (1, rgfw), (2, kdcsq), (3, 360 wd) {
+  @each $index, $btn in (0, rjgj), (1, rgfw), (2, kdcsq), (3, 360wd) {
     > ##{$btn} {
       $start: 525px;
       $width: 76px;

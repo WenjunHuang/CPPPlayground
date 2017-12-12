@@ -7,14 +7,29 @@ $leaveAnimationImage,
 $leaveAnimationFrameCount,
 $leaveAnimationDuration,
 $width) {
-  > ##{$selector} {
+   ##{$selector} {
     qproperty-normalImage: url(#{$normalImage});
-    qproperty-enterAnimationImage: url(#{$enterAnimationImage});
-    qproperty-enterAnimationFrameCount: $enterAnimationFrameCount;
-    qproperty-enterAnimationDuration: $enterAnimationDuration;
-    qproperty-leaveAnimationImage: url(#{$leaveAnimationImage});
-    qproperty-leaveAnimationFrameCount: $leaveAnimationFrameCount;
-    qproperty-leaveAnimationDuration: $leaveAnimationDuration;
+    qproperty-normalEnterAnimationImage: url(#{$enterAnimationImage});
+    qproperty-normalEnterAnimationFrameCount: $enterAnimationFrameCount;
+    qproperty-normalEnterAnimationDuration: $enterAnimationDuration;
+    qproperty-normalLeaveAnimationImage: url(#{$leaveAnimationImage});
+    qproperty-normalLeaveAnimationFrameCount: $leaveAnimationFrameCount;
+    qproperty-normalLeaveAnimationDuration: $leaveAnimationDuration;
+    qproperty-size: $width $width;
+  }
+}
+
+@mixin animationButtonNoLeave($selector,
+$normalImage,
+$enterAnimationImage,
+$enterAnimationFrameCount,
+$enterAnimationDuration,
+$width) {
+   ##{$selector} {
+    qproperty-normalImage: url(#{$normalImage});
+    qproperty-normalEnterAnimationImage: url(#{$enterAnimationImage});
+    qproperty-normalEnterAnimationFrameCount: $enterAnimationFrameCount;
+    qproperty-normalEnterAnimationDuration: $enterAnimationDuration;
     qproperty-size: $width $width;
   }
 }

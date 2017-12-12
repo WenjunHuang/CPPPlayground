@@ -1,13 +1,10 @@
 #pragma once
-struct AnimationButtonPrivate {
-  AnimationButtonPrivate(AnimationButton *ptr) : q_ptr(ptr) {}
 
-  AnimationButton *q_ptr;
-  QPixmap currentImage;
-  QPixmap normalImage;
-  QPixmap enterAnimationImage;
-  QPixmap leaveAnimationImage;
+#include <QDebug>
+#include <tuple>
 
+
+struct State {
   QScopedPointer<QStateMachine> stateMachine;
   QScopedPointer<QVariantAnimation> enteringAnimation;
   QScopedPointer<QVariantAnimation> leavingAnimation;
@@ -15,12 +12,37 @@ struct AnimationButtonPrivate {
   QList<QPixmap> enterList;
   QList<QPixmap> leaveList;
 
-  int enterAnimationDuration;
-  int enterAnimationFrameCount;
-  int leaveAnimationDuration;
-  int leaveAnimationFrameCount;
+  QPixmap image;
+  QPixmap enterAnimationImage;
+  QPixmap leaveAnimationImage;
+  int enterAnimationDuration = 0;
+  int enterAnimationFrameCount = 0;
+  int leaveAnimationDuration = 0;
+  int leaveAnimationFrameCount = 0;
 
-  Q_DECLARE_PUBLIC(AnimationButton)
+  AnimationButton *button;
+
+  QString name;
+
+  State() : stateMachine{new QStateMachine},
+            enteringAnimation{new QVariantAnimation},
+            leavingAnimation{new QVariantAnimation} {}
+
+  void setName(const QString& name) {
+    this->name = name;
+  }
+
+  void setImage(const QPixmap &image) {
+    this->image = image;
+  }
+
+  void enterState() {
+    stateMachine->start();
+  }
+
+  void leaveState() {
+    stateMachine->stop();
+  }
 
   void updateEnterAnimation() {
     if (!enterAnimationImage.isNull() && enterAnimationFrameCount > 0 && enterAnimationDuration > 0) {
@@ -39,7 +61,7 @@ struct AnimationButtonPrivate {
   void updateLeaveAnimation() {
     if (!leaveAnimationImage.isNull() && leaveAnimationFrameCount > 0 && leaveAnimationDuration > 0) {
       leaveList.clear();
-      for (int j = 0; j < 8; j++) {
+      for (int j = 0; j < leaveAnimationFrameCount; j++) {
         leaveList << leaveAnimationImage.copy(j * (leaveAnimationImage.width() / leaveAnimationFrameCount),
                                               0,
                                               leaveAnimationImage.width() / leaveAnimationFrameCount,
@@ -49,110 +71,88 @@ struct AnimationButtonPrivate {
       leavingAnimation->setStartValue(0);
       leavingAnimation->setEndValue(leaveList.size() - 1);
     }
-
   }
 
-  void initialize() {
+  void initialize(AnimationButton *button) {
+    this->button = button;
+    updateEnterAnimation();
+    updateLeaveAnimation();
     initAnimations();
     initStates();
-    setupUpdates();
-
-    Q_Q(AnimationButton);
-    QObject::connect(q, SIGNAL(currentImageChanged()), q, SLOT(update()));
-
   }
 
-  void initStates(){
-    Q_Q(AnimationButton);
+  void initStates() {
+    QObject::connect(stateMachine.data(),&QStateMachine::stopped,[=](){
+      qDebug() << "stateMachine "<< name << " Stopped";
+    });
+    QObject::connect(stateMachine.data(),&QStateMachine::started,[=](){
+      qDebug() << "stateMachine " << name << " Started";
+    });
 
-    stateMachine.reset(new QStateMachine);
     auto startState = new QState;
     auto leavedState = new QState;
     auto enteredState = new QState;
-    startState->addTransition(q, &AnimationButton::mouseEntered, enteredState);
-    leavedState->addTransition(q, &AnimationButton::mouseEntered, enteredState);
-    enteredState->addTransition(q, &AnimationButton::mouseLeaved, leavedState);
+    startState->addTransition(button, &AnimationButton::mouseEntered, enteredState);
+    startState->addTransition(button, &AnimationButton::mouseLeaved, leavedState);
+    leavedState->addTransition(button, &AnimationButton::mouseEntered, enteredState);
+    leavedState->addTransition(leavingAnimation.data(), &QVariantAnimation::finished, startState);
+    enteredState->addTransition(button, &AnimationButton::mouseLeaved, leavedState);
+
     stateMachine->addState(startState);
     stateMachine->addState(leavedState);
     stateMachine->addState(enteredState);
     stateMachine->setInitialState(startState);
 
     QObject::connect(startState, &QState::entered, [=]() {
-      q->setCurrentImage(q->normalImage());
+      button->setCurrentImage(image);
     });
 
     QObject::connect(enteredState, &QState::entered, [=]() {
-      enteringAnimation->start();
+      if (!enterList.isEmpty())
+        enteringAnimation->start();
     });
     QObject::connect(enteredState, &QState::exited, [=]() {
       enteringAnimation->stop();
     });
 
     QObject::connect(leavedState, &QState::entered, [=]() {
-      leavingAnimation->start();
+      if (leaveList.isEmpty()) {
+        // 没有动画可以显示，转移到startState
+        emit leavingAnimation->finished();
+      } else {
+        leavingAnimation->start();
+      }
     });
     QObject::connect(leavedState, &QState::exited, [=]() {
       leavingAnimation->stop();
     });
-    stateMachine->start();
   }
 
-  void initAnimations(){
-    Q_Q(AnimationButton);
-
+  void initAnimations() {
     enteringAnimation.reset(new QVariantAnimation());
     enteringAnimation->setStartValue(0);
-    QObject::connect(q, &AnimationButton::enterAnimationDurationChanged, [=]() {
-      enteringAnimation->setDuration(enterAnimationDuration);
-    });
-    QObject::connect(q, &AnimationButton::enterAnimationFrameCountChanged, [=]() {
-      enteringAnimation->setEndValue(enterAnimationFrameCount - 1);
-    });
+    enteringAnimation->setDuration(enterAnimationDuration);
+    enteringAnimation->setEndValue(enterAnimationFrameCount - 1);
+
     QObject::connect(enteringAnimation.data(), &QVariantAnimation::valueChanged, [=](auto value) {
       if (!enterList.empty()) {
         int current = value.toInt();
         if (current >= 0 && current < enterList.size())
-          q->setCurrentImage(enterList.at(current));
+          button->setCurrentImage(enterList.at(current));
       }
     });
 
     leavingAnimation.reset(new QVariantAnimation());
     leavingAnimation->setStartValue(0);
-    QObject::connect(q, &AnimationButton::leaveAnimationDurationChanged, [=]() {
-      leavingAnimation->setDuration(leaveAnimationDuration);
-    });
-    QObject::connect(q, &AnimationButton::leaveAnimationFrameCountChanged, [=]() {
-      leavingAnimation->setEndValue(leaveAnimationFrameCount - 1);
-    });
+    leavingAnimation->setDuration(leaveAnimationDuration);
+    leavingAnimation->setEndValue(leaveAnimationFrameCount - 1);
+
     QObject::connect(leavingAnimation.data(), &QVariantAnimation::valueChanged, [=](auto value) {
       if (!leaveList.empty()) {
         int current = value.toInt();
         if (current >= 0 && current < leaveList.size())
-          q->setCurrentImage(leaveList.at(current));
+          button->setCurrentImage(leaveList.at(current));
       }
     });
-  }
-  void setupUpdates(){
-    Q_Q(AnimationButton);
-    using MF = void (AnimationButton::*)();
-    constexpr MF ea[] = {&AnimationButton::enterAnimationFrameCountChanged,
-                         &AnimationButton::enterAnimationDurationChanged,
-                         &AnimationButton::enterAnimationImageChanged};
-    auto bindEnter = std::bind(&AnimationButtonPrivate::updateEnterAnimation, this);
-    for (auto me : ea) {
-      QObject::connect(q,
-                       me,
-                       bindEnter);
-    }
-
-    auto bindLeave = std::bind(&AnimationButtonPrivate::updateLeaveAnimation, this);
-    MF la[] = {&AnimationButton::leaveAnimationFrameCountChanged,
-               &AnimationButton::leaveAnimationDurationChanged,
-               &AnimationButton::leaveAnimationImageChanged};
-    for (auto me : la) {
-      QObject::connect(q,
-                       me,
-                       bindLeave);
-    }
   }
 };

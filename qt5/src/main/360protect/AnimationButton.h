@@ -6,66 +6,39 @@
 #include <QPointer>
 #include <QList>
 
+#define DECLARE_STATE(state) \
+  Q_PROPERTY(QPixmap state##Image  READ state##Image WRITE set##state##Image) \
+  Q_PROPERTY(QPixmap state##EnterAnimationImage READ state##EnterAnimationImage WRITE set ## state ## EnterAnimationImage) \
+  Q_PROPERTY(int state ## EnterAnimationDuration READ state##EnterAnimationDuration WRITE set ## state ## EnterAnimationDuration) \
+  Q_PROPERTY(int state ## EnterAnimationFrameCount READ state##EnterAnimationFrameCount WRITE set ## state ## EnterAnimationFrameCount) \
+  Q_PROPERTY(QPixmap state ## LeaveAnimationImage READ state##LeaveAnimationImage WRITE set ## state ## LeaveAnimationImage) \
+  Q_PROPERTY(int state ## LeaveAnimationDuration READ state ## LeaveAnimationDuration WRITE set ## state ## LeaveAnimationDuration) \
+  Q_PROPERTY(int state ## LeaveAnimationFrameCount READ state ## LeaveAnimationFrameCount WRITE set ## state ## LeaveAnimationFrameCount) \
+  public: \
+  QPixmap state##Image() const; \
+  void set ## state ##Image(const QPixmap &image); \
+  QPixmap state##EnterAnimationImage() const; \
+  void set ## state ## EnterAnimationImage(const QPixmap &enter); \
+  int state ## EnterAnimationDuration() const; \
+  void set ## state ## EnterAnimationDuration(int duration); \
+  int state##EnterAnimationFrameCount() const; \
+  void set##state##EnterAnimationFrameCount(int frameCount); \
+  QPixmap state##LeaveAnimationImage() const; \
+  void set##state##LeaveAnimationImage(const QPixmap &leave); \
+  int state##LeaveAnimationDuration() const; \
+  void set ## state ## LeaveAnimationDuration(int duration); \
+  int state##LeaveAnimationFrameCount() const; \
+  void set ## state ##LeaveAnimationFrameCount(int frameCount);
+
+
 class AnimationButtonPrivate;
 
 class AnimationButton : public QPushButton {
 Q_OBJECT
-  Q_PROPERTY(QPixmap currentImage
-               READ
-                 currentImage
-               WRITE
-                 setCurrentImage
-               NOTIFY
-               currentImageChanged)
-  Q_PROPERTY(QPixmap normalImage
-               READ
-                 normalImage
-               WRITE
-                 setNormalImage
-               NOTIFY
-               normalImageChanged)
-  Q_PROPERTY(QPixmap enterAnimationImage
-               READ
-                 enterAnimationImage
-               WRITE
-                 setEnterAnimationImage
-               NOTIFY
-               enterAnimationImageChanged)
-  Q_PROPERTY(int enterAnimationDuration
-               READ
-                 enterAnimationDuration
-               WRITE
-                 setEnterAnimationDuration
-               NOTIFY
-               enterAnimationDurationChanged)
-  Q_PROPERTY(int enterAnimationFrameCount
-               READ
-                 enterAnimationFrameCount
-               WRITE
-                 setEnterAnimationFrameCount
-               NOTIFY
-               enterAnimationFrameCountChanged)
-  Q_PROPERTY(QPixmap leaveAnimationImage
-               READ
-                 leaveAnimationImage
-               WRITE
-                 setLeaveAnimationImage
-               NOTIFY
-               leaveAnimationImageChanged)
-  Q_PROPERTY(int leaveAnimationDuration
-               READ
-                 leaveAnimationDuration
-               WRITE
-                 setLeaveAnimationDuration
-               NOTIFY
-               leaveAnimationDurationChanged)
-  Q_PROPERTY(int leaveAnimationFrameCount
-               READ
-                 leaveAnimationFrameCount
-               WRITE
-                 setLeaveAnimationFrameCount
-               NOTIFY
-               leaveAnimationFrameCountChanged)
+  Q_PROPERTY(QPixmap currentImage READ currentImage WRITE setCurrentImage)
+
+DECLARE_STATE(normal)
+DECLARE_STATE(checked)
 
 public:
   AnimationButton(QWidget *parent = nullptr);
@@ -76,32 +49,9 @@ public:
 
   void setCurrentImage(const QPixmap &image);
 
-  QPixmap normalImage() const;
-
-  void setNormalImage(const QPixmap &image);
-
-  QPixmap enterAnimationImage() const;
-
-  void setEnterAnimationImage(const QPixmap &enter);
-
-  int enterAnimationDuration() const;
-
-  void setEnterAnimationDuration(int duration);
-
-  int enterAnimationFrameCount() const;
-
-  void setEnterAnimationFrameCount(int frameCount);
-
-  QPixmap leaveAnimationImage() const;
-  void setLeaveAnimationImage(const QPixmap &leave);
-
-  int leaveAnimationDuration() const;
-  void setLeaveAnimationDuration(int duration);
-
-  int leaveAnimationFrameCount() const;
-  void setLeaveAnimationFrameCount(int frameCount);
-
 protected:
+  bool eventFilter(QObject* obj,QEvent *event) override;
+  void showEvent(QShowEvent *) override;
   void enterEvent(QEvent *) override;
 
   void leaveEvent(QEvent *) override;
@@ -109,26 +59,14 @@ protected:
   void paintEvent(QPaintEvent *) override;
 
 signals:
-  void currentImageChanged();
-
-  void normalImageChanged();
-
-  void enterAnimationImageChanged();
-
-  void enterAnimationDurationChanged();
-
-  void enterAnimationFrameCountChanged();
-
-  void leaveAnimationImageChanged();
-
-  void leaveAnimationDurationChanged();
-
-  void leaveAnimationFrameCountChanged();
 
   void mouseEntered();
+
   void mouseLeaved();
+
 private:
   QScopedPointer<AnimationButtonPrivate> d_ptr;
+
   Q_DECLARE_PRIVATE(AnimationButton)
 };
 

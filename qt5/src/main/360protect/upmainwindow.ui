@@ -90,10 +90,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="centerwindres.qrc"/>
-  <include location="lowmainres.qrc"/>
-  <include location="trayiconmenures.qrc"/>
-  <include location="upmainres.qrc"/>
+  <include location="resources.qrc"/>
  </resources>
  <connections/>
 </ui>

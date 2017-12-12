@@ -3,7 +3,7 @@ TopWidget {
   qproperty-minimumSize: 900px 150px;
   background-color: rgb(57,196,44);
 
-  > #returnBtn {
+   #returnBtn {
     qproperty-position: 0px 0px;
     qproperty-size: 115px 38px;
     qproperty-pixmapUrl: ":/image/return.png";

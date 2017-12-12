@@ -13,13 +13,11 @@ struct is_qwidget : std::conditional<std::is_base_of<QWidget, T>::value,
 
 //template<typename T, typename = void>
 //class PositionableWidget;
-template<typename T>
+template<typename T,typename=std::enable_if_t<std::is_base_of<QWidget,T>::value>>
 class PositionableWidget : public T {
   W_OBJECT(PositionableWidget)
 public:
   PositionableWidget(QWidget *parent = nullptr) : T(parent) {
-    this->connect(this, SIGNAL(positionChanged()), SLOT(onPositionChanged()));
-    this->connect(this, SIGNAL(sizeChanged()), SLOT(onSizeChanged()));
   }
 
   QSize position() const {
@@ -28,6 +26,9 @@ public:
 
   void setPosition(QSize position) {
     _position = position;
+    auto rect = this->geometry();
+    this->setGeometry(QRect(_position.width(), _position.height(), rect.width(), rect.height()));
+
     emit positionChanged();
   }
 
@@ -37,30 +38,15 @@ public:
 
   void setSize(QSize size) {
     _size = size;
+    auto rect = this->geometry();
+    this->setFixedSize(_size);
+    this->setGeometry(QRect(rect.x(), rect.y(), _size.width(), _size.height()));
+
     emit sizeChanged();
   }
 
 public:
-
-  void onPositionChanged() {
-    auto rect = this->geometry();
-    qDebug() << _position;
-    this->setGeometry(QRect(_position.width(), _position.height(), rect.width(), rect.height()));
-  }
-
-  W_SLOT(onPositionChanged)
-
-  void onSizeChanged() {
-    auto rect = this->geometry();
-    this->setFixedSize(_size);
-    this->setGeometry(QRect(rect.x(), rect.y(), _size.width(), _size.height()));
-  }
-
-  W_SLOT(onSizeChanged)
-
-public:
   void positionChanged() W_SIGNAL(positionChanged)
-
   void sizeChanged() W_SIGNAL(sizeChanged)
 
 private:

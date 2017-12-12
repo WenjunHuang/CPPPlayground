@@ -16,20 +16,20 @@
 #include "WordLineButton.h"
 #include "MainWindow.h"
 #include "PositionableWidget.h"
-#include "wobjectimpl.h"
 #include "ui_upmainwindow.h"
+#include "wobjectimpl.h"
 
-W_OBJECT_IMPL(PositionableWidget<T>, template<typename T>)
+W_OBJECT_IMPL((PositionableWidget<T,S>), template<typename T,typename S>)
 
 UpMainWindow::UpMainWindow(QWidget *parent) : QWidget(parent) {
   _ui = new Ui::UpMainWindow;
   _ui->setupUi(this);
   // initialize qss
-  QFile qss(":/qss/upmainwindow");
-  if (qss.open(QFile::ReadOnly)) {
-    QTextStream stream(&qss);
-    setStyleSheet(stream.readAll());
-  }
+//  QFile qss(":/qss/upmainwindow");
+//  if (qss.open(QFile::ReadOnly)) {
+//    QTextStream stream(&qss);
+//    setStyleSheet(stream.readAll());
+//  }
 
   _mousePressed = false;
 
@@ -115,7 +115,7 @@ void UpMainWindow::mousePressEvent(QMouseEvent *event) {
     auto topLevels = QApplication::topLevelWidgets();
     QWidget * mainWin = topLevels.takeFirst();
 //    for (auto top:topLevels) {
-//      mainWin = qobject_cast<MainWindow *>(top);
+//      mainWin = qobject_cast<AddressBookMainWindow *>(top);
 //      if (mainWin)
 //        break;
 //    }

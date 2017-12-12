@@ -136,4 +136,7 @@
     <qresource prefix="/qss">
         <file alias="styles">qss/styles.css</file>
     </qresource>
+    <qresource prefix="/settings">
+        <file alias="mainwindow">settings/mainwindow.ini</file>
+    </qresource>
 </RCC>
