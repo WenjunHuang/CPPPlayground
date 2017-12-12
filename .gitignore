@@ -2,3 +2,8 @@ cmake-build-debug/
 build/
 .idea/
 .sass-cache/
+lldb/
+target/
+Cargo.lock
+*.css
+*.css.map
