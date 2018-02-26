@@ -40,3 +40,8 @@ void CustomStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOp
     QProxyStyle::drawPrimitive(element, option, painter, widget);
   }
 }
+
+void CustomStyle::drawSubControl(QStyle::SubControl sc, const QStyleOption *option, QPainter *painter,
+                                 const QWidget *widget) const {
+
+}

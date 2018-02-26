@@ -5,6 +5,7 @@ version = "1.0.0"
 [dependencies]
 libc = "*"
 
-[lib]
-name = "rust"
-crate-type = ["staticlib"]
+#[lib]
+#name = "rust"
+#crate-type = ["staticlib"]
+

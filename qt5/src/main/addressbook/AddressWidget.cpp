@@ -8,6 +8,7 @@
 #include <QTableView>
 #include <QSortFilterProxyModel>
 #include <QHeaderView>
+#include <QFile>
 #include "AddressWidget.h"
 #include "TableModel.h"
 #include "NewAddressTab.h"
@@ -23,11 +24,40 @@ AddressWidget::AddressWidget(QWidget *parent) : QTabWidget(parent) {
 }
 
 void AddressWidget::readFromFile(const QString &fileName) {
+  QFile file(fileName);
 
+  if (!file.open(QIODevice::ReadOnly)) {
+    QMessageBox::information(this, tr("Unable to open file"), file.errorString());
+    return;
+  }
+
+  QList<Contact> contacts;
+  QDataStream in(&file);
+  in >> contacts;
+
+  if (contacts.isEmpty()) {
+    QMessageBox::information(this,
+                             tr("No contacts in file"),
+                             tr("The file you are attempting to open contains no contact"));
+  } else {
+    for (const auto &contact: qAsConst(contacts)) {
+      addEntry(contact.name, contact.address);
+    }
+  }
 }
 
 void AddressWidget::writeToFile(const QString &fileName) {
+  QFile file(fileName);
 
+  if (!file.open(QIODevice::WriteOnly)) {
+    QMessageBox::information(this,
+                             tr("Unable to open file"),
+                             file.errorString());
+    return;
+  }
+
+  QDataStream out(&file);
+  out << table->getContacts();
 }
 
 void AddressWidget::showAddEntryDialog() {
@@ -113,7 +143,7 @@ void AddressWidget::setupTabs() {
       auto regExp = QString("^[%1].*").arg(str);
       auto proxyModel = new QSortFilterProxyModel(this);
       proxyModel->setSourceModel(table);
-      proxyModel->setFilterRegExp(QRegExp(regExp));
+      proxyModel->setFilterRegExp(QRegExp(regExp, Qt::CaseInsensitive));
       proxyModel->setFilterKeyColumn(0);
 
       auto tableView = new QTableView;

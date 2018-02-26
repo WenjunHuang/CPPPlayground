@@ -1,11 +1,11 @@
 #pragma once
 #include <QWidget>
 
-class MyWidget: public QWidget {
+class ResizeWidget: public QWidget {
   Q_OBJECT
 public:
-  MyWidget(QWidget *parent = nullptr);
-  ~MyWidget();
+  ResizeWidget(QWidget *parent = nullptr);
+  ~ResizeWidget();
 };
 
 

@@ -6,9 +6,7 @@
 #include "CustomStyle.h"
 #include "fixture.h"
 
-TEST_CASE("custom_style","[CustomStyle]"){
-  int i = 0;
-  QApplication application(i,nullptr);
+TEST_CASE_METHOD(TestFixture,"custom_style","[CustomStyle]"){
   application.setStyle(new CustomStyle);
   QSpinBox spinBox;
   spinBox.show();

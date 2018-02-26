@@ -18,3 +18,5 @@ TEST_CASE_METHOD(TestFixture,"add_dialog","[addressbook]"){
   main.show();
   application.exec();
 }
+
+

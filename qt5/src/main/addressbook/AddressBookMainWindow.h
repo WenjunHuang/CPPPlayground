@@ -19,8 +19,13 @@ private:
   void createMenus();
   AddressWidget* _addressWidget;
   QMenu *_fileMenu;
-
-
+  QMenu *_toolMenu;
+  QAction *_openAct;
+  QAction *_saveAct;
+  QAction *_exitAct;
+  QAction *_addAct;
+  QAction *_editAct;
+  QAction *_removeAct;
 };
 
 

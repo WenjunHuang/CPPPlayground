@@ -3,5 +3,5 @@
 //
 
 #include "MyWidget.h"
-MyWidget::MyWidget(QWidget *parent):QWidget(parent) {}
-MyWidget::~MyWidget() = default;
+ResizeWidget::ResizeWidget(QWidget *parent):QWidget(parent) {}
+ResizeWidget::~ResizeWidget() = default;
