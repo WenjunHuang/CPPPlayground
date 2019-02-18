@@ -24,6 +24,7 @@ class TriangleWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
         default: return QWindow::event(event);
         }
     }
+
     void exposeEvent(QExposeEvent* event) override {
         Q_UNUSED(event);
 
@@ -103,6 +104,9 @@ int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
     QSurfaceFormat format;
     format.setSamples(16);
+    format.setVersion(3, 3);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+
     TriangleWindow window;
     window.resize(640, 480);
     window.setFormat(format);

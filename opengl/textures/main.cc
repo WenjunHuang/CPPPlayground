@@ -2,39 +2,88 @@
 // Created by rick on 2020/2/17.
 //
 
-#include "../stb_image.h"
-#include <GLFW/glfw3.h>
+#include <QEvent>
+#include <QGuiApplication>
+#include <QOpenGLContext>
+#include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLVertexArrayObject>
+#include <QWindow>
 #include <QtCore/qfile.h>
-#include <glad/glad.h>
 #include <iostream>
 
-void framebufferSizeCallback(GLFWwindow*, int, int);
-void processInput(GLFWwindow*);
+#include <QOpenGLBuffer>
+#include <QOpenGLTexture>
 
 // settings
 constexpr unsigned int kScrWidth  = 800;
 constexpr unsigned int kScrHeight = 600;
 
-int main(int argc, char* argv[]) {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
+    Q_OBJECT
+  public:
+    TextureWindow() { setSurfaceType(SurfaceType::OpenGLSurface); }
 
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+  protected:
+    bool event(QEvent* event) override {
+        switch (event->type()) {
+        case QEvent::UpdateRequest: renderNow(); return true;
+        default: return QWindow::event(event);
+        }
+    }
 
-    // glfw window creation
-    if (auto window = glfwCreateWindow(kScrWidth, kScrHeight, "LearnOpenGL",
-                                       nullptr, nullptr)) {
-        glfwMakeContextCurrent(window);
-        glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+    void exposeEvent(QExposeEvent* event) override {
+        Q_UNUSED(event);
 
-        // glad
-        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-            std::cout << "Failed to initialize GLAD" << std::endl;
-            return -1;
+        if (isExposed())
+            renderNow();
+    }
+
+    void renderNow() {
+        bool needInitialize = false;
+        if (!_context) {
+            _context = new QOpenGLContext(this);
+            _context->setFormat(requestedFormat());
+            _context->create();
+            needInitialize = true;
+        }
+        _context->makeCurrent(this);
+        if (needInitialize) {
+            initializeOpenGLFunctions();
+            initialize();
+        }
+
+        const qreal retinaScale = devicePixelRatio();
+        glViewport(0, 0, width() * retinaScale, height() * retinaScale);
+
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // bind texture
+        glActiveTexture(GL_TEXTURE0);
+        _texture->bind();
+        glActiveTexture(GL_TEXTURE1);
+        _texture1->bind();
+        //        glBindTexture(GL_TEXTURE_2D, _texture);
+
+        // render container
+        _program->bind();
+        _program->setUniformValue("texture1",0);
+        _program->setUniformValue("texture2",1);
+        _vao->bind();
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        _context->swapBuffers(this);
+    }
+
+    void initialize() {
+        _program = new QOpenGLShaderProgram(this);
+        _program->addShaderFromSourceFile(QOpenGLShader::Vertex,
+                                          ":/vertex.glsl");
+        _program->addShaderFromSourceFile(QOpenGLShader::Fragment,
+                                          ":/fragment.glsl");
+        if (!_program->link()) {
+            qDebug() << _program->log();
         }
 
         // build and compile our shader program
@@ -49,19 +98,30 @@ int main(int argc, char* argv[]) {
 
         unsigned int indices[] = {0, 1, 3, 1, 2, 3};
 
-        unsigned int VBO, VAO, EBO;
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
+        _vao = new QOpenGLVertexArrayObject(this);
+        _vao->create();
+        _vao->bind();
 
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,
-                     GL_STATIC_DRAW);
+        _vbo = std::make_unique<QOpenGLBuffer>(QOpenGLBuffer::VertexBuffer);
+        _vbo->create();
+        _vbo->bind();
+        _vbo->allocate(vertices, sizeof(vertices));
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-                     GL_STATIC_DRAW);
+        _ebo = std::make_unique<QOpenGLBuffer>(QOpenGLBuffer::IndexBuffer);
+        _ebo->create();
+        _ebo->bind();
+        _ebo->allocate(indices, sizeof(indices));
+        //        glGenBuffers(1, &VBO);
+        //        glGenBuffers(1, &EBO);
+
+        //        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        //        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,
+        //                     GL_STATIC_DRAW);
+        //
+        //        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        //        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices),
+        //        indices,
+        //                     GL_STATIC_DRAW);
 
         // position attribute
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
@@ -79,23 +139,61 @@ int main(int argc, char* argv[]) {
         glEnableVertexAttribArray(2);
 
         // load and create a texture
-        unsigned int texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
+        //        glGenTextures(1, &_texture);
+        //        glBindTexture(GL_TEXTURE_2D, _texture);
+        // set the texture wrapping parameters
+        //        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        //        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        // set texture filtering parameters
+        //        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+        //        GL_LINEAR); glTexParameteri(GL_TEXTURE_2D,
+        //        GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        int width, height, nrChannels;
-        QFile container(":/container.jpg");
-        auto containerBuffer = container.readAll();
-        auto data = stbi_load_from_memory((stbi_uc*)containerBuffer.data(),
-                                          containerBuffer.size(), &width,
-                                          &height, &nrChannels, 0);
-        if (data) {
-            glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,)
-        }
-    } else {
+        // load and create a texture
+        QImage image(":/container.jpg");
+        qDebug() << "image width:" << image.width()
+                 << ",height:" << image.height();
+        _texture = std::make_unique<QOpenGLTexture>(image);
+        _texture->generateMipMaps();
 
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
+        _texture->setMinificationFilter(QOpenGLTexture::Linear);
+        _texture->setMagnificationFilter(QOpenGLTexture::Linear);
+        _texture->setWrapMode(QOpenGLTexture::DirectionS,
+                              QOpenGLTexture::Repeat);
+        _texture->setWrapMode(QOpenGLTexture::DirectionT,
+                              QOpenGLTexture::Repeat);
+
+        _texture1 = std::make_unique<QOpenGLTexture>(QImage(":/awesomeface.png").mirrored());
+        //        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width(),
+        //        image.height(), 0,
+        //                     GL_RGB, GL_UNSIGNED_BYTE, image.);
+        //        glGenerateMipmap(GL_TEXTURE_2D);
     }
+
+  private:
+    QOpenGLContext* _context{nullptr};
+    QOpenGLVertexArrayObject* _vao;
+    QOpenGLShaderProgram* _program{nullptr};
+
+    std::unique_ptr<QOpenGLBuffer> _vbo;
+    std::unique_ptr<QOpenGLBuffer> _ebo;
+    std::unique_ptr<QOpenGLTexture> _texture;
+    std::unique_ptr<QOpenGLTexture> _texture1;
+    //    unsigned int _texture;
+};
+
+int main(int argc, char* argv[]) {
+    QGuiApplication app(argc, argv);
+    QSurfaceFormat format;
+    format.setSamples(16);
+    format.setMajorVersion(3);
+    format.setMinorVersion(3);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+
+    TextureWindow window;
+    window.setFormat(format);
+    window.resize(640, 480);
+    window.show();
+    return app.exec();
 }
+#include "main.moc"
