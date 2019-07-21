@@ -1,0 +1,14 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+Language: Cpp
+DerivePointerAlignment: false
+PointerAlignment: Left
+AlignConsecutiveAssignments: true
+AlignEscapedNewlines: Right
+AlignTrailingComments: true
+#AllowAllArgumentsOnNextLine: true
+#AllowAllConstructorInitializersOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+#AllowShortLambdasOnASingleLine: true
