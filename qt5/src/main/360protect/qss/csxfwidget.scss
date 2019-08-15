@@ -1,0 +1,153 @@
+CsxfWidget {
+  #logoLabel {
+    border-image: url(:/image/logo_normal.png);
+    qproperty-position: 40px 40px;
+    qproperty-size: 76px 75px;
+  }
+
+  #titleLabel {
+    qproperty-position: 150px 60px;
+    qproperty-size: 400px 32px;
+    color: white;
+    font: {
+      family: "Heiti SC";
+      size: 24px;
+    }
+  }
+
+  #titleLabel2 {
+    color: white;
+    qproperty-position: 150px 92px;
+    qproperty-size: 400px 32px;
+  }
+
+  #startScanBtn {
+    qproperty-pixmapUrl: ":/image/start_btn.png";
+    qproperty-position: 700px 50px;
+    qproperty-size: 164px 64px;
+  }
+
+  @include animationButtonNoLeave("quickScanBtn",
+          ":/image/scan_button_quick.png",
+          ":/image/scan_button_quick_hover.png",
+          8, 500, 140);
+  #quickScanBtn {
+    qproperty-position: 140px 100px;
+    qproperty-size: 140px 140px;
+  }
+
+  @include animationButtonNoLeave("fullScanBtn",
+          ":/image/scan_button_full.png",
+          ":/image/scan_button_full_hover.png",
+          8, 500, 140);
+  #fullScanBtn {
+    qproperty-position: 380px 100px;
+    qproperty-size: 140px 140px;
+  }
+
+  @include animationButtonNoLeave("customScanBtn",
+          ":/image/scan_button_custom.png",
+          ":/image/scan_button_custom_hover.png",
+          8, 500, 140);
+  #customScanBtn {
+    qproperty-position: 620px 100px;
+    qproperty-size: 140px 140px;
+  }
+
+  #quickScanLabel, #fullScanLabel, #customScanLabel {
+    color: rgb(68, 68, 68);
+    font: {
+      size: 13pt;
+      family: "Microsoft YaHei";
+    }
+    qproperty-size: 150px 24px;
+  }
+
+  #quickScanLabel {
+    qproperty-position: 175px 250px;
+  }
+  #fullScanLabel {
+    qproperty-position: 415px 250px;
+  }
+  #customScanLabel {
+    qproperty-position: 650px 250px;
+  }
+
+  #normalFixBtn {
+    qproperty-pixmapUrl: ":/image/system_fix.png";
+    qproperty-position: 710px 310px;
+    qproperty-size: 60px 60px;
+  }
+  #leakFixBtn {
+    qproperty-pixmapUrl: ":/image/system_fix.png";
+    qproperty-position: 800px 310px;
+    qproperty-size: 60px 60px;
+  }
+
+  #normalFixLabel, #leakFixLabel {
+    color: rgb(68, 68, 68);
+    font: {
+      size: 14px;
+      family: "Microsoft YaHei";
+    }
+    qproperty-size: 80px 30px;
+  }
+  #normalFixLabel {
+    qproperty-position: 710px 380px;
+  }
+  #leakFixLabel {
+    qproperty-position: 800px 380px;
+  }
+
+  #labLabel {
+    color: rgb(153, 153, 153);
+    qproperty-position: 25px 423px;
+    qproperty-size: 100px 24px;
+  }
+
+  @each $image, $index in (":/image/engStateBtnAvira.png", 1), (":/image/engStateBtnCloud.png", 2), (":/image/engStateBtnQEX.png", 3),
+          (":/image/engStateBtnQiFa.png", 4), (":/image/engStateBtnQVM.png", 5) {
+    $startX: 130px;
+    $y: 423px;
+    $width: 24px;
+    #btnDown#{$index} {
+      qproperty-pixmapUrl: "#{$image}";
+      qproperty-position: $startX + ($width + 1px) * ($index - 1) $y;
+      qproperty-size: $width $width;
+    }
+  }
+
+  #settingBtn {
+    $c: rgb(36, 147, 229);
+    background: transparent;
+    color: $c;
+
+    qproperty-pixmapUrl: url(:/image/scan_setting.png);
+    qproperty-position: 700px 423px;
+    qproperty-size: 50px 25px;
+
+    &:hover {
+      color: lighten($c, 20%);
+    }
+  }
+
+  $refDownBtns: (trustyBtn, recoverBtn, reportBtn);
+  @for $i from 1 through length($refDownBtns) {
+    $btn: nth($refDownBtns, $i);
+    $start: 750px;
+    $y: 423px;
+    $width: 50px;
+    $height: 24px;
+    $c: rgb(0, 138, 255);
+
+    ##{$btn} {
+      qproperty-position: $start + ($i - 1) * 50 $y;
+      qproperty-size: $width $height;
+      background-color: transparent;
+      color: $c;
+      &:hover {
+        color: lighten($c, 20%);
+      }
+    }
+  }
+}

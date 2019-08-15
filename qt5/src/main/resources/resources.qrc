@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <RCC>
     <qresource prefix="/icons">
         <file>restart_icon.png</file>
@@ -8,3 +9,23 @@
         <file>logo.png</file>
     </qresource>
 </RCC>
+=======
+<!DOCTYPE RCC>
+<RCC vesion="1.0">
+    <qresource>
+        <file>images/image.png</file>
+        <file>images/open.png</file>
+        <file>images/new.png</file>
+        <file>images/copy.png</file>
+        <file>images/cut.png</file>
+        <file>images/paste.png</file>
+        <file>images/printText.png</file>
+        <file>images/printImage.png</file>
+        <file>images/zoomin.png</file>
+        <file>images/zoomout.png</file>
+        <file>images/rotate90.png</file>
+        <file>images/rotate180.png</file>
+        <file>images/rotate180.png</file>
+    </qresource>
+</RCC>
+>>>>>>> 6b0663b4cf54727e84e00a957f3c1ab056b8174c

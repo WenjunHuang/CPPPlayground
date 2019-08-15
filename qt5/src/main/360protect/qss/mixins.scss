@@ -1,0 +1,55 @@
+@mixin animationButton($selector,
+$normalImage,
+$enterAnimationImage,
+$enterAnimationFrameCount,
+$enterAnimationDuration,
+$leaveAnimationImage,
+$leaveAnimationFrameCount,
+$leaveAnimationDuration,
+$width) {
+   ##{$selector} {
+    qproperty-normalImage: url(#{$normalImage});
+    qproperty-normalEnterAnimationImage: url(#{$enterAnimationImage});
+    qproperty-normalEnterAnimationFrameCount: $enterAnimationFrameCount;
+    qproperty-normalEnterAnimationDuration: $enterAnimationDuration;
+    qproperty-normalLeaveAnimationImage: url(#{$leaveAnimationImage});
+    qproperty-normalLeaveAnimationFrameCount: $leaveAnimationFrameCount;
+    qproperty-normalLeaveAnimationDuration: $leaveAnimationDuration;
+    qproperty-size: $width $width;
+  }
+}
+
+@mixin animationButtonNoLeave($selector,
+$normalImage,
+$enterAnimationImage,
+$enterAnimationFrameCount,
+$enterAnimationDuration,
+$width) {
+   ##{$selector} {
+    qproperty-normalImage: url(#{$normalImage});
+    qproperty-normalEnterAnimationImage: url(#{$enterAnimationImage});
+    qproperty-normalEnterAnimationFrameCount: $enterAnimationFrameCount;
+    qproperty-normalEnterAnimationDuration: $enterAnimationDuration;
+    qproperty-size: $width $width;
+  }
+}
+
+@mixin buttonLabel($selector,$image) {
+  > ##{$selector} {
+    background-image: url(#{$image});
+  }
+}
+
+@mixin titleBar() {
+  @each $index, $btn in (0, Skin), (1, feedback), (2, Menu), (3, min), (4, close) {
+    > ##{$btn} {
+      $start: 750px;
+      $width: 29px;
+      $height: 24px;
+      qproperty-index: 0;
+      qproperty-pixmapUrl: ":/image/#{$btn}.png";
+      qproperty-size: $width $height;
+      qproperty-position: ($start + $width * $index) 0px;
+    }
+  }
+}

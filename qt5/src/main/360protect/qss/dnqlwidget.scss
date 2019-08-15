@@ -1,0 +1,73 @@
+DnqlWidget {
+  #labLogo {
+    border-image: url(:/image/logo_clean.png);
+    qproperty-position: 40px 40px;
+    qproperty-size: 90px 90px;
+  }
+  #cleanBtn {
+    qproperty-position: 700px 50px;
+    qproperty-size: 164px 64px;
+    qproperty-pixmapUrl: ":/image/btn_top_clean.png";
+  }
+
+  #titleLabel {
+    qproperty-position: 150px 92px;
+    qproperty-size: 400px 32px;
+    color: white;
+    font: {
+      family: "Heiti SC";
+      size: 27px;
+    }
+  }
+
+  $color: rgb(36, 147, 229);
+  $hoverColor: rgba(36, 147, 229, 180/255);
+  @mixin makeButton($name,$x,$y,$width,$height) {
+    ##{$name} {
+      qproperty-position: $x $y;
+      qproperty-size: $width $height;
+      background: transparent;
+      color: $color;
+      &:hover {
+        color: $hoverColor;
+      }
+    }
+  }
+
+  @include makeButton(classicCleanBtn, 15px, 422px, 100px, 20px);
+  @include makeButton(webchatCleanBtn, 440px, 422px, 100px, 20px);
+  @include makeButton(appleDeviceCleanBtn, 515px, 422px, 100px, 20px);
+  @include makeButton(systemDriveShrinkBtn, 610px, 422px, 100px, 20px);
+  @include makeButton(findBigFileBtn, 690px, 422px, 100px, 20px);
+  @include makeButton(autoCleanBtn, 765px, 422px, 100px, 20px);
+  @include makeButton(recoverBtn, 825px, 422px, 100px, 20px);
+
+  #cleanTraceBtn {
+    qproperty-position: 410px 60px;
+    qproperty-size: 90px 90px;
+    qproperty-normalImage: url(:/image/clean/clean_trace_uncheck.png);
+    qproperty-normalEnterAnimationImage: url(:/image/clean/clean_trace_anim_gray.png);
+    qproperty-normalEnterAnimationFrameCount: 17;
+    qproperty-normalEnterAnimationDuration: 1200;
+
+    qproperty-checkedImage: url(:/image/clean/clean_trace_check.png);
+    qproperty-checkedEnterAnimationImage: url(:/image/clean/clean_trace_anim.png);
+    qproperty-checkedEnterAnimationFrameCount: 17;
+    qproperty-checkedEnterAnimationDuration: 1200;
+
+    &[checked="true"] {
+      qproperty-borderPixmap: url(:/image/clean/select_normal.png);
+      qproperty-groupPixmap: url(:/image/clean/group_check.png);
+      &[hover="true"] {
+        qproperty-borderPixmap: url(:/image/clean/select_hover.png);
+      }
+    }
+    &[checked="false"] {
+      qproperty-borderPixmap: url(:/image/clean/notselect_normal.png);
+      qproperty-groupPixmap: url(:/image/clean/group_uncheck.png);
+      &[hover="true"] {
+        qproperty-borderPixmap: url(:/image/clean/notselect_hover.png);
+      }
+    }
+  }
+}
