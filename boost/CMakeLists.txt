@@ -4,8 +4,9 @@ project(BoostPlayground)
 set(CMAKE_CXX_STANDARD 14)
 
 enable_testing()
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
+add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+#find_package(GTest REQUIRED)
+#include_directories(${GTEST_INCLUDE_DIRS})
 
 set(BOOST_ROOT $ENV{BOOST_ROOT})
 find_package(Boost REQUIRED

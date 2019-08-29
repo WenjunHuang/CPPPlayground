@@ -11,4 +11,5 @@ AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
+NamespaceIndentation: All
 #AllowShortLambdasOnASingleLine: true
