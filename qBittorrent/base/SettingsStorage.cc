@@ -3,6 +3,7 @@
 //
 
 #include "SettingsStorage.h"
+#include "Logger.h"
 #include <QFile>
 #include <QHash>
 #include <memory>
