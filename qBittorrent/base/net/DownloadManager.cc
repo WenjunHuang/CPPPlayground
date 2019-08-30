@@ -6,6 +6,7 @@
 #include "../Preferences.h"
 #include <QNetworkCookie>
 #include <QNetworkCookieJar>
+#include <QNetworkProxy>
 #include <QNetworkReply>
 #include <QTemporaryFile>
 
@@ -211,4 +212,21 @@ QList<QNetworkCookie> Net::DownloadManager::allCookies() const {
 void Net::DownloadManager::setAllCookies(
     const QList<QNetworkCookie>& cookieList) {
     static_cast<NetworkCookieJar *>(m_networkManager.cookieJar())->setAllCookies(cookieList);
+}
+
+bool Net::DownloadManager::deleteCookie(const QNetworkCookie& cookie) {
+    return static_cast<NetworkCookieJar *>(m_networkManager.cookieJar())->deleteCookie(cookie);
+}
+
+bool Net::DownloadManager::hasSupportedScheme(const QString& url) {
+    const QStringList schemes = instance()->m_networkManager.supportedSchemes();
+    return std::any_of(schemes.cbegin(),schemes.cend(),[&url](const QString& scheme){
+        return url.startsWith((scheme + QLatin1Char(':')),Qt::CaseInsensitive);
+    });
+}
+
+void Net::DownloadManager::applyProxySettings() {
+    const auto *proxyManager = ProxyConfigurationManager::instance();
+    const ProxyConfiguration proxyConfig = proxyManager->proxyConfiguration();
+    QNetworkProxy proxy;
 }
