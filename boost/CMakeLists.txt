@@ -16,6 +16,6 @@ include_directories(include)
 
 file(GLOB BOOST_SOURCES src/main/*.cpp src/main/*.h)
 
-add_executable(${PROJECT_NAME} ${BOOST_SOURCES} ../actor/src/main/main.cpp)
+add_executable(${PROJECT_NAME} ${BOOST_SOURCES} src/main/main.cpp)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${GTEST_BOTH_LIBRARIES})
 add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME})

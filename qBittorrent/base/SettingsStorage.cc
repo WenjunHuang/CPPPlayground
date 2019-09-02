@@ -2,8 +2,11 @@
 // Created by HUANG WEN JUN on 2019/8/30.
 //
 
+#include "global.h"
 #include "SettingsStorage.h"
 #include "Logger.h"
+#include "Profile.h"
+#include "utils/Fs.h"
 #include <QFile>
 #include <QHash>
 #include <memory>
@@ -171,9 +174,7 @@ SettingsStorage::SettingsStorage()
     connect(&m_timer, &QTimer::timeout, this, &SettingsStorage::save);
 }
 
-SettingsStorage::~SettingsStorage() {
-    save();
-}
+SettingsStorage::~SettingsStorage() { save(); }
 
 void SettingsStorage::initInstance() {
     if (!m_instance)
@@ -185,14 +186,14 @@ void SettingsStorage::freeInstance() {
     m_instance = nullptr;
 }
 
-SettingsStorage* SettingsStorage::instance() {
-    return m_instance;
-}
+SettingsStorage* SettingsStorage::instance() { return m_instance; }
 
 bool SettingsStorage::save() {
-    if (!m_dirty) return false;
+    if (!m_dirty)
+        return false;
     QWriteLocker locker(&m_lock);
-    if (!m_dirty) return false;
+    if (!m_dirty)
+        return false;
 
     TransactionalSettings settings(QLatin1String("qBittorrent"));
     if (settings.write(m_data)) {
@@ -204,9 +205,10 @@ bool SettingsStorage::save() {
     return false;
 }
 
-QVariant SettingsStorage::loadValue(const QString& key,const QVariant& defaultValue) {
+QVariant SettingsStorage::loadValue(const QString& key,
+                                    const QVariant& defaultValue) {
     QReadLocker locker(&m_lock);
-    return m_data.value(mapKey(key),defaultValue);
+    return m_data.value(mapKey(key), defaultValue);
 }
 
 void SettingsStorage::storeValue(const QString& key, const QVariant& value) {
@@ -214,7 +216,7 @@ void SettingsStorage::storeValue(const QString& key, const QVariant& value) {
     QWriteLocker locker(&m_lock);
     if (m_data.value(realKey) != value) {
         m_dirty = true;
-        m_data.insert(realKey,value);
+        m_data.insert(realKey, value);
         m_timer.start();
     }
 }
@@ -232,9 +234,74 @@ void SettingsStorage::removeValue(const QString& key) {
 QVariantHash TransactionalSettings::read() {
     QVariantHash res;
 
-    const QString newPath = deserialize(m_name+QLatin1String("_new"),res);
+    const QString newPath = deserialize(m_name + QLatin1String("_new"), res);
     if (!newPath.isEmpty()) {
-        Logger::instance()->addMessage(QObject::tr("Detected unclean program exit. Using fallback file to restore settings: %1")
-        .arg(Utils::Fs::toNativePath(newPath)),Log::WARNING);
+        Logger::instance()->addMessage(
+            QObject::tr("Detected unclean program exit. Using fallback file to "
+                        "restore settings: %1")
+                .arg(Utils::Fs::toNativePath(newPath)),
+            Log::WARNING);
+
+        QString finalPath = newPath;
+        int index = finalPath.lastIndexOf("_new", -1, Qt::CaseInsensitive);
+        finalPath.remove(index, 4);
+
+        Utils::Fs::forceRemove(finalPath);
+        QFile::rename(newPath, finalPath);
+    } else {
+        deserialize(m_name, res);
     }
+}
+
+bool TransactionalSettings::write(const QVariantHash& data) {
+    const auto newPath = serialize(m_name + QLatin1String("_new"),data);
+    if (newPath.isEmpty()) {
+        Utils::Fs::forceRemove(newPath);
+        return false;
+    }
+
+    QString finalPath = newPath;
+    int index = finalPath.lastIndexOf("_new",-1,Qt::CaseInsensitive);
+    finalPath.remove(index,4);
+
+    Utils::Fs::forceRemove(finalPath);
+    return QFile::rename(newPath,finalPath);
+}
+
+QString TransactionalSettings::deserialize(const QString& name,
+                                           QVariantHash& data) {
+    SettingsPtr settings = Profile::instance().applicationSettings(name);
+
+    if (settings->allKeys().isEmpty())
+        return {};
+
+    for (auto& key:asConst(settings->allKeys())){
+        data.insert(key,settings->value(key));
+    }
+
+    return settings->fileName();
+}
+
+QString TransactionalSettings::serialize(const QString& name,
+                                         const QVariantHash& data) {
+    SettingsPtr settings = Profile::instance().applicationSettings(name);
+    for (auto i = data.begin(); i!=data.end();++i) {
+        settings->setValue(i.key(),i.value());
+    }
+
+    settings->sync();
+    switch(settings->status()) {
+    case QSettings::NoError:
+        return settings->fileName();
+    case QSettings::AccessError:
+        Logger::instance()->addMessage(QObject::tr("An access error occurred while trying to write the configuration file."), Log::CRITICAL);
+        break;
+    case QSettings::FormatError:
+        Logger::instance()->addMessage(QObject::tr("A format error occurred while trying to write the configuration file."), Log::CRITICAL);
+        break;
+    default:
+        Logger::instance()->addMessage(QObject::tr("An unknown error occurred while trying to write the configuration file."), Log::CRITICAL);
+        break;
+    }
+    return {};
 }
