@@ -4,6 +4,8 @@
 
 #include "DownloadManager.h"
 #include "../Preferences.h"
+#include "ProxyConfigurationManager.h"
+#include "utils/Fs.h"
 #include <QNetworkCookie>
 #include <QNetworkCookieJar>
 #include <QNetworkProxy>
@@ -22,10 +24,10 @@ namespace {
         explicit NetworkCookieJar(QObject* parent = nullptr)
             : QNetworkCookieJar(parent) {
             const auto now = QDateTime::currentDateTime();
-            auto cookies   = Preferences::instance()->getNetworkCookies();
+            auto cookies   = Preferences::instance()->networkCookie();
 
             for (const QNetworkCookie& cookie :
-                 Preferences::instance()->getNetworkCookies()) {
+                 Preferences::instance()->networkCookie()) {
                 if (cookie.isSessionCookie() ||
                     (cookie.expirationDate() <= now))
                     cookies.removeAll(cookie);
@@ -42,7 +44,7 @@ namespace {
                     cookies.removeAll(cookie);
             }
 
-            Preferences::instance()->setNetworkCookies(cookies);
+            Preferences::instance()->setNetworkCookie(cookies);
         }
 
         using QNetworkCookieJar::allCookies;
@@ -211,22 +213,65 @@ QList<QNetworkCookie> Net::DownloadManager::allCookies() const {
 
 void Net::DownloadManager::setAllCookies(
     const QList<QNetworkCookie>& cookieList) {
-    static_cast<NetworkCookieJar *>(m_networkManager.cookieJar())->setAllCookies(cookieList);
+    static_cast<NetworkCookieJar*>(m_networkManager.cookieJar())
+        ->setAllCookies(cookieList);
 }
 
 bool Net::DownloadManager::deleteCookie(const QNetworkCookie& cookie) {
-    return static_cast<NetworkCookieJar *>(m_networkManager.cookieJar())->deleteCookie(cookie);
+    return static_cast<NetworkCookieJar*>(m_networkManager.cookieJar())
+        ->deleteCookie(cookie);
 }
 
 bool Net::DownloadManager::hasSupportedScheme(const QString& url) {
     const QStringList schemes = instance()->m_networkManager.supportedSchemes();
-    return std::any_of(schemes.cbegin(),schemes.cend(),[&url](const QString& scheme){
-        return url.startsWith((scheme + QLatin1Char(':')),Qt::CaseInsensitive);
-    });
+    return std::any_of(schemes.cbegin(), schemes.cend(),
+                       [&url](const QString& scheme) {
+                           return url.startsWith((scheme + QLatin1Char(':')),
+                                                 Qt::CaseInsensitive);
+                       });
 }
 
 void Net::DownloadManager::applyProxySettings() {
-    const auto *proxyManager = ProxyConfigurationManager::instance();
+    const auto* proxyManager = ProxyConfigurationManager::instance();
     const ProxyConfiguration proxyConfig = proxyManager->proxyConfiguration();
     QNetworkProxy proxy;
+
+    if (!proxyManager->proxyOnlyForTorrents() &&
+        (proxyConfig.type != ProxyType::None)) {
+        // Proxy enabled
+        proxy.setHostName(proxyConfig.ip);
+        proxy.setPort(proxyConfig.port);
+
+        // Default proxy type is HTTP, we must change if it is SOCKS5
+        if ((proxyConfig.type == ProxyType::SOCKS5) ||
+            (proxyConfig.type == ProxyType::SOCKS5_PW)) {
+            qDebug() << Q_FUNC_INFO << "using SOCKS proxy";
+            proxy.setType(QNetworkProxy::Socks5Proxy);
+        } else {
+            qDebug() << Q_FUNC_INFO << "using HTTP proxy";
+            proxy.setType(QNetworkProxy::HttpProxy);
+        }
+
+        // Authentication?
+        if (proxyManager->authenticationRequired()){
+            qDebug("Proxy requires authentication, authenticating...");
+            proxy.setUser(proxyConfig.username);
+            proxy.setPassword(proxyConfig.password);
+        }
+    } else {
+        proxy.setType(QNetworkProxy::NoProxy);
+    }
+
+    m_networkManager.setProxy(proxy);
+}
+
+void Net::DownloadManager::handleReplyFinished(const QNetworkReply* reply) {
+    const ServiceID id = ServiceID::fromURL(reply->request().url());
+    const auto waitingJobsIter = m_waitingJobs.find(id);
+    if ((waitingJobsIter == m_waitingJobs.end())||waitingJobsIter.value().isEmpty()) {
+        // No more waiting jobs for given ServiceID
+        m_busyServices.remove(id);
+        return;
+    }
+
 }

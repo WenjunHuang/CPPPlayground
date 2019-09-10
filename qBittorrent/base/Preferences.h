@@ -306,17 +306,17 @@ class Preferences : public QObject {
     // Stuff that don't appear in the Options GUI but are saved
     // in the same file.
     QDateTime dnsLastUpd() const;
-    void setDnsLastUpd(QDateTime value);
+    void setDnsLastUpd(const QDateTime& value);
     QString dnsLastIP() const;
-    void setDnsLastIP(QString value);
+    void setDnsLastIP(const QString& value);
     bool acceptedLegal() const;
     void setAcceptedLegal(bool value);
     QByteArray mainGeometry() const;
-    void setMainGeometry(QByteArray value);
+    void setMainGeometry(const QByteArray& value);
     QByteArray mainVSplitterState() const;
-    void setMainVSplitterState(QByteArray value);
+    void setMainVSplitterState(const QByteArray& value);
     QString mainLastDir() const;
-    void setMainLastDir(QString value);
+    void setMainLastDir(const QString& value);
     QSize prefSize() const;
     void setPrefSize(QSize value);
     QStringList prefHSplitterSizes() const;
@@ -350,13 +350,14 @@ class Preferences : public QObject {
     QStringList searchEngDisabled() const;
     void setSearchEngDisabled(const QStringList& value);
     QString torImportLastContentDir() const;
-    void setTorImportLastContentDir(QString value);
+    void setTorImportLastContentDir(const QString& value);
 
     QByteArray torImportGeometry() const;
     void setTorImportGeometry(const QByteArray& value);
     bool statusFilterState() const;
     bool categoryFilterState() const;
     bool tagFilterState() const;
+    bool trackerFilterState() const;
     int transSelFilter() const;
     void setTransSelFilter(int value);
     QByteArray transHeaderState() const;
@@ -379,8 +380,8 @@ class Preferences : public QObject {
     void setSpeedWidgetEnabled(bool value);
     int speedWidgetPeriod() const;
     void setSpeedWidgetPeriod(int value);
-    bool speedWidgetGraphEnable() const;
-    void setSpeedWidgetGraphEnable(bool value);
+    bool speedWidgetGraphEnable(int id) const;
+    void setSpeedWidgetGraphEnable(int id,bool value);
 
   public slots:
     void setStatusFilterState(bool checked);
