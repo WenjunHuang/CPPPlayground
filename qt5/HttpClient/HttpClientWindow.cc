@@ -32,6 +32,8 @@ struct HttpClientWindowPrivate {
 
         auto bottomLayout = new QHBoxLayout;
         startLoad         = new QPushButton("开始");
+
+        qDebug() <<Q_FUNC_INFO;
         QObject::connect(startLoad, &QPushButton::clicked, [this]() {
             auto outer = this;
             QNetworkRequest request;

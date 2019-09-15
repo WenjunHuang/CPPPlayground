@@ -32,3 +32,6 @@ qt5_use_modules(HttpClient LINK_PRIVATE Core Widgets Network)
 
 add_executable(Crypto Crypto/main.cc)
 target_link_libraries(Crypto PRIVATE crypto++ Qt5::Core )
+
+add_subdirectory(widgets)
+add_subdirectory(QtQuickPlayground)

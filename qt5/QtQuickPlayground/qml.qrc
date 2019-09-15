@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>loader/main.qml</file>
+        <file>loader/Analog.qml</file>
+        <file>loader/Digital.qml</file>
+        <file>connections/main.qml</file>
+        <file>load-component/main.qml</file>
+        <file>load-component/create-component.js</file>
+        <file>load-component/dynamic-image.qml</file>
+        <file>dynamic_scene/main.qml</file>
+        <file>Circle.qml</file>
+    </qresource>
+</RCC>
