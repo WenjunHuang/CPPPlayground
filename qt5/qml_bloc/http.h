@@ -36,7 +36,20 @@ class ExportedFactory : public QObject {
         return jsEngine->newQObject(rtn);
     }
 };
+class HttpResult : public QObject {
+    Q_OBJECT
+    Q_PROPERTY(QString result READ result)
+  public:
+    HttpResult(const QString& result) : _result{result} {}
+    ~HttpResult() {
+        qDebug() << "HttpResult deconstructed";
+    }
 
+    QString result() { return _result; }
+
+  private:
+    QString _result;
+};
 class Http : public QObject {
     Q_OBJECT
   public:
@@ -53,11 +66,16 @@ class Http : public QObject {
         auto reply = _network->get(request);
         connect(reply, &QNetworkReply::finished,
                 [callback = std::move(callback), reply, this]() mutable {
-                    auto engine       = qjsEngine(this);
-                    auto resultObject = engine->newObject();
+                    auto engine = qjsEngine(this);
                     QString result(reply->readAll());
-                    resultObject.setProperty("result", QJSValue(result));
-                    callback.call({resultObject});
+                    reply->deleteLater();
+
+                    auto resultObject = new HttpResult(result);
+
+                    //                  auto resultObject = engine->newObject();
+                    //                  resultObject.setProperty("result",
+                    //                  QJSValue(result));
+                    callback.call({engine->newQObject(resultObject)});
                 });
     }
 

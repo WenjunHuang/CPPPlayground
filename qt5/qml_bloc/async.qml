@@ -50,10 +50,11 @@ Window {
                 if (obj) {
                     root.state = "loading"
                     var result = http.fetch(obj, function (result) {
-                    console.log(result.result)
-
+                        console.log(result.result)
                         taResponse.text = result.result
                         root.state = "normal"
+                        // test if free qobject
+                        gc()
                     })
                 }
             }
