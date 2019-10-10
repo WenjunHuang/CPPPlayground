@@ -11,7 +11,9 @@ find_package(Boost REQUIRED COMPONENTS filesystem system thread coroutine)
 find_package(Qt5 REQUIRED Core Widgets Network Xml)
 
 add_subdirectory(base)
+add_subdirectory(test)
 
 add_executable(qBittorrent main.cc)
 qt5_use_modules(qBittorrent LINK_PRIVATE Widgets Network)
 target_link_libraries(qBittorrent PRIVATE qbt_base)
+

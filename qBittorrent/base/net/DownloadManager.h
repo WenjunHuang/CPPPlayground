@@ -100,7 +100,7 @@ namespace Net {
       private:
         explicit DownloadManager(QObject* parent = nullptr);
 
-        DownloadHandler * download(const DownloadRequest &downloadRequest);
+        DownloadHandler* download(const DownloadRequest& downloadRequest);
         void applyProxySettings();
         void handleReplyFinished(const QNetworkReply* reply);
 
@@ -109,13 +109,13 @@ namespace Net {
 
         QSet<ServiceID> m_sequentialServices;
         QSet<ServiceID> m_busyServices;
-        QHash<ServiceID,QQueue<DownloadHandler *>> m_waitingJobs;
+        QHash<ServiceID, QQueue<DownloadHandler*>> m_waitingJobs;
     };
 
-    template <typename Context,typename Func>
+    template <typename Context, typename Func>
     void DownloadManager::download(const DownloadRequest& downloadRequest,
-        Context context,Func &&slot) {
+                                   Context context, Func&& slot) {
         const auto handler = download(downloadRequest);
-        connect(handler,&DownloadHandler::finished,context,slot);
+        connect(handler, &DownloadHandler::finished, context, slot);
     }
 } // namespace Net

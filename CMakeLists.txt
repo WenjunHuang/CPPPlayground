@@ -12,7 +12,11 @@ download_project(PROJ                googletest
         GIT_TAG             master
         ${UPDATE_DISCONNECTED_IF_AVAILABLE}
         )
-
+download_project(PROJ                catch2
+        GIT_REPOSITORY      https://github.com/catchorg/Catch2.git
+        GIT_TAG             master
+        ${UPDATE_DISCONNECTED_IF_AVAILABLE}
+        )
 enable_testing()
 include_directories(include)
 set(CMAKE_CXX_STANDARD 17)

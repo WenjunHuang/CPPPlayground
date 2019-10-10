@@ -15,7 +15,7 @@ namespace BitTorrent {
         InfoHash(const QString& hasString);
         InfoHash(const InfoHash& other) = default;
 
-        static constexpr int length() { return lt::sha1_hash::size; }
+        static constexpr int length() { return lt::sha1_hash::size(); }
 
         bool isValid() const { return m_valid; }
         operator lt::sha1_hash() const { return m_nativeHash; }
