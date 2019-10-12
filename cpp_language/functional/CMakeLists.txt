@@ -1,4 +1,16 @@
+set(CMAKE_PREFIX_PATH $ENV{QT_CMAKE})
+find_package(PkgConfig)
+find_package(nlohmann_json 3.2.0 REQUIRED)
+#pkg_check_modules(crypto++ REQUIRED libcrypto++)
+find_package(Qt5 REQUIRED Core Widgets Network Quick)
+
 add_executable(function function.cc)
 add_executable(older-than-generic older-than-generic.cc)
 add_executable(error-test error-test.cc)
 add_executable(partial_function partial_function.cc)
+add_executable(bind bind.cc)
+add_executable(lazy_val lazy_val.cc)
+add_executable(sum_type sum_type.cc)
+qt5_use_modules(sum_type LINK_PRIVATE Core)
+add_executable(tenis tenis.cc)
+
