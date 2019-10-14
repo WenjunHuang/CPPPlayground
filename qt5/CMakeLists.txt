@@ -38,3 +38,4 @@ qt5_use_modules(qml_bloc LINK_PRIVATE Core Widgets Network Quick)
 
 add_subdirectory(widgets)
 add_subdirectory(QtQuickPlayground)
+add_subdirectory(core)
