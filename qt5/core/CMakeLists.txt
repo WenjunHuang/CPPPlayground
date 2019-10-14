@@ -1,0 +1,10 @@
+find_package(Qt5 REQUIRED Core Widgets Network Quick)
+
+file(GLOB_RECURSE SRCS *.cc)
+foreach (SRC_FILE IN LISTS SRCS)
+    message(${SRC_FILE})
+    get_filename_component(TARGET_NAME ${SRC_FILE} NAME_WLE)
+    message(${TARGET_NAME})
+    add_executable(${TARGET_NAME} ${SRC_FILE})
+    qt5_use_modules(${TARGET_NAME} LINK_PRIVATE Core)
+endforeach ()
