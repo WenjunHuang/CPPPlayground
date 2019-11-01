@@ -20,4 +20,3 @@ foreach (TARGET IN LISTS TARGETS)
     add_executable(${TARGET} ${${TARGET}_files})
 endforeach ()
 
-message("${TARGETS}")
