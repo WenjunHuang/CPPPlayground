@@ -5,8 +5,19 @@
 #include "clock_circle.h"
 #include <QSGFlatColorMaterial>
 #include <cmath>
-ClockCircle::ClockCircle(QQuickItem* parent) : QQuickItem(parent) {
+ClockCircle::ClockCircle(QQuickItem* parent)
+    : QQuickItem(parent), _backgroundColor(Qt::white),
+      _borderActiveColor(Qt::blue), _borderNonActiveColor(Qt::gray), _angle(0),
+      _circleTime(QTime(0, 0, 0, 0)) {
     setFlag(QQuickItem::ItemHasContents);
+    setAntialiasing(true);
+
+    _internalTimer = new QTimer(this);
+    connect(_internalTimer, &QTimer::timeout, [=]() {
+        setAngle(angle() + 0.3);
+        setCircleTime(circleTime().addMSecs(50));
+        update();
+    });
 }
 QSGNode* ClockCircle::updatePaintNode(
     QSGNode* oldNode, QQuickItem::UpdatePaintNodeData* updatePaintNodeData) {
@@ -24,7 +35,7 @@ QSGNode* ClockCircle::updatePaintNode(
         auto borderNonActiveGeometry =
             new QSGGeometry(QSGGeometry::defaultAttributes_Point2D(), 360);
         borderNonActiveGeometry->setDrawingMode(GL_POLYGON);
-        drawCircle(width() / 2,borderNonActiveGeometry);
+        drawCircle(width() / 2, borderNonActiveGeometry);
 
         auto borderNonActiveMaterial = new QSGFlatColorMaterial();
         borderNonActiveMaterial->setColor(_borderNonActiveColor);
@@ -32,7 +43,8 @@ QSGNode* ClockCircle::updatePaintNode(
         auto borderNonActiveNode = new QSGGeometryNode();
         borderNonActiveNode->setGeometry(borderNonActiveGeometry);
         borderNonActiveNode->setMaterial(borderNonActiveMaterial);
-        borderNonActiveNode->setFlags(QSGNode::OwnsGeometry|QSGNode::OwnsMaterial);
+        borderNonActiveNode->setFlags(QSGNode::OwnsGeometry |
+                                      QSGNode::OwnsMaterial);
     }
     return QQuickItem::updatePaintNode(oldNode, updatePaintNodeData);
 }
