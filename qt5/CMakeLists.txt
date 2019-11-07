@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.7)
 project(qt5)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
 set(CMAKE_PREFIX_PATH $ENV{QT_CMAKE})
 find_package(PkgConfig)
-#pkg_check_modules(crypto++ REQUIRED libcrypto++)
+pkg_check_modules(cryptopp REQUIRED libcryptopp)
 find_package(Qt5 REQUIRED Core Widgets Network Quick)
 
 set_target_properties(Qt5::Core PROPERTIES MAP_IMPORTED_CONFIG_COVERAGE "DEBUG")
@@ -31,10 +31,14 @@ add_executable(HttpClient HttpClient/main.cc HttpClient/HttpClientWindow.cc Http
 qt5_use_modules(HttpClient LINK_PRIVATE Core Widgets Network)
 
 add_executable(Crypto Crypto/main.cc)
-target_link_libraries(Crypto PRIVATE crypto++ Qt5::Core)
+target_include_directories(Crypto PRIVATE ${cryptopp_INCLUDE_DIRS})
+target_link_libraries(Crypto PRIVATE ${cryptopp_LINK_LIBRARIES} Qt5::Core)
 
 add_executable(qml_bloc qml_bloc/main.cc qml_bloc/async.qml qml_bloc/foo.cc qml_bloc/foo.h qml_bloc/http.cc qml_bloc/http.h)
 qt5_use_modules(qml_bloc LINK_PRIVATE Core Widgets Network Quick)
+
+add_executable(json json/main.cc)
+qt5_use_modules(json LINK_PRIVATE Core)
 
 add_subdirectory(widgets)
 add_subdirectory(QtQuickPlayground)
