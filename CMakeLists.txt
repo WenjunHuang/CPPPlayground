@@ -36,7 +36,7 @@ add_subdirectory(libsdl2)
 add_subdirectory(qt_command_line)
 add_subdirectory(kqueue)
 add_subdirectory(llvm)
-add_subdirectory(qBittorrent)
+#add_subdirectory(qBittorrent)
 add_subdirectory(opengl)
 
 

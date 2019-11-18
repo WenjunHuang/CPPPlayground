@@ -1,5 +1,5 @@
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_PREFIX_PATH $ENV{QT_CMAKE})
+set(CMAKE_PREFIX_PATH ${QT_CMAKE})
 find_package(PkgConfig)
 #find_package(nlohmann_json 3.2.0 REQUIRED)
 #pkg_check_modules(crypto++ REQUIRED libcrypto++)

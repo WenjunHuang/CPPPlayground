@@ -1,28 +1,27 @@
-//
-// Created by rick on 19-7-11.
+﻿//
+// Created by rick on 2019/11/16.
 //
 
 #include "HttpClientWindow.h"
 #include <QNetworkAccessManager>
 #include <QtNetwork/QtNetwork>
 
-struct HttpClientWindowPrivate {
+class HttpClientWindowPrivate {
     Q_DECLARE_PUBLIC(HttpClientWindow)
+  public:
     HttpClientWindowPrivate(HttpClientWindow* ptr) : q_ptr{ptr} {}
     HttpClientWindow* q_ptr;
 
     void initNetwork() { networkAccess = new QNetworkAccessManager(q_ptr); }
 
     void buildUI() {
-        auto layout     = new QVBoxLayout;
-        auto addressLab = new QLabel("地址:");
-        addressText     = new QLineEdit;
-
-        auto responseLab = new QLabel("回复:");
+        auto layout      = new QVBoxLayout;
+        auto addressLab  = new QLabel(QStringLiteral(u"地址:"));
+        addressText      = new QLineEdit;
+        auto responseLab = new QLabel(QStringLiteral(u"回复:"));
         responseText     = new QPlainTextEdit;
 
         isJson = new QCheckBox("Json");
-
         layout->setSpacing(5);
         layout->addWidget(addressLab);
         layout->addWidget(addressText);
@@ -31,36 +30,36 @@ struct HttpClientWindowPrivate {
         layout->addWidget(isJson);
 
         auto bottomLayout = new QHBoxLayout;
-        startLoad         = new QPushButton("开始");
+        startLoad         = new QPushButton(QStringLiteral(u"开始"));
 
-        qDebug() <<Q_FUNC_INFO;
+        qDebug() << Q_FUNC_INFO;
         QObject::connect(startLoad, &QPushButton::clicked, [this]() {
-            auto outer = this;
-            QNetworkRequest request;
-            request.setUrl(QUrl(addressText->text()));
+          auto outer = this;
+          QNetworkRequest request;
+          request.setUrl(QUrl(addressText->text()));
 
-            auto reply = networkAccess->get(request);
-            QObject::connect(reply, &QNetworkReply::finished, [=]() {
-                auto contentType = reply->header(
-                    QNetworkRequest::KnownHeaders::ContentTypeHeader);
-                qDebug() << contentType.toString();
+          auto reply = networkAccess->get(request);
+          QObject::connect(reply, &QNetworkReply::finished, [=]() {
+            auto contentType = reply->header(
+                QNetworkRequest::KnownHeaders::ContentTypeHeader);
+            qDebug() << contentType.toString();
 
-                QByteArray content = reply->readAll();
-                QString response   = QString::fromUtf8(content);
-                QJsonDocument json = QJsonDocument::fromJson(content);
-                qDebug() << json.isObject() << json.isArray() << json.isEmpty()
-                         << json.isNull();
-                responseText->setPlainText(response);
+            QByteArray content = reply->readAll();
+            QString response   = QString::fromUtf8(content);
+            QJsonDocument json = QJsonDocument::fromJson(content);
+            qDebug() << json.isObject() << json.isArray() << json.isEmpty()
+                     << json.isNull();
+            responseText->setPlainText(response);
 
-                reply->deleteLater();
-            });
+            reply->deleteLater();
+          });
 
-            QObject::connect(reply, &QNetworkReply::downloadProgress,
-                             [](auto bytesReceived, auto bytesTotal) {
-                                 qDebug() << QString("Downloading %1/%2")
-                                                 .arg(bytesReceived)
-                                                 .arg(bytesTotal);
-                             });
+          QObject::connect(reply, &QNetworkReply::downloadProgress,
+                           [](auto bytesReceived, auto bytesTotal) {
+                             qDebug() << QString("Downloading %1/%2")
+                                 .arg(bytesReceived)
+                                 .arg(bytesTotal);
+                           });
         });
 
         bottomLayout->addWidget(startLoad, 0, Qt::AlignRight);
