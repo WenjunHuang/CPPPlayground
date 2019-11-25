@@ -6,7 +6,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY bin)
-set(CMAKE_PREFIX_PATH $ENV{QT_CMAKE})
+set(CMAKE_PREFIX_PATH ${QT_CMAKE})
 find_package(Boost REQUIRED COMPONENTS filesystem system thread coroutine)
 find_package(Qt5 REQUIRED Core Widgets Network Xml)
 
