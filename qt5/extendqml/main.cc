@@ -97,6 +97,35 @@ enum class BirthdayPartySize { Small, Medium, Large };
 
 enum class BirthdayPartyTheme { Classic, Modern, Future };
 
+enum class FuckType {
+    A,
+    B
+};
+struct FuckTypeA {
+    Q_GADGET
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(FuckType type READ type)
+  public:
+    QString name;
+    FuckType type () const {
+        return FuckType::A;
+    }
+};
+struct FuckTypeB {
+  Q_GADGET
+    Q_PROPERTY(QString name MEMBER name)
+    Q_PROPERTY(FuckType type READ type)
+  public:
+    QString name;
+    FuckType type () const {
+        return FuckType::B;
+    }
+};
+
+Q_DECLARE_METATYPE(FuckTypeA)
+Q_DECLARE_METATYPE(FuckTypeB)
+
+
 class BirthdayPartyAttached : public QObject {
     Q_OBJECT
     Q_PROPERTY(QDate rsvp READ rsvp WRITE setRsvp)
@@ -114,8 +143,11 @@ class BirthdayParty : public QObject {
     Q_CLASSINFO("DefaultProperty", "guests")
     Q_PROPERTY(QQmlListProperty<Person> guests READ guests)
     Q_PROPERTY(Person* host READ host WRITE setHost)
+    Q_PROPERTY(QVariant fuck READ fuck)
+
     Q_ENUM(BirthdayPartySize)
     Q_ENUM(BirthdayPartyTheme)
+    Q_ENUM(FuckType)
 
   public:
     explicit BirthdayParty(QObject* parent = nullptr) : QObject(parent) {}
@@ -146,6 +178,12 @@ class BirthdayParty : public QObject {
     Person* guest(int index) { return _guests.at(index); }
 
     void clearGuests() { _guests.clear(); }
+
+    QVariant fuck() const {
+//        return "foo";
+        return QVariant::fromValue(Fuck{"Wenjun Huang"});
+    }
+
 
     static BirthdayPartyAttached* qmlAttachedProperties(QObject* object) {
         return new BirthdayPartyAttached(object);
@@ -178,6 +216,7 @@ QML_DECLARE_TYPEINFO(BirthdayParty, QML_HAS_ATTACHED_PROPERTIES)
 int main(int argc, char* argv[]) {
     QCoreApplication app(argc, argv);
 
+    qRegisterMetaType<Fuck>();
     qmlRegisterType<BirthdayPartyAttached>();
     qmlRegisterType<BirthdayParty>("People", 1, 0, "BirthdayParty");
     qmlRegisterType<Person>("People", 1, 0, "Person");

@@ -2,11 +2,15 @@ import QtQuick 2.12
 import People 1.0
 
 BirthdayParty{
+    id:root
     property var foo:BirthdayParty.Classic
     property var bar:BirthdayParty.Small
     Component.onCompleted:{
     console.log(food.china)
+
+    console.log(root.fuck.name)
     }
+    //foo:"abc"
     host:Boy {
         name:"Bob Jones"
         favor:food["china"]
