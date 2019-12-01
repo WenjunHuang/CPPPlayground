@@ -1,0 +1,16 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+<!--        <file>images/icons8-master.png</file>-->
+<!--        <file>images/icons8-call_in_bed.png</file>-->
+        <file>example.qml</file>
+        <file>imports/Foo/qmldir</file>
+        <file>imports/Foo/FAFonts.qml</file>
+        <file>imports/Foo/FAIcons.qml</file>
+        <file>imports/Foo/fa-brands-400.ttf</file>
+        <file>imports/Foo/fa-duotone-900.ttf</file>
+        <file>imports/Foo/fa-light-300.ttf</file>
+        <file>imports/Foo/fa-regular-400.ttf</file>
+        <file>imports/Foo/fa-solid-900.ttf</file>
+    </qresource>
+</RCC>

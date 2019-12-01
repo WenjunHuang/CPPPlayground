@@ -52,10 +52,11 @@ SemiFuture<uint64_t> skynetAsync(uint64_t num, uint64_t size, uint64_t div,folly
     }
 }
 
-int skyNet1() {
-    CPUThreadPoolExecutor executor(6);
+void skyNet1() {
+    CPUThreadPoolExecutor executor(4);
+//  auto executor = folly::getCPUExecutor();
 
-    auto start = std::chrono::high_resolution_clock::now();
+  auto start = std::chrono::high_resolution_clock::now();
 
 
     auto result = skynetAsync(0, 1000000, 10,&executor);

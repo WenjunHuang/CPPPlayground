@@ -1,0 +1,3 @@
+module Foo
+singleton FAFonts 1.0 FAFonts.qml
+singleton FAIcons 1.0 FAIcons.qml

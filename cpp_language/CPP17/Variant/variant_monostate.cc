@@ -6,6 +6,14 @@
 
 struct NoDefConstr {
     NoDefConstr(int i) { std::cout << "NoDefConstr::NoDefConstr"; }
+
+    bool operator==(const NoDefConstr&other) const {
+        return true;
+    }
+
+    bool operator!=(const NoDefConstr&other) const {
+        return false;
+    }
 };
 
 int main() {
@@ -20,4 +28,15 @@ int main() {
 
     if (std::get_if<std::monostate>(&v2))
         std::cout <<"has monstate\n";
+
+
+    std::variant<std::monostate, NoDefConstr, int> v3;
+    v3 = 1;
+
+    NoDefConstr a(10);
+    NoDefConstr b(20);
+    if (a == b)
+        std::cout <<"ok";
+    if (v2 == v3)
+        std::cout << "equal" << std::endl;
 }
