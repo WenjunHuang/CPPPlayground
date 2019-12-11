@@ -17,12 +17,16 @@ ApplicationWindow {
     radius: height/2
     leftPadding: radius
     rightPadding: radius
-        text:"全部歌单 >"
+        text:"全部歌单"
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.leftMargin: 10
         anchors.topMargin: 10
         onClicked: popup.open()
+
+        Behavior on width {
+            NumberAnimation {duration:2000}
+        }
 
     Popup {
     id:popup
@@ -41,6 +45,19 @@ ApplicationWindow {
         }
         }
     }
+    }
+
+    Button {
+        id:change
+        anchors.centerIn:parent
+        text:"随机修改宽度"
+        onClicked:{
+            const times = Math.floor(Math.random() * 10)
+            let text = ""
+            for (let t = 0;t < times;t++)
+                text += "全部歌单"
+            button.text = text
+        }
     }
 
 }

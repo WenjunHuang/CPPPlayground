@@ -39,6 +39,7 @@ add_subdirectory(kqueue)
 add_subdirectory(llvm)
 #add_subdirectory(qBittorrent)
 add_subdirectory(opengl)
+add_subdirectory(ffmpeg)
 
 
 

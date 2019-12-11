@@ -1,0 +1,32 @@
+set(CMAKE_CXX_STANDARD 17)
+find_package(PkgConfig)
+pkg_check_modules(avformat REQUIRED libavformat IMPORTED_TARGET)
+pkg_check_modules(avcodec REQUIRED libavcodec IMPORTED_TARGET)
+pkg_check_modules(avfilter REQUIRED libavfilter IMPORTED_TARGET)
+
+list(APPEND CMAKE_PREFIX_PATH ${QT_CMAKE})
+find_package(Qt5 REQUIRED Core Widgets Network Quick)
+
+file(GLOB_RECURSE SRCS *.cc)
+set(TARGETS "")
+foreach (SRC_FILE IN LISTS SRCS)
+    get_filename_component(FILE_NAME ${SRC_FILE} NAME_WLE)
+    string(REGEX MATCHALL "([A-Za-z0-9_]+)-?.*" MATCHES "${FILE_NAME}")
+    if (MATCHES)
+        set(TARGET_NAME ${CMAKE_MATCH_1})
+        list(FIND TARGETS ${TARGET_NAME} IDX)
+        if (IDX EQUAL "-1")
+            list(APPEND TARGETS ${TARGET_NAME})
+            set(${TARGET_NAME}_files ${SRC_FILE})
+        else ()
+            list(APPEND ${TARGET_NAME}_files ${SRC_FILE})
+        endif ()
+    endif ()
+
+endforeach ()
+
+foreach (TARGET IN LISTS TARGETS)
+    add_executable(${TARGET} ${${TARGET}_files})
+    target_link_libraries(${TARGET} PRIVATE PkgConfig::avformat PkgConfig::avformat PkgConfig::avfilter Qt5::Core)
+endforeach ()
+
