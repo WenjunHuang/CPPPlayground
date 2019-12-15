@@ -5,6 +5,8 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <QtCore>
+
 using namespace sqlite_orm;
 struct User {
     int id;
@@ -35,6 +37,7 @@ int main(int argc, char* argv[]) {
             make_column("id", &UserType::id, autoincrement(), primary_key()),
             make_column("name", &UserType::name,
                         default_value("place_holder"))));
+    storage.sync_schema();
 
     User user{-1,
               "Jonh",
@@ -67,4 +70,9 @@ int main(int argc, char* argv[]) {
 
     storage.update_all(set(c(&User::lastName) = "Hardey", c(&User::typeId) = 2),
                        where(c(&User::firstName) == "Tom"));
+
+    auto allUsers = storage.get_all<User>();
+    for (auto &user: allUsers){
+        std::cout << storage.dump(user) << std::endl;
+    }
 }
