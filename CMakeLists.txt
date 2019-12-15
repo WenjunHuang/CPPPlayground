@@ -23,7 +23,7 @@ include_directories(include)
 set(CMAKE_CXX_STANDARD 17)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-add_subdirectory(boost)
+#add_subdirectory(boost)
 add_subdirectory(folly)
 add_subdirectory(algorithm)
 add_subdirectory(cookbook)
@@ -35,11 +35,12 @@ add_subdirectory(lldb)
 add_subdirectory(rust_with_cpp)
 add_subdirectory(libsdl2)
 add_subdirectory(qt_command_line)
-add_subdirectory(kqueue)
-add_subdirectory(llvm)
+#add_subdirectory(kqueue)
+#add_subdirectory(llvm)
 #add_subdirectory(qBittorrent)
 add_subdirectory(opengl)
 add_subdirectory(ffmpeg)
+add_subdirectory(sqlite3)
 
 
 
