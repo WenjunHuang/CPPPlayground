@@ -40,6 +40,7 @@ add_subdirectory(llvm)
 #add_subdirectory(qBittorrent)
 add_subdirectory(opengl)
 add_subdirectory(ffmpeg)
+add_subdirectory(cpp_concurrent)
 
 
 
