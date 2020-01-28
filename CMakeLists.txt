@@ -41,6 +41,7 @@ add_subdirectory(qt_command_line)
 add_subdirectory(opengl)
 add_subdirectory(ffmpeg)
 add_subdirectory(sqlite3)
+add_subdirectory(cpp_concurrent)
 
 
 

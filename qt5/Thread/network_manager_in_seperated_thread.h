@@ -10,6 +10,8 @@
 #include <QtCore/QObject>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
+#include "../ImageProvider/http_worker.h"
+
 
 enum class HttpMethod {
     GET,
