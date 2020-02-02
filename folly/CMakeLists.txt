@@ -1,11 +1,6 @@
-cmake_minimum_required(VERSION 3.13)
-
-project(folly)
-set(LANGUAGE CXX)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (WIN32)
+if (MSVC)
     find_package(folly CONFIG REQUIRED)
     find_package(glog CONFIG REQUIRED)
     find_package(ZLIB REQUIRED)
@@ -21,7 +16,7 @@ if (APPLE)
     set(FOLLY PkgConfig::folly)
     set(GLOG PkgConfig::glog)
 endif ()
-#find_package(folly REQUIRED)
+
 add_subdirectory(futures)
 
 

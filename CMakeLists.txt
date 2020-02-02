@@ -1,40 +1,88 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 project(CPPPlayground)
 
-if (CMAKE_VERSION VERSION_LESS 3.2)
-    set(UPDATE_DISCONNECTED_IF_AVAILABLE "")
-else()
-    set(UPDATE_DISCONNECTED_IF_AVAILABLE "UPDATE_DISCONNECTED 1")
-endif()
-include(DownloadProject.cmake)
-#download_project(PROJ                googletest
-#        GIT_REPOSITORY      https://github.com/google/googletest.git
-#        GIT_TAG             master
-#        GIT_SHALLOW
-#        ${UPDATE_DISCONNECTED_IF_AVAILABLE}
-#        )
-#download_project(PROJ                catch2
-#        GIT_REPOSITORY      https://github.com/catchorg/Catch2.git
-#        GIT_TAG             master
-#        ${UPDATE_DISCONNECTED_IF_AVAILABLE}
-#        )
-enable_testing()
 include_directories(include)
 set(CMAKE_CXX_STANDARD 17)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-#add_subdirectory(boost)
+# 单个cc文件
+function(add_single_file_targets)
+    include(CMakeParseArguments)
+    set(singleValues DIR PREFIX)
+    set(multiValues LIBS)
+    cmake_parse_arguments(ARG
+            ""
+            "${singleValues}"
+            "${multiValues}"
+            ${ARGN})
+
+    if (ARG_DIR)
+        set(TARGETS "")
+        file(GLOB SRCS ${ARG_DIR}/*.cc)
+        foreach (SRC_FILE IN LISTS SRCS)
+            get_filename_component(FILE_NAME ${SRC_FILE} NAME_WLE)
+            string(REGEX MATCHALL "([A-Za-z0-9_]+)-?.*" MATCHES "${FILE_NAME}")
+            if (MATCHES)
+                set(TARGET_NAME ${PREFIX}_${CMAKE_MATCH_1})
+                list(FIND TARGETS ${TARGET_NAME} IDX)
+                if (IDX EQUAL "-1")
+                    list(APPEND TARGETS ${TARGET_NAME})
+                    set(${TARGET_NAME}_files ${SRC_FILE})
+                else ()
+                    list(APPEND ${TARGET_NAME}_files ${SRC_FILE})
+                endif ()
+            endif ()
+        endforeach ()
+
+        foreach (TARGET IN LISTS TARGETS)
+            add_executable(${TARGET} ${${TARGET}_files})
+            if (ARG_LIBS)
+                target_link_libraries(${TARGET} PRIVATE ${ARG_LIBS})
+            endif ()
+        endforeach ()
+    else ()
+        message(FATAL_ERROR "please specify DIR")
+    endif ()
+endfunction()
+
+function(add_dir_target)
+    include(CMakeParseArguments)
+    set(singleValues DIR PREFIX)
+    set(multiValues LIBS)
+    cmake_parse_arguments(ARG
+            ""
+            "${singleValues}"
+            "${multiValues}"
+            ${ARGN})
+    if (ARG_PREFIX AND ARG_DIR)
+        if (IS_DIRECTORY ${ARG_DIR})
+            file(GLOB children ${ARG_DIR}/*)
+            foreach (child IN LISTS children)
+                IF (IS_DIRECTORY ${child})
+                    file(GLOB files LIST_DIRECTORIES false ${child}/*)
+                    get_filename_component(dir_name ${child} NAME)
+                    add_executable(${ARG_PREFIX}_${dir_name} ${files})
+                    if (ARG_LIBS)
+                        target_link_libraries(${ARG_PREFIX}_${dir_name} PRIVATE ${ARG_LIBS})
+                    endif ()
+                ENDIF ()
+            endforeach ()
+        else ()
+            message(SEND_ERROR "${ARG_DIR} is not a directory")
+        endif ()
+    endif ()
+endfunction()
+
+add_subdirectory(boost)
 add_subdirectory(folly)
 add_subdirectory(algorithm)
 add_subdirectory(cookbook)
 add_subdirectory(cpp_template)
 add_subdirectory(cpp_language)
-add_subdirectory(coreutils_cpp)
 add_subdirectory(qt5)
 add_subdirectory(lldb)
 add_subdirectory(rust_with_cpp)
 add_subdirectory(libsdl2)
-add_subdirectory(qt_command_line)
 #add_subdirectory(kqueue)
 #add_subdirectory(llvm)
 #add_subdirectory(qBittorrent)
@@ -42,8 +90,6 @@ add_subdirectory(opengl)
 add_subdirectory(ffmpeg)
 add_subdirectory(sqlite3)
 add_subdirectory(cpp_concurrent)
-
-
 
 
 ## The gtest/gtest_main targets carry header search path
