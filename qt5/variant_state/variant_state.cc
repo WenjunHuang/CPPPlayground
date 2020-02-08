@@ -19,20 +19,19 @@
 QVector<QString> kTexts{
     QStringLiteral(u"每个人都有潜在的能量，只是很容易：被习惯所掩盖，被时间所迷"
                    u"离，被惰性所消磨。"),
-    QStringLiteral(u"每个人都有潜在的能量，只是很容易：被习惯所掩盖，被时间所迷"
-                   u"离，被惰性所消磨。"),
-    QStringLiteral(u"无论你觉得自己多么的不幸，永远有人比你更加不幸。")
-};
-QString kSetuDir = "/Users/huangwenjun/Desktop/setu";
+    QStringLiteral(
+        u"乞丐并不会妒忌百万富翁，但是他肯定会妒忌收入更高的乞丐。——罗素"),
+    QStringLiteral(u"无论你觉得自己多么的不幸，永远有人比你更加不幸。")};
+QString kSetuDir = "/home/huangwj";
 
-class Helper:public QObject {
+class Helper : public QObject {
     Q_OBJECT
   public:
     enum class StimulateType { SeTu, Text };
     Q_ENUM(StimulateType)
 };
 
-//Q_DECLARE_METATYPE(StimulateType)
+// Q_DECLARE_METATYPE(StimulateType)
 
 struct SeTuStimulate {
     Q_GADGET
@@ -44,7 +43,7 @@ struct SeTuStimulate {
 };
 
 Q_DECLARE_METATYPE(SeTuStimulate)
-bool operator==(const SeTuStimulate& first ,const SeTuStimulate& other) {
+bool operator==(const SeTuStimulate& first, const SeTuStimulate& other) {
     return first.setuUrl == other.setuUrl;
 }
 
@@ -57,7 +56,9 @@ struct TextStimulate {
     Helper::StimulateType type() const { return Helper::StimulateType::Text; }
 };
 
-bool operator==(const TextStimulate& first,const TextStimulate& other) { return first.text == other.text; }
+bool operator==(const TextStimulate& first, const TextStimulate& other) {
+    return first.text == other.text;
+}
 
 Q_DECLARE_METATYPE(TextStimulate)
 
@@ -76,8 +77,10 @@ class SetuViewModel : public QObject {
             // setu
             QDir dir(kSetuDir);
             auto setuList = dir.entryList(QDir::Files);
-            auto pick = QRandomGenerator::global()->bounded(setuList.size());
-            QUrl setuUrl = QUrl::fromLocalFile(dir.absoluteFilePath(setuList.at(pick)));
+            //            auto pick =
+            //            QRandomGenerator::global()->bounded(setuList.size());
+            QUrl setuUrl{
+                "qrc:/setu"}; // QUrl::fromLocalFile(dir.absoluteFilePath(setuList.at(pick)));
             qDebug() << setuUrl;
 
             setStimulate(SeTuStimulate{setuUrl});
@@ -96,7 +99,7 @@ class SetuViewModel : public QObject {
 
         QDir dir(kSetuDir);
         auto setuList = dir.entryList(QDir::Files);
-        for (const auto& file: setuList) {
+        for (const auto& file : setuList) {
             QUrl setuUrl = QUrl::fromLocalFile(dir.absoluteFilePath(file));
             result.append(SeTuStimulate{setuUrl});
         }
@@ -106,15 +109,17 @@ class SetuViewModel : public QObject {
 
     QVariant stimulate() const {
         return QVariant::fromStdVariant(_stimulate);
-//        return std::visit(_stimulate,[](auto &value) {
-//            if constexpr (std::is_convertible_v< decltype(value),SeTuStimulate>) {
-//
-//            } else if (std::is_convertible_v< decltype(value),TextStimulate>) {
-//
-//            } else {
-//                return QVariant();
-//            }
-//        });
+        //        return std::visit(_stimulate,[](auto &value) {
+        //            if constexpr (std::is_convertible_v<
+        //            decltype(value),SeTuStimulate>) {
+        //
+        //            } else if (std::is_convertible_v<
+        //            decltype(value),TextStimulate>) {
+        //
+        //            } else {
+        //                return QVariant();
+        //            }
+        //        });
     }
 
   signals:
@@ -137,11 +142,12 @@ class SetuViewModel : public QObject {
 int main(int argc, char* argv[]) {
 
     // Singleton Type
-    qmlRegisterUncreatableType<Helper>("ViewModel",1,0,"Helper","Helper not creatable");
-    qmlRegisterType<SetuViewModel>("ViewModel",1,0,"SetuViewModel");
+    qmlRegisterUncreatableType<Helper>("ViewModel", 1, 0, "Helper",
+                                       "Helper not creatable");
+    qmlRegisterType<SetuViewModel>("ViewModel", 1, 0, "SetuViewModel");
     qRegisterMetaType<SeTuStimulate>();
     qRegisterMetaType<TextStimulate>();
-//    qRegisterMetaType<StimulateType>();
+    //    qRegisterMetaType<StimulateType>();
 
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;

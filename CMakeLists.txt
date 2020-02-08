@@ -4,8 +4,11 @@ project(CPPPlayground)
 include_directories(include)
 set(CMAKE_CXX_STANDARD 17)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+if(MSVC)
+    add_compile_options("/Zc:__cplusplus" "/utf-8")
+endif()
 
-# 单个cc文件
+    # 单个cc文件
 function(add_single_file_targets)
     include(CMakeParseArguments)
     set(singleValues DIR PREFIX)

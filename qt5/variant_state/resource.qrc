@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>variant_state.qml</file>
+        <file alias="setu">0E1B647827A63093E2DE1D4781B5AC62.jpg</file>
     </qresource>
 </RCC>
