@@ -42,7 +42,7 @@ add_custom_command(
 list(APPEND Libs Qt5::Widgets ${CMAKE_DL_LIBS})
 list(APPEND Libs "${RUST_LIB}")
 list(APPEND Libs "resolv")
-set(SRCS src/main/cpp_to_rust.cpp)
+set(SRCS src/main/cpp_to_rust.cpp )
 
 add_library(MyLib ${SRCS})
 add_custom_target(MyRust DEPENDS "${RUST_LIB}")

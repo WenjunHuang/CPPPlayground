@@ -1,5 +1,3 @@
-set(CMAKE_CXX_STANDARD 17)
-
 if (APPLE)
     find_package(PkgConfig)
     pkg_check_modules(avformat REQUIRED libavformat IMPORTED_TARGET)

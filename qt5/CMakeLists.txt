@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.7)
-project(qt5)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -8,9 +5,9 @@ set(CMAKE_AUTORCC ON)
 list(APPEND CMAKE_PREFIX_PATH ${QT_CMAKE})
 find_package(PkgConfig)
 #pkg_check_modules(cryptopp REQUIRED libcryptopp)
-find_package(Qt5 REQUIRED Core Widgets Network Quick Concurrent)
+find_package(Qt5 REQUIRED Core Widgets Network Quick Concurrent QuickControls2)
 
 set(PREFIX qt5)
-add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS Qt5::Core Qt5::Widgets Qt5::Network Qt5::Quick Qt5::Concurrent)
-add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS Qt5::Core Qt5::Widgets Qt5::Network Qt5::Quick Qt5::Concurrent)
+add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS Qt5::Core Qt5::Widgets Qt5::Network Qt5::Quick Qt5::Concurrent Qt5::QuickControls2)
+add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS Qt5::Core Qt5::Widgets Qt5::Network Qt5::Quick Qt5::Concurrent Qt5::QuickControls2)
 
