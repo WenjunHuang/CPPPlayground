@@ -1,0 +1,8 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>audible.svg</file>
+        <file>bandcamp.svg</file>
+    </qresource>
+</RCC>
