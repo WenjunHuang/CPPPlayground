@@ -93,6 +93,7 @@ int main(int argc, char* argv[]) {
             glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height,0,GL_RGB,)
         }
     } else {
+
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
