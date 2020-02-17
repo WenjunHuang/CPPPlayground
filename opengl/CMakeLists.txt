@@ -13,5 +13,5 @@ if (MSVC)
 endif ()
 set(PREFIX opengl)
 add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${GLFW} ${GLAD} Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Quick)
-#add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS glfw3)
+add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${GLFW} ${GLAD} Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Quick)
 
