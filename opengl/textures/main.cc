@@ -68,7 +68,15 @@ int main(int argc, char* argv[]) {
         glEnableVertexAttribArray(0);
 
         // color attribute
-        glVertexAttribPointer(1,3,GL_FLOAT)
+        glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,
+            8* sizeof(float),(void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        // texture coord attribute
+        glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,8*sizeof(float),(void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+
+        // load and create a texture
     } else {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
