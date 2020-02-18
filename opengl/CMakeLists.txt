@@ -3,7 +3,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 list(APPEND CMAKE_PREFIX_PATH ${QT_HOME})
-
 find_package(Qt5 5.14 REQUIRED Gui Core Widgets Network Quick Concurrent QuickControls2)
 
 set(PREFIX opengl)
