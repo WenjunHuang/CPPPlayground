@@ -8,4 +8,3 @@ find_package(Qt5 5.14 REQUIRED Gui Core Widgets Network Quick Concurrent QuickCo
 set(PREFIX opengl)
 add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS Qt5::QuickControls2 Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Network Qt5::Quick Qt5::Concurrent)
 add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS Qt5::Core Qt5::Gui)
-
