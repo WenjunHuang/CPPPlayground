@@ -12,8 +12,10 @@
 #include <QtCore/qfile.h>
 #include <iostream>
 
+#include <QKeyEvent>
 #include <QOpenGLBuffer>
 #include <QOpenGLTexture>
+#include <QElapsedTimer>
 
 // settings
 constexpr unsigned int kScrWidth  = 800;
@@ -22,12 +24,29 @@ constexpr unsigned int kScrHeight = 600;
 class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
     Q_OBJECT
   public:
-    TextureWindow() { setSurfaceType(SurfaceType::OpenGLSurface); }
+    TextureWindow() {
+        setSurfaceType(SurfaceType::OpenGLSurface);
+        _time.start();
+    }
 
   protected:
     bool event(QEvent* event) override {
         switch (event->type()) {
-        case QEvent::UpdateRequest: renderNow(); return true;
+        case QEvent::UpdateRequest: {
+            renderNow();
+            return true;
+        }
+        case QEvent::KeyPress: {
+            auto keyEvent = dynamic_cast<QKeyEvent*>(event);
+            if (keyEvent->key() == Qt::Key_Up) {
+                _value = std::min(1.0f, _value + 0.1f);
+                requestUpdate();
+            } else if (keyEvent->key() == Qt::Key_Down) {
+                _value = std::max(0.0f, _value - 0.1f);
+                requestUpdate();
+            } else
+                return QWindow::event(event);
+        }
         default: return QWindow::event(event);
         }
     }
@@ -68,12 +87,21 @@ class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
 
         // render container
         _program->bind();
-        _program->setUniformValue("texture1",0);
-        _program->setUniformValue("texture2",1);
+        _program->setUniformValue("texture1", 0);
+        _program->setUniformValue("texture2", 1);
+        _program->setUniformValue("value", _value);
+
+        QMatrix4x4 matrix;
+        matrix.translate(0.5f,-0.5f,0.0f);
+        matrix.rotate(_time.elapsed(),QVector3D(0.0f,0.0f,1.0f));
+        _program->setUniformValue("transform",matrix);
+
         _vao->bind();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         _context->swapBuffers(this);
+
+        requestUpdate();
     }
 
     void initialize() {
@@ -163,7 +191,8 @@ class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
         _texture->setWrapMode(QOpenGLTexture::DirectionT,
                               QOpenGLTexture::Repeat);
 
-        _texture1 = std::make_unique<QOpenGLTexture>(QImage(":/awesomeface.png").mirrored());
+        _texture1 = std::make_unique<QOpenGLTexture>(
+            QImage(":/awesomeface.png").mirrored());
         //        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width(),
         //        image.height(), 0,
         //                     GL_RGB, GL_UNSIGNED_BYTE, image.);
@@ -179,6 +208,10 @@ class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
     std::unique_ptr<QOpenGLBuffer> _ebo;
     std::unique_ptr<QOpenGLTexture> _texture;
     std::unique_ptr<QOpenGLTexture> _texture1;
+
+    QElapsedTimer _time;
+
+    float _value{0.2};
     //    unsigned int _texture;
 };
 
