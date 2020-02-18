@@ -1,7 +1,12 @@
-if(UNIX AND NOT APPLE)
-    set(LINUX TRUE)
-endif()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+list(APPEND CMAKE_PREFIX_PATH ${QT_HOME})
 
-add_subdirectory(source/common)
-add_subdirectory(source/opengl)
-add_subdirectory(source/glfw)
+find_package(Qt5 5.14 REQUIRED Gui Core Widgets Network Quick Concurrent QuickControls2)
+
+set(PREFIX opengl)
+add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS Qt5::QuickControls2 Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Network Qt5::Quick Qt5::Concurrent)
+add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS Qt5::Core Qt5::Gui)
+
