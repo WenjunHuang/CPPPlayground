@@ -79,16 +79,16 @@ class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // bind texture
-        glActiveTexture(GL_TEXTURE0);
-        _texture->bind();
         glActiveTexture(GL_TEXTURE1);
+        _texture->bind();
+        glActiveTexture(GL_TEXTURE2);
         _texture1->bind();
         //        glBindTexture(GL_TEXTURE_2D, _texture);
 
         // render container
         _program->bind();
-        _program->setUniformValue("texture1", 0);
-        _program->setUniformValue("texture2", 1);
+        _program->setUniformValue("texture1", 1);
+        _program->setUniformValue("texture2", 2);
         _program->setUniformValue("value", _value);
 
         QMatrix4x4 matrix;
@@ -193,6 +193,9 @@ class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
 
         _texture1 = std::make_unique<QOpenGLTexture>(
             QImage(":/awesomeface.png").mirrored());
+        _texture1->generateMipMaps();
+
+        qDebug() << _texture->textureId() << " " << _texture1->textureId();
         //        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width(),
         //        image.height(), 0,
         //                     GL_RGB, GL_UNSIGNED_BYTE, image.);

@@ -1,0 +1,8 @@
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>vertex.glsl</file>
+        <file>fragment.glsl</file>
+        <file>container.jpg</file>
+        <file>awesomeface.png</file>
+    </qresource>
+</RCC>
