@@ -20,6 +20,29 @@ class MyWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
     bool event(QEvent* event) override {
         switch (event->type()) {
         case QEvent::UpdateRequest: renderNow(); return true;
+        case QEvent::KeyPress:{
+            float cameraSpeed=  0.5f;
+            auto keyEvent = dynamic_cast<QKeyEvent*>(event);
+            switch(keyEvent->key()) {
+            case Qt::Key_Up:
+                _cameraPos += cameraSpeed * _cameraFront;
+                requestUpdate();
+                break;
+            case Qt::Key_Down:
+                _cameraPos -= cameraSpeed * _cameraFront;
+                requestUpdate();
+                break;
+            case Qt::Key_Left:
+                _cameraPos -= QVector3D::crossProduct(_cameraFront,_cameraUp).normalized() * cameraSpeed;
+                requestUpdate();
+                break;
+            case Qt::Key_Right:
+                _cameraPos += QVector3D::crossProduct(_cameraFront,_cameraUp).normalized() * cameraSpeed;
+                requestUpdate();
+                break;
+            }
+            return true;
+        }
         default: QWindow::event(event);
         }
     }
@@ -62,11 +85,7 @@ class MyWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
         // camera/view transformation
         QMatrix4x4 view;
         view.setToIdentity();
-        float radius = 10.0f;
-        float camX   = std::sin(_timer.elapsed()) * radius;
-        float camZ   = std::cos(_timer.elapsed()) * radius;
-        view.lookAt(QVector3D(camX, 0.0f, camZ), QVector3D(0.0f, 0.0f, 0.0f),
-                    QVector3D(0.0f, 1.0f, 0.0f));
+        view.lookAt(_cameraPos,_cameraPos + _cameraFront,_cameraUp);
         _shaderProgram->setUniformValue("view", view);
 
         // projection
@@ -175,8 +194,6 @@ class MyWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
         _shaderProgram->bind();
         _shaderProgram->setUniformValue("texture1", 0);
         _shaderProgram->setUniformValue("texture2", 1);
-
-        _repaintTimer->start();
     }
 
   private:
@@ -188,6 +205,10 @@ class MyWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
     std::unique_ptr<QOpenGLTexture> _faceTexture;
     QElapsedTimer _timer;
     QTimer *_repaintTimer;
+
+    QVector3D _cameraPos{0.0f,0.0f,3.0f};
+    QVector3D _cameraFront{0.0f,0.0f,-1.0f};
+    QVector3D _cameraUp{0.0f,1.0f,0.0f};
 };
 int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
