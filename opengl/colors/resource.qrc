@@ -1,0 +1,8 @@
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>colors_fs.glsl</file>
+        <file>colors_vs.glsl</file>
+        <file>lamp_fs.glsl</file>
+        <file>lamp_vs.glsl</file>
+    </qresource>
+</RCC>

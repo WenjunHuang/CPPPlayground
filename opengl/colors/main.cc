@@ -25,6 +25,8 @@ class ColorsWindow : public QOpenGLWindow, private QOpenGLFunctions_3_3_Core {
                                              ":/lamp_vs.glsl");
         _lampShader->addShaderFromSourceFile(QOpenGLShader::Fragment,
                                              ":/lamp_fs.glsl");
+        if (!_lampShader->link())
+            qDebug() << _lampShader->log();
 
         // set up vertex data (and buffer(s)) and configure vertex attributes
         // ------------------------------------------------------------------
@@ -70,13 +72,53 @@ class ColorsWindow : public QOpenGLWindow, private QOpenGLFunctions_3_3_Core {
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
                               (void*)0);
         glEnableVertexAttribArray(0);
+
+        _cameraPosition = QVector3D{0.2f,0.2f,3.0f};
+        _cameraFront = QVector3D{0.0f,0.0f,-1.0f};
+        _cameraUp = QVector3D{0.0f,1.0f,0.0f};
     }
 
     void paintGL() override {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        QOpenGLShaderProgram::
+        // be sure to activate shader when setting uniforms/drawing objects
+        _lightingShader->bind();
+        _lightingShader->setUniformValue("objectColor", QVector3D{1.0f, 0.5f, 0.31f});
+        _lightingShader->setUniformValue("lightColor",QVector3D{1.0f,1.0f,1.0f});
+
+        QMatrix4x4 projection;
+        projection.perspective(45.0f,
+            ((float)width())/height(),
+            0.1f,
+            100.0f);
+        _lightingShader->setUniformValue("projection",projection);
+
+        QMatrix4x4 view;
+        view.setToIdentity();
+        view.lookAt(_cameraPosition,_cameraPosition + _cameraFront,_cameraUp);
+        _lightingShader->setUniformValue("view",view);
+
+        QMatrix4x4 model;
+        model.setToIdentity();
+        _lightingShader->setUniformValue("model",model);
+
+        // render the cube
+        _cubeVAO->bind();
+        glDrawArrays(GL_TRIANGLES,0,36);
+
+
+        // also draw the lamp object
+        _lampShader->bind();
+        _lampShader->setUniformValue("projection",projection);
+        _lampShader->setUniformValue("view",view);
+        model.setToIdentity();
+        model.translate(_lightPos);
+        model.scale(0.2f);
+        _lampShader->setUniformValue("model",model);
+
+        _lightVAO->bind();
+        glDrawArrays(GL_TRIANGLES,0,36);
     }
 
   private:
@@ -86,6 +128,11 @@ class ColorsWindow : public QOpenGLWindow, private QOpenGLFunctions_3_3_Core {
     QOpenGLVertexArrayObject* _lightVAO;
 
     QOpenGLBuffer _vbo;
+
+    QVector3D _cameraPosition;
+    QVector3D _cameraFront;
+    QVector3D _cameraUp;
+    QVector3D _lightPos{1.2f,1.0f,2.0f};
 };
 
 int main(int argc, char* argv[]) {
