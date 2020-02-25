@@ -1,31 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
-project(BoostPlayground)
-
-#find_package(GTest REQUIRED)
-#include_directories(${GTEST_INCLUDE_DIRS})
-
-#set(BOOST_ROOT $ENV{BOOST_ROOT})
 find_package(Boost REQUIRED)
 
-file(GLOB_RECURSE SRCS *.cc)
-set(TARGETS "")
-foreach (SRC_FILE IN LISTS SRCS)
-    get_filename_component(FILE_NAME ${SRC_FILE} NAME_WLE)
-    string(REGEX MATCHALL "([A-Za-z0-9_]+)-?.*" MATCHES "${FILE_NAME}")
-    if (MATCHES)
-        set(TARGET_NAME ${CMAKE_MATCH_1})
-        list(FIND TARGETS ${TARGET_NAME} IDX)
-        if (IDX EQUAL "-1")
-            list(APPEND TARGETS ${TARGET_NAME})
-            set(${TARGET_NAME}_files ${SRC_FILE})
-        else ()
-            list(APPEND ${TARGET_NAME}_files ${SRC_FILE})
-        endif ()
-    endif ()
-
-endforeach ()
-
-foreach (TARGET IN LISTS TARGETS)
-    add_executable(${TARGET} ${${TARGET}_files})
-    target_include_directories(${TARGET} PRIVATE ${Boost_INCLUDE_DIRS})
-endforeach ()
+set(PREFIX boost)
+add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} INCLUDES ${Boost_INCLUDE_DIRS})

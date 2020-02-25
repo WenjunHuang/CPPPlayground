@@ -10,7 +10,7 @@
 
 int main(int argc, char* argv[]) {
     QLoggingCategory::setFilterRules("qt.scenegraph.general=true");
-    QQuickWindow::setSceneGraphBackend(QSGRendererInterface::Direct3D11Rhi);
+//    QQuickWindow::setSceneGraphBackend(QSGRendererInterface::OpenGL);
 
     QQuickStyle::setStyle("material");
     QGuiApplication app(argc, argv);
