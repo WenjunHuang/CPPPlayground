@@ -23,8 +23,10 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
 
     void start() {
         message_ = makeDaytimeString();
-        boost::asio::async_write(socket_,
-            boost::asio::buffer())
+        std::cout << "Connection accepted" << std::endl;
+        std::cout << message_ << std::endl;
+        boost::asio::async_write(socket_, boost::asio::buffer(message_),
+                                 [self=shared_from_this()](auto& error, auto bytesTransferred) {});
     }
 
     tcp::socket& socket() { return socket_; }
@@ -48,10 +50,18 @@ class TcpServer {
         acceptor_.async_accept(newConnection->socket(), [=](auto& error) {
             if (!error)
                 newConnection->start();
-
+            startAccept();
         });
     }
 
     boost::asio::io_context& io_context_;
     tcp::acceptor acceptor_;
 };
+
+int main() {
+    try {
+        boost::asio::io_context ioContext;
+        TcpServer server{ioContext};
+        ioContext.run();
+    } catch (std::exception& e) { std::cerr << e.what() << std::endl; }
+}
