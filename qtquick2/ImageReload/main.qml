@@ -9,6 +9,41 @@ Window {
     title:"DelayButton"
     height:480
     width: 640
+            GridLayout {
+                id: grid
+                anchors.fill: parent
+
+                columns: 5
+                columnSpacing: 7
+                rowSpacing: 7
+
+                Repeater {
+                    model: 100
+                    delegate: delegate
+                }
+            }
+    Component{
+    id: delegate
+    Item {
+        id:root
+        clip:true
+        width: 100
+        height: 100
+        property real radius:7.0
+
+        Rectangle {
+            // 圆角遮罩
+            id: mask
+            width: root.width
+            height: root.height
+            radius: root.radius
+            visible: false
+        }
+
+        layer.enabled: true
+        layer.effect: OpacityMask {
+            maskSource: mask
+        }
 Item {
 anchors.fill: parent
     Image {
@@ -41,6 +76,7 @@ anchors.fill: parent
         mode: "darken"
     }
 }
+    }
 
-
+}
 }
