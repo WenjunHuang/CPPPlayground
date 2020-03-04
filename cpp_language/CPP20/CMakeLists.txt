@@ -1,5 +1,9 @@
 set(PREFIX cpp20)
 set(CMAKE_CXX_STANDARD 20)
+
+if (APPLE)
+    add_compile_options("-fcoroutines-ts")
+endif ()
 if (MSVC)
     add_compile_options("/std:c++latest" "/await")
 endif ()
