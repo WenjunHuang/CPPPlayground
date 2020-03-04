@@ -2,7 +2,7 @@ find_package(Boost REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 if (MSVC)
-    add_compile_options("/std:c++latest")
+    add_compile_options("/std:c++latest" "/await")
 endif ()
 
 set(PREFIX boost)
