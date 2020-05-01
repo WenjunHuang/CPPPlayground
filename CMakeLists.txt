@@ -102,6 +102,7 @@ add_subdirectory(opengl)
 add_subdirectory(sqlite3)
 add_subdirectory(cpp_concurrent)
 add_subdirectory(rxcpp)
+add_subdirectory(libtorrent)
 
 
 ## The gtest/gtest_main targets carry header search path
