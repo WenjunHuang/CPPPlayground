@@ -1,12 +1,14 @@
 
 if (WIN32)
-    find_package(sqlite3 CONFIG REQUIRED)
+    find_package(unofficial-sqlite3 CONFIG REQUIRED)
+    list(APPEND LIBS unofficial::sqlite3::sqlite3 )
 endif ()
+
 list(APPEND CMAKE_PREFIX_PATH ${QT_CMAKE})
 find_package(Qt5 REQUIRED Core)
+list(APPEND LIBS Qt5::Core)
 
 set(PREFIX sqlite3)
-list(APPEND LIBS sqlite3 Qt5::Core)
 
 file(GLOB_RECURSE SRCS *.cc)
 set(TARGETS "")

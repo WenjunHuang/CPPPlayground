@@ -155,7 +155,7 @@ template <typename T> class MyTemplate : public QObject {
     void signal(T t) W_SIGNAL(signal, t)
 };
 
-W_OBJECT_IMPL(MyTemplate<T>, template <typename T>)
+W_OBJECT_IMPL((MyTemplate<T>), template <typename T>)
 
 template <typename A, typename B> class MyTemplate2 : public QObject {
     W_OBJECT(MyTemplate2)

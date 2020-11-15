@@ -1,5 +1,0 @@
-set(PREFIX stl)
-find_package(BOOST REQUIRED)
-add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} INCLUDES ${Boost_INCLUDE_DIRS})
-add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR})
-
