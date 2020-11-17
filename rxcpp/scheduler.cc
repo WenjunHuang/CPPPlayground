@@ -23,7 +23,7 @@ int main() {
     });
 
     s1.merge(s2).take(6).observe_on(threads)
-//    .as_blocking()
+    .as_blocking()
     .subscribe(rxcpp::util::apply_to([](const char*s ,int p){
         std::cout << s << " " << p << '\n';
     }));

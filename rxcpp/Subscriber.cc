@@ -1,28 +1,24 @@
 //
-// Created by rick on 2020/3/23.
+// Created by HUANG WEN JUN on 2020/11/17.
 //
 #include <rx.hpp>
-
 int main() {
     auto subscription = rxcpp::composite_subscription();
-    auto subscriber = rxcpp::make_subscriber<int>(
+    auto subscriber   = rxcpp::make_subscriber<int>(
         subscription,
-        [&](int v){
-            printf("OnNext: --%d\n",v);
-            if (v==3)
+        [&](int v) {
+            printf("OnNext: --- %d\n", v);
+            if (v == 3)
                 subscription.unsubscribe();
         },
-        [](){printf("OnCompleted\n");}
-        );
-
+        []() { printf("OnCompleted\n"); });
     rxcpp::observable<>::create<int>(
         [](rxcpp::subscriber<int> s){
-            for (int i = 0;i<5;++i){
+            for (int i = 0;i < 5;i++){
                 if (!s.is_subscribed())
                     break;
                 s.on_next(i);
             }
             s.on_completed();
         }).subscribe(subscriber);
-    return 0;
 }
