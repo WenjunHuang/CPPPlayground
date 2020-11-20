@@ -4,16 +4,26 @@
 
 #pragma once
 #include "json.hpp"
+#include "util.h"
 #include <map>
+#include <range/v3/action.hpp>
+#include <rxcpp/rx.hpp>
 #include <string>
 #include <unordered_set>
 #include <vector>
-#include <range/v3/action.hpp>
-#include <rx.hpp>
-#include "util.h"
+
 using namespace std;
 using namespace ::util;
 using namespace nlohmann;
+using namespace rxcpp;
+namespace rxu = rxcpp::util;
+namespace Rx {
+    using namespace rxcpp;
+    using namespace rxcpp::sources;
+    using namespace rxcpp::operators;
+    using namespace rxcpp::subjects;
+} // namespace Rx
+using namespace Rx;
 
 namespace model {
     inline string tweetText(const json& tweet) {
@@ -93,55 +103,68 @@ namespace model {
             "you", "your", "yours", "yourself", "yourselves", "the"};
 
         static const string delimiters = R"(\s+)";
-        auto words = split(text,delimiters,::util::Split::RemoveDelimiter);
+        auto words = split(text, delimiters, ::util::Split::RemoveDelimiter);
 
+        static const regex ignore(
+            R"((\xe2\x80\xa6)|(&[\w]+;)|((http|ftp|https)://[\w-]+(.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?))");
+        static const regex expletives(
+            R"(\x66\x75\x63\x6B|\x73\x68\x69\x74|\x64\x61\x6D\x6E)");
 
-        static const regex ignore(R"((\xe2\x80\xa6)|(&[\w]+;)|((http|ftp|https)://[\w-]+(.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?))");
-        static const regex expletives(R"(\x66\x75\x63\x6B|\x73\x68\x69\x74|\x64\x61\x6D\x6E)");
-
-        for (auto& word: words) {
-            while (!word.empty() && (word.front() == '.' || word.front() == '(' || word.front() == '\'' || word.front() == '\"')) word.erase(word.begin());
-            while (!word.empty() && (word.back() == ':' || word.back() == ',' || word.back() == ')' || word.back() == '\'' || word.back() == '\"')) word.resize(word.size() - 1);
-            if (!word.empty() && word.front() == '@') continue;
+        for (auto& word : words) {
+            while (!word.empty() &&
+                   (word.front() == '.' || word.front() == '(' ||
+                    word.front() == '\'' || word.front() == '\"'))
+                word.erase(word.begin());
+            while (!word.empty() &&
+                   (word.back() == ':' || word.back() == ',' ||
+                    word.back() == ')' || word.back() == '\'' ||
+                    word.back() == '\"'))
+                word.resize(word.size() - 1);
+            if (!word.empty() && word.front() == '@')
+                continue;
             word = regex_replace(tolower(word), ignore, "");
             if (!word.empty() && word.front() != '#') {
-                while (!word.empty() && ispunct(word.front())) word.erase(word.begin());
-                while (!word.empty() && ispunct(word.back())) word.resize(word.size() - 1);
+                while (!word.empty() && ispunct(word.front()))
+                    word.erase(word.begin());
+                while (!word.empty() && ispunct(word.back()))
+                    word.resize(word.size() - 1);
             }
             word = regex_replace(word, expletives, "<expletive>");
         }
 
-        words.erase(std::remove_if(words.begin(), words.end(), [=](const string& w){
-          return !(w.size() > 2 && ignoredWords.find(w) == ignoredWords.end());
-        }), words.end());
+        words.erase(std::remove_if(words.begin(), words.end(),
+                                   [=](const string& w) {
+                                       return !(w.size() > 2 &&
+                                                ignoredWords.find(w) ==
+                                                    ignoredWords.end());
+                                   }),
+                    words.end());
 
-        words |=
-            ranges::actions::sort |
-            ranges::actions::unique;
+        words |= ranges::actions::sort | ranges::actions::unique;
 
         return words;
     }
 
-    struct TimeRange{
-        using timestamp = milliseconds ;
+    struct TimeRange {
+        using timestamp = milliseconds;
 
         timestamp begin;
         timestamp end;
     };
 
-    bool operator<(const TimeRange& lhs,const TimeRange& rhs){
+    bool operator<(const TimeRange& lhs, const TimeRange& rhs) {
         return lhs.begin < rhs.begin && lhs.end < rhs.end;
     }
 
-    using WordCountMap = unordered_map<string,int>;
+    using WordCountMap = unordered_map<string, int>;
 
     struct Tweet {
         struct shared {
             json tweet;
             vector<string> words;
             shared() {}
-            explicit shared(const json& t):tweet{t},words(splitWords(tweetText(tweet))) {
-            }
+            explicit shared(const json& t)
+                : tweet{t}, words(splitWords(tweetText(tweet))) {}
         };
     };
 
@@ -150,22 +173,22 @@ namespace model {
         WordCountMap words;
         int positive = 0;
         int negative = 0;
-        int toxic = 0;
+        int toxic    = 0;
     };
 
-    struct Perspective{
+    struct Perspective {
         float toxicity;
         float spam;
         float inflammatory;
     };
 
     struct Model {
-        struct shared{
+        struct shared {
             string url;
             rxsc::scheduler::clock_type::time_point timestamp;
             int total = 0;
             deque<TimeRange> groups;
-            std::map<TimeRange,shared_ptr<TweetGroup>> groupedTweets;
+            std::map<TimeRange, shared_ptr<TweetGroup>> groupedTweets;
             seconds tweetsStart;
             deque<int> tweetsperminute;
             deque<Tweet> tweets;
@@ -173,8 +196,86 @@ namespace model {
             WordCountMap positivewords;
             WordCountMap negativewords;
             WordCountMap toxicwords;
-            unordered_map<string,string> sentiment;
-            unordered_map<string,Perspective> perspective;
+            unordered_map<string, string> sentiment;
+            unordered_map<string, Perspective> perspective;
         };
+        shared_ptr<shared> data = make_shared<shared>();
+    };
+    using Reducer = function<Model(Model&)>;
+
+    auto noop = Reducer([](Model& m) { return std::move(m); });
+
+    inline function<observable<Reducer>(observable<Reducer>)>
+    noopOnError(string from = string{}) {
+        return [=](observable<Reducer> s) {
+            return s | on_error_resume_next([=](std::exception_ptr ep) {
+                       if (!from.empty())
+                           cerr << from << " - ";
+                       cerr << rxu::what(ep) << endl;
+                       return observable<>::empty<Reducer>();
+                   }) |
+                   repeat();
+        };
+    }
+
+    inline auto noopAndIgnore() {
+        return [](observable<Tweet> s) {
+            return s.map([](const Tweet&) { return noop; })
+                .op(noopOnError())
+                .ignore_elements();
+        };
+    }
+
+    struct WordCount {
+        string word;
+        int count;
+        vector<float> all;
+    };
+
+    int idx                     = 0;
+    const int kScopeAll         = 1;
+    const int kScopeAllNegative = 2;
+    const int kScopeAllToxic    = 4;
+    const int kScopeSelected    = 5;
+    static int scope            = kScopeSelected;
+
+    struct ViewModel {
+        Model m;
+        struct shared {
+            vector<WordCount> words;
+            vector<WordCount> allwords;
+            vector<WordCount> negativeWords;
+            vector<WordCount> positiveWords;
+            vector<WordCount> toxicWords;
+
+            vector<float> groupedTpm;
+            vector<float> positiveTpm;
+            vector<float> negativeTpm;
+            float maxtpm = 0.0f;
+
+            string scopeBegin                   = {};
+            string scopeEnd                     = {};
+            const vector<WordCount>* scopeWords = nullptr;
+            const deque<Tweet>* scopeTweets     = nullptr;
+        };
+        shared_ptr<shared> data = make_shared<shared>();
+
+        ViewModel() {}
+
+        explicit ViewModel(Model& m):m{m}{
+            auto& model = *m.data;
+
+            if (scope == kScopeSelected && idx >= 0 && idx < int(model.groups.size())){
+                assert(model.groups.size() <= model.groupedTweets.size());
+
+                auto& window = model.groups.at(idx);
+                auto& group = model.groupedTweets.at(window);
+
+                data->scopeWords = &data->words;
+                data->scopeTweets = &group->tweets;
+                data->scopeBegin = utcTextFrom(duration_cast<seconds>(window.begin));
+                data->scopeEnd = utcTextFrom()
+            }
+        }
     };
 } // namespace model

@@ -137,7 +137,7 @@ class FlattenVisitor : public IFileFolderVisitor {
 
     void Visit(FileNode& fn) override {
         files.push_back(
-            FileInformation{.name = fn.GetName(), .size = fn.GetSize()});
+            FileInformation{fn.GetName(), fn.GetSize()});
     }
 
     void Visit(DirectoryNode& dn) override {
@@ -158,8 +158,45 @@ list<FileInformation> GetAllFiles(string dirname) {
     return ret;
 }
 
+template <typename T> struct ActiveObject {
+    rxcpp::subjects::subject<T> subj;
+    void FireAndForget(T& item) { subj.get_subscriber().on_next(item); }
+
+    rxcpp::observable<T> GetObservable() { return subj.get_observable(); }
+};
+
+class DirectoryEmitter {
+    string rootDir;
+
+    ActiveObject<FileInformation> act;
+
+  public:
+    DirectoryEmitter(string s) {
+        rootDir = s;
+        act.GetObservable().subscribe([](FileInformation item) {
+            std::cout << item.name << ":" << item.size << std::endl;
+        });
+    }
+
+    bool Trigger() {
+        std::packaged_task<int()> task([&](){
+            EmitDirEntry();return 1;
+        });
+        auto result = task.get_future();
+        task();
+        auto r = result.get();
+        return true;
+    }
+    bool EmitDirEntry() {
+        list<FileInformation> rs = GetAllFiles(rootDir);
+        for (auto& a : rs) {
+            act.FireAndForget(a);
+        }
+        return false;
+    }
+};
 int main() {
-    auto rs = GetAllFiles("/Users/huangwenjun/test");
+    auto rs = GetAllFiles("C:\\Sources\\CPPPlayground");
     for (auto& as : rs)
         std::cout << as.name << std::endl;
 }
