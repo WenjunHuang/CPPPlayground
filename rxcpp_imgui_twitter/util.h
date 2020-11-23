@@ -11,6 +11,7 @@
 #include <regex>
 #include <sstream>
 #include <string>
+#include <filesystem>
 #include <rxcpp/rx.hpp>
 
 using namespace std;
@@ -69,4 +70,11 @@ namespace util {
         return t;
     }
 
+    std::wstring to_wstring(const std::string& str) {
+        return std::filesystem::path(str).wstring();
+    }
+
+    std::string to_string(const std::wstring& wstr){
+        return std::filesystem::path(wstr).string();
+    }
 } // namespace util

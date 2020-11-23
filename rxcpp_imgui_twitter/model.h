@@ -7,6 +7,9 @@
 #include "util.h"
 #include <map>
 #include <range/v3/action.hpp>
+#include <range/v3/algorithm.hpp>
+#include <range/v3/range.hpp>
+#include <range/v3/view.hpp>
 #include <rxcpp/rx.hpp>
 #include <string>
 #include <unordered_set>
@@ -166,6 +169,10 @@ namespace model {
             explicit shared(const json& t)
                 : tweet{t}, words(splitWords(tweetText(tweet))) {}
         };
+        shared_ptr<const shared> data = make_shared<shared>();
+
+        Tweet(){}
+        explicit Tweet(const json& tweet):data{make_shared<shared>(shared{tweet})}{}
     };
 
     struct TweetGroup {
@@ -235,6 +242,7 @@ namespace model {
     int idx                     = 0;
     const int kScopeAll         = 1;
     const int kScopeAllNegative = 2;
+    const int kScopeAllPositive = 3;
     const int kScopeAllToxic    = 4;
     const int kScopeSelected    = 5;
     static int scope            = kScopeSelected;
@@ -251,6 +259,7 @@ namespace model {
             vector<float> groupedTpm;
             vector<float> positiveTpm;
             vector<float> negativeTpm;
+            vector<float> toxicTpm;
             float maxtpm = 0.0f;
 
             string scopeBegin                   = {};
@@ -262,20 +271,209 @@ namespace model {
 
         ViewModel() {}
 
-        explicit ViewModel(Model& m):m{m}{
+        explicit ViewModel(Model& m) : m{m} {
             auto& model = *m.data;
 
-            if (scope == kScopeSelected && idx >= 0 && idx < int(model.groups.size())){
+            if (scope == kScopeSelected && idx >= 0 &&
+                idx < int(model.groups.size())) {
                 assert(model.groups.size() <= model.groupedTweets.size());
 
                 auto& window = model.groups.at(idx);
-                auto& group = model.groupedTweets.at(window);
+                auto& group  = model.groupedTweets.at(window);
 
-                data->scopeWords = &data->words;
+                data->scopeWords  = &data->words;
                 data->scopeTweets = &group->tweets;
-                data->scopeBegin = utcTextFrom(duration_cast<seconds>(window.begin));
-                data->scopeEnd = utcTextFrom()
+                data->scopeBegin =
+                    utcTextFrom(duration_cast<seconds>(window.begin));
+                data->scopeEnd =
+                    utcTextFrom(duration_cast<seconds>(window.end));
+
+                data->words =
+                    group->words |
+                    ranges::views::transform(
+                        [&](const pair<string, int>& word) {
+                            return WordCount{word.first, word.second, {}};
+                        }) |
+                    ranges::to_vector;
+
+                data->words |= ranges::actions::sort(
+                    [](const WordCount& l, const WordCount& r) {
+                        return l.count > r.count;
+                    });
+            } else {
+                if (scope == kScopeAllNegative) {
+                    data->scopeWords = &data->negativeWords;
+                    data->negativeWords =
+                        model.negativewords |
+                        ranges::views::transform(
+                            [&](const pair<string, int>& word) {
+                                return WordCount{word.first, word.second, {}};
+                            }) |
+                        ranges::to_vector;
+
+                    data->negativeWords |= ranges::actions::sort(
+                        [](const WordCount& l, const WordCount& r) {
+                            return l.count > r.count;
+                        });
+                } else if (scope == kScopeAllPositive) {
+                    data->scopeWords = &data->positiveWords;
+                    data->positiveWords =
+                        model.positivewords |
+                        ranges::views::transform(
+                            [&](const pair<string, int>& word) {
+                                return WordCount{word.first, word.second, {}};
+                            }) |
+                        ranges::to_vector;
+
+                    data->positiveWords |= ranges::actions::sort(
+                        [](const WordCount& l, const WordCount& r) {
+                            return l.count > r.count;
+                        });
+                } else if (scope == kScopeAllToxic) {
+                    data->scopeWords = &data->toxicWords;
+                    data->toxicWords =
+                        model.toxicwords |
+                        ranges::views::transform(
+                            [&](const pair<string, int>& word) {
+                                return WordCount{word.first, word.second, {}};
+                            }) |
+                        ranges::to_vector;
+                    data->toxicWords |= ranges::actions::sort(
+                        [](const WordCount& l, const WordCount& r) {
+                            return l.count > r.count;
+                        });
+                } else {
+                    data->scopeWords = &data->allwords;
+                }
+
+                data->allwords =
+                    model.allwords |
+                    ranges::views::transform(
+                        [&](const pair<string, int>& word) {
+                            return WordCount{word.first, word.second, {}};
+                        }) |
+                    ranges::to_vector;
+
+                data->allwords |= ranges::actions::sort(
+                    [](const WordCount& l, const WordCount& r) {
+                        return l.count > r.count;
+                    });
+
+                data->scopeTweets = &model.tweets;
+                data->scopeBegin  = model.groups.empty()
+                                        ? string{}
+                                        : utcTextFrom(duration_cast<seconds>(
+                                             model.groups.front().begin));
+                data->scopeEnd    = model.groups.empty()
+                                        ? string{}
+                                        : utcTextFrom(duration_cast<seconds>(
+                                           model.groups.back().end));
+            }
+            {
+                vector<pair<milliseconds, float>> groups =
+                    model.groupedTweets |
+                    ranges::views::transform(
+                        [&](const pair<TimeRange, shared_ptr<TweetGroup>>&
+                                group) {
+                            return make_pair(group.first.begin,
+                                             static_cast<float>(
+                                                 group.second->tweets.size()));
+                        }) |
+                    ranges::to_vector;
+
+                groups |=
+                    ranges::actions::sort([](const auto& l, const auto& r) {
+                        return l.first < r.first;
+                    });
+                data->groupedTpm =
+                    groups | ranges::views::transform([&](const auto& group) {
+                        return group.second;
+                    }) |
+                    ranges::to_vector;
+                data->maxtpm = data->groupedTpm.size() > 0
+                                   ? *ranges::max_element(data->groupedTpm)
+                                   : 0.0f;
+            }
+
+            {
+                vector<pair<milliseconds, float>> groups =
+                    model.groupedTweets |
+                    ranges::views::transform(
+                        [&](const pair<TimeRange, shared_ptr<TweetGroup>>&
+                                group) {
+                            return make_pair(
+                                group.first.begin,
+                                static_cast<float>(group.second->positive));
+                        }) |
+                    ranges::to_vector;
+
+                groups |=
+                    ranges::actions::sort([](const auto& l, const auto& r) {
+                        return l.first < r.first;
+                    });
+
+                data->positiveTpm =
+                    groups | ranges::views::transform([&](const auto& group) {
+                        return group.second;
+                    }) |
+                    ranges::to_vector;
+            }
+            {
+                vector<pair<milliseconds, float>> groups =
+                    model.groupedTweets |
+                    ranges::views::transform([&](const auto& group) {
+                        return make_pair(
+                            group.first.begin,
+                            static_cast<float>(group.second->negative));
+                    }) |
+                    ranges::to_vector;
+
+                groups |=
+                    ranges::actions::sort([](const auto& l, const auto& r) {
+                        return l.first < r.first;
+                    });
+
+                data->negativeTpm =
+                    groups | ranges::views::transform([&](const auto& group) {
+                        return group.second;
+                    }) |
+                    ranges::to_vector;
+            }
+
+            {
+                vector<pair<milliseconds, float>> groups =
+                    model.groupedTweets |
+                    ranges::views::transform(
+                        [&](const pair<TimeRange, shared_ptr<TweetGroup>>&
+                                group) {
+                            return make_pair(
+                                group.first.begin,
+                                static_cast<float>(group.second->toxic));
+                        }) |
+                    ranges::to_vector;
+
+                groups |=
+                    ranges::actions::sort([](const auto& l, const auto& r) {
+                        return l.first < r.first;
+                    });
+
+                data->toxicTpm =
+                    groups | ranges::views::transform([&](const auto& group) {
+                        return group.second;
+                    }) |
+                    ranges::to_vector;
             }
         }
     };
+
+    inline function<observable<ViewModel>(observable<ViewModel>)>
+    reportAndRepeat() {
+        return [](observable<ViewModel> s) {
+            return s | on_error_resume_next([](std::exception_ptr ep) {
+                       cerr << rxu::what(ep) << endl;
+                       return observable<>::empty<ViewModel>();
+                   }) |
+                   repeat();
+        };
+    }
 } // namespace model

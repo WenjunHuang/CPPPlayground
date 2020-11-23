@@ -24,7 +24,7 @@ namespace Rx {
 } // namespace Rx
 using namespace Rx;
 
-namespace RxCurl {
+namespace rxcurl {
     struct RxCurlState {
         RxCurlState()
             : thread{observe_on_new_thread()}, worker{},
