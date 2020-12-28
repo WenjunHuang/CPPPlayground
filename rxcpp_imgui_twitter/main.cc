@@ -357,9 +357,28 @@ int main(int argc, char* argv[]) {
                            !settings["SentimentKey"].get<std::string>().empty();
             return use == "on" && haveUrl && haveKey;
         }) |
-        debounce(milliseconds(500), mainThread) |
-        distinct_until_changed() |
-        rxo::replay(1) |
-        ref_count() |
-        as_dynamic();
+        debounce(milliseconds(500), mainThread) | distinct_until_changed() |
+        rxo::replay(1) | ref_count() | as_dynamic();
+
+    /*
+     * filter settings updates to changes in the perspective api settings.
+     * debounce is used to wait until the updates pause before signaling a
+     * change.
+     */
+
+    auto usePerspectiveApi =
+        settingUpdates | rxo::map([=](const json& settings) {
+            string use =
+                tolower(settings["PerspectiveRequests"].get<std::string>());
+            bool haveUrl =
+                settings.count("PerspectiveUrl") > 0 &&
+                !settings["PerspectiveUrl"].get<std::string>().empty();
+            bool haveKey =
+                settings.count("PerspectiveKey") > 0 &&
+                !settings["PerspectiveKey"].get<std::string>().empty();
+            return use == "on" && haveUrl && haveKey;
+        }) |
+        debounce(milliseconds(500), mainThread) | distinct_until_changed() |
+        replay(1) | ref_count() | as_dynamic();
+}
 }
