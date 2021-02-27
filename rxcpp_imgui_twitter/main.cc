@@ -357,9 +357,154 @@ int main(int argc, char* argv[]) {
                            !settings["SentimentKey"].get<std::string>().empty();
             return use == "on" && haveUrl && haveKey;
         }) |
-        debounce(milliseconds(500), mainThread) |
-        distinct_until_changed() |
-        rxo::replay(1) |
-        ref_count() |
-        as_dynamic();
+        debounce(milliseconds(500), mainThread) | distinct_until_changed() |
+        rxo::replay(1) | ref_count() | as_dynamic();
+
+    auto usePerspectiveApi =
+        settingUpdates | rxo::map([=](const json& settings) {
+            string use =
+                tolower(settings["PerspectiveRequests"].get<std::string>());
+            bool haveUrl =
+                settings.count("PerspectiveUrl") > 0 &&
+                !settings["PerspectiveUrl"].get<std::string>().empty();
+            bool haveKey =
+                settings.count("PerspectiveKey") > 0 &&
+                !settings["PerspectiveKey"].get<std::string>().empty();
+            return use == "on" && haveUrl && haveKey;
+        }) |
+        debounce(milliseconds(500), mainThread) | distinct_until_changed() |
+        rxo::replay(1) | ref_count() | as_dynamic();
+
+    auto urlChanges =
+        settingUpdates | rxo::map([=](const json& settings) {
+            string url =
+                URL + settings["Query"]["Action"].get<std::string>() + ".json?";
+            if (settings.count("Language") > 0) {
+                url +=
+                    "language=" + settings["Language"].get<std::string>() + "&";
+            }
+            if (settings["Query"].count("Keywords") > 0 &&
+                settings["Query"]["Keywords"].is_array()) {
+                url += "track=";
+                for (auto& kw : settings["Query"]["Keywords"]) {
+                    url += kw.get<std::string>() + ",";
+                }
+            }
+            return url;
+        }) |
+        debounce(milliseconds(1000), mainThread) | distinct_until_changed() |
+        tap([](string url) { std::cerr << "url = " << url << std::endl; }) |
+        rxo::replay(1) | ref_count() | as_dynamic();
+
+    // === Tweets
+    observable<string> chunks;
+    if (playback) {
+        chunks = fileChunks(tweetThread, filePath);
+    } else {
+        // switch to new connection whenever the url changes
+        chunks = urlChanges | rxo::map([&](const string& url) {
+                     // ==== Constants - flags
+                     const bool isFilter =
+                         url.find("/statuses/filter") != string::npos;
+                     string method = isFilter ? "POST" : "GET";
+
+                     return twitterRequest(tweetThread, factory, url, method,
+                                           settings["ConsumerKey"],
+                                           settings["ConsumerSecret"],
+                                           settings["AccessTokenKey"],
+                                           settings["AccessTokenSecret"]) |
+                            on_error_resume_next([](std::exception_ptr ep) {
+                                std::cerr << rxu::what(ep) << std::endl;
+                                return rxs::never<string>();
+                            });
+                 }) |
+                 switch_on_next();
+    }
+
+    // parse tweets
+    auto tweets = chunks | parseTweets(poolThread, tweetThread) |
+                  rxo::map([](ParsedTweets p) {
+                      p.errors | tap([](ParseError e) {
+                          std::cerr << rxu::what(e.ep) << std::endl;
+                      }) | subscribe<ParseError>();
+                      return p.tweets;
+                  }) |
+                  merge(tweetThread);
+
+    auto ts = tweets | retry() | publish() | ref_count() | as_dynamic();
+
+    // === Model
+    vector<observable<Reducer>> reducers;
+
+    auto newJsonFile = [exeDir]() -> unique_ptr<ofstream> {
+        return unique_ptr<ofstream>{new ofstream(
+            exeDir + "/" +
+            to_string(time_point_cast<milliseconds>(system_clock::now())
+                          .time_since_epoch()
+                          .count()) +
+            ".json")};
+    };
+
+    auto jsonFile = newJsonFile();
+
+    auto dumpJsonChanged = interval(every, tweetThread) |
+                           rxo::map([&](long) { return dumpjson; }) |
+                           distinct_until_changed() | publish() | ref_count();
+
+    auto delayedTweets = ts | buffer_with_time(every, tweetThread) |
+                         delay(length, tweetThread) | publish(lifetime) |
+                         connect_forever();
+
+    reducers.push_back(
+        dumpJsonChanged | filter([](bool dj) { return dj; }) |
+        rxo::map([&](bool) -> observable<Reducer> {
+            return delayedTweets |
+                   take_until(dumpJsonChanged |
+                              filter([](bool dj) { return !dj; }) |
+                              delay(length, tweetThread)) |
+                   rxo::map([&](const vector<Tweet>& tws) {
+                       return Reducer([&, tws](Model& m) {
+                           for (auto& tw : tws) {
+                               auto& tweet = tw.data->tweet;
+                               auto json   = tweet.dump();
+                               cout << json << "\r\n";
+                               *jsonFile << json << "\r\n";
+                           }
+                           *jsonFile << flush;
+                           return std::move(m);
+                       });
+                   });
+        }) |
+        switch_on_next(tweetThread) | noopOnError() | start_with(noop));
+
+    reducers.push_back(
+        urlChanges|
+        rxo::map([=](string url){
+            return Reducer([=](Model& m){
+                m.data->url = url;
+                return std::move(m);
+            });
+        })|
+        noopOnError() |
+        start_with(noop));
+
+    reducers.push_back(ts|
+                       onlyTweets()|
+                       filter([&](const Tweet&){
+                           return dumptext;
+                       })|
+                       tap([=](const Tweet& tw){
+                           auto& tweet = tw.data->tweet;
+                           if (tweet["user"]["name"].is_string() && tweet["user"]["screen_name"].is_string()) {
+                               cout << "--------------------" << endl;
+                               cout << tweet["user"]["name"].get<string>() << " (" << tweet["user"]["screen_name"].get<string>() << ")" << endl;
+                               cout << tweetText(tweet) << endl;
+                           }
+                       }) |
+                       noopAndIgnore() |
+                       start_with(noop));
+    if (!playback) {
+        reducers.push_back()
+    }
+
 }
