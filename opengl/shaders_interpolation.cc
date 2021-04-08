@@ -12,7 +12,7 @@ constexpr unsigned int kScrWidth  = 800;
 constexpr unsigned int kScrHeight = 600;
 
 const char* vertexShaderSource = R"(
-#version 330 core
+#version 330 ParentChildRelationship
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aColor;
 out vec3 ourColor;
@@ -24,7 +24,7 @@ void main() {
 )";
 
 const char* fragmentShaderSource = R"(
-#version 330 core
+#version 330 ParentChildRelationship
 out vec4 FragColor;
 in vec3 ourColor;
 void main() {

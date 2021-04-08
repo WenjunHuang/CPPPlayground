@@ -14,7 +14,7 @@ constexpr uint32_t kScrWidth  = 800;
 constexpr uint32_t kScrHeight = 600;
 
 const char* vertexShaderSource = R"(
-#version 330 core
+#version 330 ParentChildRelationship
 layout(location=0) in vec3 aPos;
 void main() {
     gl_Position = vec4(aPos.x,aPos.y,aPos.z,1.0);
@@ -22,7 +22,7 @@ void main() {
 )";
 
 const char* fragmentShaderSource = R"(
-#version 330 core
+#version 330 ParentChildRelationship
 out vec4 FragColor;
 void main() {
     FragColor = vec4(1.0f,0.5f,0.2f,1.0f);

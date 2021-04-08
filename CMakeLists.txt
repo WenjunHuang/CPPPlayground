@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 project(CPPPlayground)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 if (MSVC)
-    add_compile_options("/Zc:__cplusplus" "/utf-8")
+    add_compile_options("/Zc:__cplusplus" "/utf-8" "/std:c++latest")
 endif ()
 if (APPLE)
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -84,7 +84,7 @@ function(add_dir_target)
 endfunction()
 
 #add_subdirectory(qtquick2)
-#add_subdirectory(qt5)
+add_subdirectory(qt5)
 #add_subdirectory(boost)
 #add_subdirectory(folly)
 #add_subdirectory(algorithm)
@@ -106,6 +106,7 @@ add_subdirectory(rxcpp)
 #add_subdirectory(libtorrent)
 add_subdirectory(imgui_play)
 add_subdirectory(rxcpp_imgui_twitter)
+add_subdirectory(catch2_learn)
 
 
 ## The gtest/gtest_main targets carry header search path

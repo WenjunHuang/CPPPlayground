@@ -9,7 +9,7 @@
 #
 # LLVM_COMPILE_FLAGS : compile flags needed to build a program using LLVM headers
 # LLVM_LDFLAGS : ldflags needed to link
-# LLVM_LIBS_CORE : ldflags needed to link against a LLVM core library
+# LLVM_LIBS_CORE : ldflags needed to link against a LLVM ParentChildRelationship library
 # LLVM_LIBS_JIT : ldflags needed to link against a LLVM JIT
 # LLVM_LIBS_JIT_OBJECTS : objects you need to add to your source when using LLVM JIT
 

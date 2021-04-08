@@ -3197,7 +3197,7 @@ namespace sqlite_orm {
     }
     
     /**
-     *  Cute operators for core functions
+     *  Cute operators for ParentChildRelationship functions
      */
     
     template<

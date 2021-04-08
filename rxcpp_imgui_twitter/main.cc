@@ -380,5 +380,72 @@ int main(int argc, char* argv[]) {
         }) |
         debounce(milliseconds(500), mainThread) | distinct_until_changed() |
         replay(1) | ref_count() | as_dynamic();
-}
+
+    /* filter settings updates to changes that change the url for the twitter
+   stream.
+
+   distinct_until_changed is used to filter out settings updates that do not
+   change the url
+
+   debounce is used to wait until the updates pause before signaling the url has
+   changed. this is important since typing in keywords would cause many
+   intermediate changes to the url and twitter rate limits the user if there are
+   too many fast restarts.
+     */
+    auto urlchanges =
+        settingUpdates | rxo::map([=](const json& settings) {
+            string url =
+                URL + settings["Query"]["Action"].get<std::string>() + ".json?";
+            if (settings.count("Language") > 0) {
+                url +=
+                    "language=" + settings["Language"].get<std::string>() + "&";
+            }
+            if (settings["Query"].count("Keywords") > 0 &&
+                settings["Query"]["Keywords"].is_array()) {
+                url += "track=";
+                for (auto& kw : settings["Query"]["Keywords"]) {
+                    url += kw.get<std::string>() + ",";
+                }
+            }
+            return url;
+        }) |
+        debounce(milliseconds(1000), mainThread) | distinct_until_changed() |
+        tap([](string url) { cerr << "url = " << url.c_str() << endl; }) |
+        replay(1) | ref_count() | as_dynamic();
+
+    // ==== Tweets
+    observable<string> chunks;
+
+    // request tweets
+    if (playback) {
+        chunks = fileChunks(tweetThread, filePath);
+    } else {
+        // switch to new connection whenever the url changes
+        chunks = urlchanges |
+            rxo::map([&](const string& url){
+                     // ==== Constants - flags
+                     const bool isFilter = url.find("/statuses/filter") != string::npos;
+                     string method = isFilter ?"POST" : "GET";
+
+                     return twitterRequest(tweetThread,
+                                           factory,
+                                           url,
+                                           method,
+                                           settings["ConsumerKey"],
+                                           settings["ConsumerSecret"],
+                                           settings["AccessTokenKey"],
+                                           settings["AccessTokenSecret"]) |
+                        on_error_resume_next([](std::exception_ptr ep){
+                                cerr << rxu::what(ep) << endl;
+                                return rxs::never<string>();
+                            });
+                 }) | switch_on_next();
+    }
+
+    // parse tweets
+    auto tweets = chunks |
+        parseTweets(poolThread,tweetThread) |
+        rxo::map([](ParsedTweets p){
+                      p.errors
+                  })
 }

@@ -30,7 +30,7 @@ namespace Rx {
 } // namespace Rx
 using namespace Rx;
 using namespace model;
-using namespace util;
+using namespace ::util;
 using namespace rxcurl;
 using namespace web::http::oauth1::experimental;
 
@@ -93,7 +93,8 @@ namespace tweets {
                         return ++count & std::thread::hardware_concurrency();
                     }) |
                     rxo::map([=](observable<string> shard) {
-                        return shard | observe_on(worker) |
+                        return shard |
+                               observe_on(worker) |
                                rxo::map([=](const string& line)
                                             -> observable<Tweet> {
                                    try {
@@ -106,7 +107,8 @@ namespace tweets {
                                    }
                                    return rxs::empty<Tweet>();
                                }) |
-                               merge() | as_dynamic();
+                               merge() |
+                               as_dynamic();
                     }) |
                     merge(tweetThread) |
                     tap([](const Tweet&) {},
