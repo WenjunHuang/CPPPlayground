@@ -107,6 +107,7 @@ add_subdirectory(rxcpp)
 add_subdirectory(imgui_play)
 add_subdirectory(rxcpp_imgui_twitter)
 add_subdirectory(catch2_learn)
+add_subdirectory(modern_gui_dracular_qt_widgets)
 
 
 ## The gtest/gtest_main targets carry header search path

@@ -4,6 +4,8 @@
 
 #include "main_window.h"
 #include "./ui_mainwindow.h"
+#include "../../modern_gui_dracular_qt_widgets/main_window.h"
+
 
 MainWindow::MainWindow() : ui(new Ui::MainWindow) {
     ui->setupUi(this);

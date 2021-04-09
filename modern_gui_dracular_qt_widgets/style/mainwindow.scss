@@ -1,0 +1,29 @@
+$backgroundColor: #282a36;
+$secondaryBackgroundColor: #6272a4;
+$gapColor: #44475a;
+$gap: 3px solid $gapColor;
+
+
+#leftMenuBg {
+  background-color: $backgroundColor;
+}
+
+#topLogo {
+  background-color: $backgroundColor;
+  background-image: url(:/images/images/images/PyDracula.png);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+#contentTopBg {
+  background-color: $backgroundColor;
+}
+
+#leftMenuFrame{
+  border-top: $gap;
+}
+
+#contentBottom{
+  border-top: $gap;
+  background-color: $secondaryBackgroundColor
+}

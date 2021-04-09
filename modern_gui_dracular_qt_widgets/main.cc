@@ -1,0 +1,12 @@
+//
+// Created by rick on 2021/4/9.
+//
+
+#include "main_window.h"
+#include <QApplication>
+int main(int argc, char* argv[]) {
+    QApplication app{argc, argv};
+    MainWindow win;
+    win.show();
+    return app.exec();
+}
