@@ -1,29 +1,57 @@
-$backgroundColor: #282a36;
-$secondaryBackgroundColor: #6272a4;
-$gapColor: #44475a;
-$gap: 3px solid $gapColor;
+@use "common";
+#MainWindow {
 
 
-#leftMenuBg {
-  background-color: $backgroundColor;
-}
 
-#topLogo {
-  background-color: $backgroundColor;
-  background-image: url(:/images/images/images/PyDracula.png);
-  background-position: center;
-  background-repeat: no-repeat;
-}
 
-#contentTopBg {
-  background-color: $backgroundColor;
-}
+  #contentTopBg {
+    background-color: common.$backgroundColor;
+  }
 
-#leftMenuFrame{
-  border-top: $gap;
-}
 
-#contentBottom{
-  border-top: $gap;
-  background-color: $secondaryBackgroundColor
+
+  #contentBottom {
+    border-top: common.$gap;
+    background-color: lighten(common.$backgroundColor, 5%);
+  }
+
+  /* Title Menu */
+  #titleRightInfo {
+    padding-left: 10px;
+  }
+
+  #rightButtons {
+    padding-right: 10px;
+
+    @mixin buttonBasic {
+      min-width: 28px;
+      max-width: 28px;
+      min-height: 28px;
+      max-height: 28px;
+      background-color: transparent;
+      border-radius: 3px;
+      background-position: center;
+      background-repeat: no-repeat;
+
+      &:hover {
+        background-color:common.$secondaryBackgroundColor;
+      }
+    }
+    #closeAppBtn {
+      @include buttonBasic;
+      background-image:url(:/icons/images/icons/icon_close.png);
+    }
+    #maximizeRestoreAppBtn {
+      @include buttonBasic;
+      background-image:url(:/icons/images/icons/icon_maximize.png);
+    }
+    #minimizeAppBtn {
+      @include buttonBasic;
+      background-image:url(:/icons/images/icons/icon_minimize.png);
+    }
+    #settingsTopBtn {
+      @include buttonBasic;
+      background-image:url(:/icons/images/icons/icon_settings.png);
+    }
+  }
 }

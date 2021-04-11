@@ -14,63 +14,162 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">#leftMenuBg {
-  background-color: #282a36;
+   <string notr="true">QWidget {
+  color: #f8f8f2;
+  font: 10pt "Segoe UI";
 }
 
-#topLogo {
+#MainWindow {
+  /* Title Menu */
+}
+#MainWindow #contentTopBg {
   background-color: #282a36;
-  background-image: url(:/images/images/images/PyDracula.png);
+}
+#MainWindow #contentBottom {
+  border-top: 3px solid #44475a;
+  background-color: #333545;
+}
+#MainWindow #titleRightInfo {
+  padding-left: 10px;
+}
+#MainWindow #rightButtons {
+  padding-right: 10px;
+}
+#MainWindow #rightButtons #closeAppBtn {
+  min-width: 28px;
+  max-width: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  background-color: transparent;
+  border-radius: 3px;
   background-position: center;
   background-repeat: no-repeat;
+  background-image: url(:/icons/images/icons/icon_close.png);
 }
-
-#contentTopBg {
-  background-color: #282a36;
+#MainWindow #rightButtons #closeAppBtn:hover {
+  background-color: #6272a4;
 }
-
-#leftMenuFrame {
-  border-top: 3px solid #44475a;
+#MainWindow #rightButtons #maximizeRestoreAppBtn {
+  min-width: 28px;
+  max-width: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  background-color: transparent;
+  border-radius: 3px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url(:/icons/images/icons/icon_maximize.png);
 }
-
-#contentBottom {
-  border-top: 3px solid #44475a;
+#MainWindow #rightButtons #maximizeRestoreAppBtn:hover {
+  background-color: #6272a4;
+}
+#MainWindow #rightButtons #minimizeAppBtn {
+  min-width: 28px;
+  max-width: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  background-color: transparent;
+  border-radius: 3px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url(:/icons/images/icons/icon_minimize.png);
+}
+#MainWindow #rightButtons #minimizeAppBtn:hover {
+  background-color: #6272a4;
+}
+#MainWindow #rightButtons #settingsTopBtn {
+  min-width: 28px;
+  max-width: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  background-color: transparent;
+  border-radius: 3px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url(:/icons/images/icons/icon_settings.png);
+}
+#MainWindow #rightButtons #settingsTopBtn:hover {
   background-color: #6272a4;
 }
 
 /*# sourceMappingURL=mainwindow.css.map */
 </string></property>
-  <widget class="QWidget" name="styleSheet">
-   <property name="styleSheet">
-    <string notr="true">#leftMenuBg {
-	background-color:#282a36
-}
-#topLogo {
-	background-color: #282a36;
-	background-image: url(:/images/images/images/PyDracula.png);
-	background-position: centered;
-	background-repeat: no-repeat;
-}</string>
-   </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="spacing">
-     <number>0</number>
-    </property>
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
+  <widget class="QWidget" name="centralContent">
+      <layout class="QVBoxLayout" name="appMargins">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
+       <property name="topMargin">
+        <number>10</number>
+       </property>
+       <property name="rightMargin">
+        <number>10</number>
+       </property>
+       <property name="bottomMargin">
+        <number>10</number>
+       </property>
+       <item>
+            <widget class="QFrame" name="bgApp">
+             <property name="styleSheet">
+              <string notr="true" />
+             </property>
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QHBoxLayout" name="appLayout">
+              <property name="spacing">
+               <number>0</number>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
     <item>
-     <widget class="QWidget" name="bgApp" native="true">
-      <layout class="QHBoxLayout" name="horizontalLayout">
+     <widget class="ExtraLeftMenu" name="leftMenuBg">
+      <property name="minimumSize">
+       <size>
+        <width>60</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>60</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="extraLeftBox">
+      <property name="maximumSize">
+       <size>
+        <width>0</width>
+        <height>16777215</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="contentBox">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -87,92 +186,26 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QWidget" name="leftMenuBg" native="true">
+        <widget class="QFrame" name="contentTopBg">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
-           <width>60</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>60</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QWidget" name="leftMenuWidget" native="true">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>50</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>50</height>
-             </size>
-            </property>
-            <widget class="QWidget" name="topLogo" native="true">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>5</y>
-               <width>42</width>
-               <height>42</height>
-              </rect>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>42</width>
-               <height>42</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>42</width>
-               <height>42</height>
-              </size>
-             </property>
-            </widget>
-           </widget>
-          </item>
-          <item>
-           <widget class="QWidget" name="leftMenuFrame" native="true" />
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="extraLeftBox" native="true">
-         <property name="maximumSize">
-          <size>
            <width>0</width>
-           <height>16777215</height>
+           <height>58</height>
           </size>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="contentBox" native="true">
-         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>58</height>
+          </size>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
           <property name="spacing">
            <number>0</number>
           </property>
@@ -189,35 +222,140 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QWidget" name="contentTopBg" native="true">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>50</height>
-             </size>
+           <widget class="QFrame" name="leftBox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>50</height>
-             </size>
-            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="TitleRightInfo" name="titleRightInfo">
+               <property name="text">
+                <string>Theme with colors based on Dracula</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item>
-           <widget class="QWidget" name="contentBottom" native="true" />
+           <widget class="QFrame" name="rightButtons">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <property name="spacing">
+              <number>5</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="settingsTopBtn">
+               <property name="minimumSize">
+                <size>
+                 <width>28</width>
+                 <height>28</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>28</width>
+                 <height>28</height>
+                </size>
+               </property>
+               <property name="text">
+                <string />
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="minimizeAppBtn">
+               <property name="minimumSize">
+                <size>
+                 <width>28</width>
+                 <height>28</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>28</width>
+                 <height>28</height>
+                </size>
+               </property>
+               <property name="text">
+                <string />
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="maximizeRestoreAppBtn">
+               <property name="text">
+                <string />
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="closeAppBtn">
+               <property name="text">
+                <string />
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
           </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="contentBottom" />
        </item>
       </layout>
      </widget>
     </item>
    </layout>
   </widget>
+       </item>
+      </layout>
+  </widget>
  </widget>
- <resources>
-  <include location="resources.qrc" />
- </resources>
+ <customwidgets>
+  <customwidget>
+   <class>ExtraLeftMenu</class>
+   <extends>QFrame</extends>
+   <header>extraleftmenu.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TitleRightInfo</class>
+   <extends>QLabel</extends>
+   <header>title_right_info.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources />
  <connections />
 </ui>

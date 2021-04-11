@@ -1,0 +1,10 @@
+$backgroundColor: #282a36;
+$secondaryBackgroundColor: #6272a4;
+$foregroundColor: #f8f8f2;
+$gapColor: #44475a;
+$gap: 3px solid $gapColor;
+
+QWidget {
+  color: $foregroundColor;
+  font: 10pt "Segoe UI";
+}

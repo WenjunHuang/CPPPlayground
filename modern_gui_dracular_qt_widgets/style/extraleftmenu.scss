@@ -1,0 +1,105 @@
+@use "common";
+
+.ExtraLeftMenu, #ExtraLeftMenu {
+  background-color: common.$backgroundColor;
+}
+
+#topLogoInfo {
+  padding: 8px;
+
+  #topLogoLabels {
+    margin-left: 16px;
+  }
+}
+
+#topLogo {
+  background-color: common.$backgroundColor;
+  background-image: url(:/images/images/images/PyDracula.png);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+#leftMenuFrame {
+  border-top: common.$gap;
+
+  #toggleButton {
+    background-position: left center;
+    background-repeat: no-repeat;
+    border: none;
+    border-left: 22px solid transparent;
+    background-color: transparent;
+    text-align: left;
+    padding-left: 44px;
+    background-image: url(:/icons/images/icons/icon_menu.png);
+  }
+}
+
+//左侧工具栏
+#topMenu {
+  @mixin BasicTopMenuButton {
+    background-position: left center;
+    background-repeat: no-repeat;
+    border: none;
+    border-left: 22px solid transparent;
+    background-color: transparent;
+    text-align: left;
+    padding-left: 44px;
+
+    &:hover {
+      background-color: lighten(common.$backgroundColor, 5%);
+    }
+    &:pressed {
+      background-color: darken(common.$backgroundColor, 5%);
+      color: white;
+    }
+  }
+
+  #btn_home {
+    @include BasicTopMenuButton;
+    background-image: url(:/icons/images/icons/cil-home.png);
+  }
+
+  #btn_widgets {
+    @include BasicTopMenuButton;
+    background-image: url(:/icons/images/icons/cil-gamepad.png);
+  }
+
+  #btn_new {
+    @include BasicTopMenuButton;
+    background-image: url(:/icons/images/icons/cil-file.png);
+  }
+
+  #btn_save {
+    @include BasicTopMenuButton;
+    background-image: url(:/icons/images/icons/cil-save.png)
+  }
+
+  #btn_exit {
+    @include BasicTopMenuButton;
+    background-image: url(:/icons/images/icons/cil-x.png);
+  }
+}
+
+
+#bottomMenu {
+  #toggleLeftBox {
+    background-position: left center;
+    background-repeat: no-repeat;
+    border: none;
+    border-left: 20px solid transparent;
+    background-color: transparent;
+    text-align: left;
+    padding-left: 44px;
+    background-image: url(:/icons/images/icons/icon_settings.png);
+
+    &:hover {
+      background-color: lighten(common.$backgroundColor, 5%);
+    }
+
+    &:pressed {
+      background-color: darken(common.$backgroundColor, 5%);
+      color: white;
+    }
+  }
+}
+

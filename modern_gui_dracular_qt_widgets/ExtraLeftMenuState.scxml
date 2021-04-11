@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" name="ExtraLeftMenuState" qt:editorversion="4.14.2" initial="Collapsed">
+    <state id="Collapsed">
+        <qt:editorinfo geometry="200.84;327.53;-106;-50;343.99;100" scenegeometry="200.84;327.53;94.84;277.53;343.99;100"/>
+        <transition type="internal" target="Expanded"/>
+        <datamodel/>
+    </state>
+    <state id="Expanded">
+        <qt:editorinfo geometry="459.36;605.63;-106;-50;166;100" scenegeometry="459.36;605.63;353.36;555.63;166;100"/>
+        <transition type="internal" target="Collapsed">
+            <qt:editorinfo endTargetFactors="77.99;36.79" movePoint="1.03;0"/>
+        </transition>
+        <onentry/>
+    </state>
+</scxml>
