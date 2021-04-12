@@ -20,7 +20,8 @@ public:
   QString personalSign() const;
 
   void addHabit(QStringView habbit);
-
+protected:
+  MyFoo(MyFooPrivate&d);
 private:
   std::unique_ptr<MyFooPrivate> d_ptr;
 

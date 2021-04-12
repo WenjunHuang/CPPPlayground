@@ -7,6 +7,7 @@
 namespace Ui {
     class ExtraLeftMenu;
 }
+class ExtraLeftMenuPrivate;
 
 class ExtraLeftMenu : public QFrame {
     Q_OBJECT
@@ -14,10 +15,9 @@ class ExtraLeftMenu : public QFrame {
   public:
     explicit ExtraLeftMenu(QWidget* parent = nullptr);
     ~ExtraLeftMenu();
-
   private:
-    Ui::ExtraLeftMenu* ui;
-    QStateMachine *_stateMachine;
+    Q_DECLARE_PRIVATE(ExtraLeftMenu);
+
 };
 
 #endif // EXTRALEFTMENU_H
