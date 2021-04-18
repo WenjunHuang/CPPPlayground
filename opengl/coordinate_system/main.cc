@@ -15,6 +15,17 @@ class Window : public QWindow, private QOpenGLFunctions_3_3_Core {
             renderNow();
     }
 
+    bool event(QEvent* event) override {
+        switch (event->type()) {
+        case QEvent::UpdateRequest: {
+            renderNow();
+            return true;
+        }
+        default:
+            return QWindow::event(event);
+        }
+    }
+
   private:
     void initialize() {
         initializeOpenGLFunctions();

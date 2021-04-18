@@ -1,10 +1,11 @@
-set(CMAKE_CXX_STANDARD 17)
+list(APPEND CMAKE_PREFIX_PATH ${QT_CMAKE})
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt5 5.14 REQUIRED Core Widgets Network Quick QuickControls2 Gui)
+find_package(Qt5 REQUIRED Core Widgets Network Quick QuickControls2 Gui)
 if (MSVC)
     find_package(glfw3 CONFIG REQUIRED)
     find_package(glad CONFIG REQUIRED)

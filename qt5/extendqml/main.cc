@@ -180,8 +180,8 @@ class BirthdayParty : public QObject {
     void clearGuests() { _guests.clear(); }
 
     QVariant fuck() const {
-//        return "foo";
-        return QVariant::fromValue(Fuck{"Wenjun Huang"});
+        return "foo";
+//        return QVariant::fromValue(Fuck{"Wenjun Huang"});
     }
 
 
@@ -216,7 +216,7 @@ QML_DECLARE_TYPEINFO(BirthdayParty, QML_HAS_ATTACHED_PROPERTIES)
 int main(int argc, char* argv[]) {
     QCoreApplication app(argc, argv);
 
-    qRegisterMetaType<Fuck>();
+//    qRegisterMetaType<Fuck>();
     qmlRegisterType<BirthdayPartyAttached>();
     qmlRegisterType<BirthdayParty>("People", 1, 0, "BirthdayParty");
     qmlRegisterType<Person>("People", 1, 0, "Person");
