@@ -1,0 +1,18 @@
+set(CMAKE_CXX_STANDARD 17)
+
+find_package(Qt5 5.15 REQUIRED Core)
+if (MSVC)
+    find_package(glfw3 CONFIG REQUIRED)
+    find_package(glad CONFIG REQUIRED)
+    find_package(glm CONFIG REQUIRED)
+    set(GLFW glfw)
+    set(GLAD glad::glad)
+else ()
+    find_package(glfw3 REQUIRED)
+#    find_package(glad REQUIRED)
+    set(GLFW glfw)
+endif ()
+
+set(PREFIX opengl_shader)
+add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${GLFW} ${GLAD} glm::glm Qt5::Core)
+add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${GLFW} ${GLAD} glm::glm Qt5::Core)

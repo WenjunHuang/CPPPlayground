@@ -5,10 +5,12 @@
 #include <QSignalTransition>
 
 ExtraLeftMenu::ExtraLeftMenu(QWidget* parent)
-    : QFrame(parent), ui(new Ui::ExtraLeftMenu) {
+    : QFrame(parent)
+    , ui(new Ui::ExtraLeftMenu)
+{
     ui->setupUi(this);
 
-    _stateMachine  = new QStateMachine(this);
+    _stateMachine = new QStateMachine(this);
     auto collapsed = new QState();
     collapsed->assignProperty(this, "minimumWidth", 60);
     auto expanded = new QState();
