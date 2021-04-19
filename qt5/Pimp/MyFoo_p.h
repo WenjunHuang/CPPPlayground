@@ -2,10 +2,10 @@
 
 #include <string>
 #include <vector>
-
+#include <QtCore/private/qobject_p.h>
 class MyFoo;
 
-struct MyFooPrivate {
+struct MyFooPrivate: QObjectPrivate {
   QString name;
   int age;
   std::vector<QString> habbits;

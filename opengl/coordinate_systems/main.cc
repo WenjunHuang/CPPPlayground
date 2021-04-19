@@ -9,7 +9,10 @@
 class Window : public QWindow, private QOpenGLFunctions_3_3_Core {
     Q_OBJECT
   public:
-    Window() { setSurfaceType(SurfaceType::OpenGLSurface); _time.start();}
+    Window() {
+        setSurfaceType(SurfaceType::OpenGLSurface);
+        _time.start();
+    }
 
     bool event(QEvent* event) override {
         switch (event->type()) {
@@ -42,7 +45,7 @@ class Window : public QWindow, private QOpenGLFunctions_3_3_Core {
 
         // render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // bind textures
         glActiveTexture(GL_TEXTURE0);
@@ -53,24 +56,17 @@ class Window : public QWindow, private QOpenGLFunctions_3_3_Core {
         // active shader
         _shaderProgram->bind();
 
-
-
         // render container
         QVector3D cubePositions[] = {
-            QVector3D( 0.0f,  0.0f,  0.0f),
-            QVector3D( 2.0f,  5.0f, -15.0f),
-            QVector3D(-1.5f, -2.2f, -2.5f),
-            QVector3D(-3.8f, -2.0f, -12.3f),
-            QVector3D( 2.4f, -0.4f, -3.5f),
-            QVector3D(-1.7f,  3.0f, -7.5f),
-            QVector3D( 1.3f, -2.0f, -2.5f),
-            QVector3D( 1.5f,  2.0f, -2.5f),
-            QVector3D( 1.5f,  0.2f, -1.5f),
-            QVector3D(-1.3f,  1.0f, -1.5f)
-        };
+            QVector3D(0.0f, 0.0f, 0.0f),    QVector3D(2.0f, 5.0f, -15.0f),
+            QVector3D(-1.5f, -2.2f, -2.5f), QVector3D(-3.8f, -2.0f, -12.3f),
+            QVector3D(2.4f, -0.4f, -3.5f),  QVector3D(-1.7f, 3.0f, -7.5f),
+            QVector3D(1.3f, -2.0f, -2.5f),  QVector3D(1.5f, 2.0f, -2.5f),
+            QVector3D(1.5f, 0.2f, -1.5f),   QVector3D(-1.3f, 1.0f, -1.5f)};
         _vao->bind();
-        int i = 0;
-        for (const auto& position:cubePositions) {
+        int i        = 0;
+        auto elapsed = _time.elapsed() / 60;
+        for (const auto& position : cubePositions) {
             // create transform
             QMatrix4x4 model, view, projection;
             model.setToIdentity();
@@ -78,14 +74,18 @@ class Window : public QWindow, private QOpenGLFunctions_3_3_Core {
             auto angle = 20.0f * (i++);
             model.rotate(angle, 0.5f, 1.0f, 0.0f);
 
+            auto radius = 10.0f;
+            float camX  = sin(elapsed) * radius;
+            float camZ  = cos(elapsed) * radius;
             view.setToIdentity();
-            view.translate(0.0f, 0.0f, -3.0f);
+            view.lookAt({camX, 0.0, camZ}, {0.0, 0.0, 0.0}, {0.0, 1.0, 0.0});
+            //            view.translate(0.0f, 0.0f, -3.0f);
 
             projection.setToIdentity();
             auto viewSize = size();
             projection.perspective(
-                45, (float)(width() * retinaScale / height() * retinaScale), 0.1f,
-                100.0f);
+                45, (float)(width() * retinaScale / height() * retinaScale),
+                0.1f, 100.0f);
 
             // retrieve the matrix uniform locations
             auto modelLoc = _shaderProgram->uniformLocation("model");
@@ -96,13 +96,13 @@ class Window : public QWindow, private QOpenGLFunctions_3_3_Core {
             _shaderProgram->setUniformValue(viewLoc, view);
             _shaderProgram->setUniformValue("projection", projection);
 
-            glDrawArrays(GL_TRIANGLES,0,36);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-//        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         _context->swapBuffers(this);
 
-//        requestUpdate();
+        requestUpdate();
     }
 
     void initialize() {
@@ -120,56 +120,37 @@ class Window : public QWindow, private QOpenGLFunctions_3_3_Core {
             qDebug() << _shaderProgram->log();
 
         // set up vertex data
-//        float vertices[] = {
-//            // positions      // texture coords
-//            0.5f,  0.5f,  0.0f, 1.0f, 1.0f, // top right
-//            0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
-//            -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-//            -0.5f, 0.5f,  0.0f, 0.0f, 1.0f  // top left
-//        };
+        //        float vertices[] = {
+        //            // positions      // texture coords
+        //            0.5f,  0.5f,  0.0f, 1.0f, 1.0f, // top right
+        //            0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
+        //            -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+        //            -0.5f, 0.5f,  0.0f, 0.0f, 1.0f  // top left
+        //        };
         float vertices[] = {
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f,
+            0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+            -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
 
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+            -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+            -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
 
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+            -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
 
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+            0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 0.0f, 1.0f,
+            0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 1.0f,
+            0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
+            -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
 
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-            0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-        };
+            -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+            -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
         constexpr auto stride  = 5 * sizeof(float);
         unsigned int indices[] = {
             0, 1, 3, // first triangle
@@ -215,17 +196,16 @@ class Window : public QWindow, private QOpenGLFunctions_3_3_Core {
             QImage(":/awesomeface.png").mirrored());
         _faceTexture->create();
         _faceTexture->setWrapMode(QOpenGLTexture::DirectionS,
-                                       QOpenGLTexture::Repeat);
+                                  QOpenGLTexture::Repeat);
         _faceTexture->setWrapMode(QOpenGLTexture::DirectionT,
-                                       QOpenGLTexture::Repeat);
+                                  QOpenGLTexture::Repeat);
         _faceTexture->setMinMagFilters(QOpenGLTexture::Linear,
-                                            QOpenGLTexture::Linear);
+                                       QOpenGLTexture::Linear);
         _faceTexture->generateMipMaps();
 
         _shaderProgram->bind();
         _shaderProgram->setUniformValue("texture1", 0);
         _shaderProgram->setUniformValue("texture2", 1);
-
     }
 
   private:

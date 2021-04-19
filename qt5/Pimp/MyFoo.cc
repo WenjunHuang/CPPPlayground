@@ -34,3 +34,4 @@ void MyFoo::addHabit(QStringView habbit) {
   Q_D(MyFoo);
   d->habbits.push_back(habbit.toString());
 }
+MyFoo::MyFoo(MyFooPrivate& d):QObject(d) {}

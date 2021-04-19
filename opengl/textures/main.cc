@@ -79,21 +79,18 @@ class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // bind texture
-        glActiveTexture(GL_TEXTURE1);
-        _texture->bind();
-        glActiveTexture(GL_TEXTURE2);
-        _texture1->bind();
-        //        glBindTexture(GL_TEXTURE_2D, _texture);
+//        _texture.bind(1);
+//        _texture1.bind(2);
 
         // render container
-        _program->bind();
-        _program->setUniformValue("texture1", 1);
-        _program->setUniformValue("texture2", 2);
-        _program->setUniformValue("value", _value);
+//        _program->bind();
+//        _program->setUniformValue("texture1", 1);
+//        _program->setUniformValue("texture2", 2);
+//        _program->setUniformValue("value", _value);
 
         QMatrix4x4 matrix;
-        matrix.translate(0.5f,-0.5f,0.0f);
-        matrix.rotate(_time.elapsed(),QVector3D(0.0f,0.0f,1.0f));
+//        matrix.translate(0.5f,-0.5f,0.0f);
+        matrix.rotate(_time.elapsed(),QVector3D(0.0f,0.0f,0.1f));
         _program->setUniformValue("transform",matrix);
 
         _vao->bind();
@@ -130,26 +127,15 @@ class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
         _vao->create();
         _vao->bind();
 
-        _vbo = std::make_unique<QOpenGLBuffer>(QOpenGLBuffer::VertexBuffer);
-        _vbo->create();
-        _vbo->bind();
-        _vbo->allocate(vertices, sizeof(vertices));
+//        _vbo = std::make_unique<QOpenGLBuffer>(QOpenGLBuffer::VertexBuffer);
+        _vbo.create();
+        _vbo.bind();
+        _vbo.allocate(vertices, sizeof(vertices));
 
-        _ebo = std::make_unique<QOpenGLBuffer>(QOpenGLBuffer::IndexBuffer);
-        _ebo->create();
-        _ebo->bind();
-        _ebo->allocate(indices, sizeof(indices));
-        //        glGenBuffers(1, &VBO);
-        //        glGenBuffers(1, &EBO);
-
-        //        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        //        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,
-        //                     GL_STATIC_DRAW);
-        //
-        //        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        //        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices),
-        //        indices,
-        //                     GL_STATIC_DRAW);
+//        _ebo = std::make_unique<QOpenGLBuffer>(QOpenGLBuffer::IndexBuffer);
+        _ebo.create();
+        _ebo.bind();
+        _ebo.allocate(indices, sizeof(indices));
 
         // position attribute
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
@@ -181,21 +167,28 @@ class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
         QImage image(":/container.jpg");
         qDebug() << "image width:" << image.width()
                  << ",height:" << image.height();
-        _texture = std::make_unique<QOpenGLTexture>(image);
-        _texture->generateMipMaps();
+        _texture.setData(image);
+        _texture.generateMipMaps();
 
-        _texture->setMinificationFilter(QOpenGLTexture::Linear);
-        _texture->setMagnificationFilter(QOpenGLTexture::Linear);
-        _texture->setWrapMode(QOpenGLTexture::DirectionS,
+        _texture.setMinificationFilter(QOpenGLTexture::Linear);
+        _texture.setMagnificationFilter(QOpenGLTexture::Linear);
+        _texture.setWrapMode(QOpenGLTexture::DirectionS,
                               QOpenGLTexture::Repeat);
-        _texture->setWrapMode(QOpenGLTexture::DirectionT,
+        _texture.setWrapMode(QOpenGLTexture::DirectionT,
                               QOpenGLTexture::Repeat);
 
-        _texture1 = std::make_unique<QOpenGLTexture>(
-            QImage(":/awesomeface.png").mirrored());
-        _texture1->generateMipMaps();
 
-        qDebug() << _texture->textureId() << " " << _texture1->textureId();
+        _texture1.setData(QImage(":/awesomeface.png").mirrored());
+        _texture1.generateMipMaps();
+
+        _texture.bind(1);
+        _texture1.bind(2);
+
+        _program->bind();
+        _program->setUniformValue("texture1", 1);
+        _program->setUniformValue("texture2", 2);
+        _program->setUniformValue("value", _value);
+//        qDebug() << _texture.textureId() << " " << _texture1.textureId();
         //        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width(),
         //        image.height(), 0,
         //                     GL_RGB, GL_UNSIGNED_BYTE, image.);
@@ -207,10 +200,10 @@ class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
     QOpenGLVertexArrayObject* _vao;
     QOpenGLShaderProgram* _program{nullptr};
 
-    std::unique_ptr<QOpenGLBuffer> _vbo;
-    std::unique_ptr<QOpenGLBuffer> _ebo;
-    std::unique_ptr<QOpenGLTexture> _texture;
-    std::unique_ptr<QOpenGLTexture> _texture1;
+    QOpenGLBuffer _vbo{QOpenGLBuffer::VertexBuffer};
+    QOpenGLBuffer _ebo{QOpenGLBuffer::IndexBuffer};
+    QOpenGLTexture _texture{QOpenGLTexture::Target2D};
+    QOpenGLTexture _texture1{QOpenGLTexture::Target2D};
 
     QElapsedTimer _time;
 
