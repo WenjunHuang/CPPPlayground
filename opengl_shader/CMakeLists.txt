@@ -14,5 +14,5 @@ else ()
 endif ()
 
 set(PREFIX opengl_shader)
-add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${GLFW} ${GLAD} glm::glm Qt5::Core)
-add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${GLFW} ${GLAD} glm::glm Qt5::Core)
+add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${GLFW} ${GLAD} glm Qt5::Core)
+add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${GLFW} ${GLAD} glm Qt5::Core)

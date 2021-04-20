@@ -19,8 +19,6 @@ class MainWindow : public QWindow, private QOpenGLFunctions_4_5_Core {
         format.setProfile(QSurfaceFormat::CoreProfile);
         setFormat(format);
     }
-  protected:
-    void pain
   private:
     QOpenGLContext* _context;
     QOpenGLShaderProgram* _program;

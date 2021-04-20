@@ -6,12 +6,12 @@
 #include "camera.h"
 #include <QElapsedTimer>
 #include <QOpenGLBuffer>
-#include <QOpenGLFunctions_4_5_Core>
+#include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLWindow>
-class BasicLightingWindow : public QOpenGLWindow ,private QOpenGLFunctions_4_5_Core{
+class BasicLightingWindow : public QOpenGLWindow ,private QOpenGLFunctions_3_3_Core{
     Q_OBJECT
 public:
     BasicLightingWindow();
@@ -34,4 +34,7 @@ private:
     int _lastY;
     long _lastFrame{0L};
 
+    QVector3D _lightColor;
+
+    QMatrix4x4 getProjection() const;
 };
