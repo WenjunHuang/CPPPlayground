@@ -1,6 +1,6 @@
 list(APPEND CMAKE_PREFIX_PATH ${QT_CMAKE})
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
@@ -18,5 +18,5 @@ else ()
 endif ()
 
 set(PREFIX opengl)
-add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${GLFW} ${GLAD} Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Quick)
-add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${GLFW} ${GLAD} Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Quick)
+add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${GLFW} ${GLAD} Qt5::Core Qt5::Widgets Qt5::GuiPrivate Qt5::Gui Qt5::Quick)
+add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${GLFW} ${GLAD} Qt5::Core Qt5::Widgets Qt5::Gui Qt5::Quick  Qt5::GuiPrivate)

@@ -48,9 +48,9 @@ class TriangleWindow : public QWindow, private QOpenGLFunctions_4_5_Core {
             initializeOpenGLFunctions();
             _program = new QOpenGLShaderProgram(this);
             _program->addShaderFromSourceFile(QOpenGLShader::Vertex,
-                                              ":/vertex.glsl");
+                                              ":/basic_lighting_vs.glsl");
             _program->addShaderFromSourceFile(QOpenGLShader::Fragment,
-                                              ":/fragment.glsl");
+                                              ":/basic_lighting_fs.glsl");
             if (!_program->link()) {
                 qDebug() << _program->log();
             }
