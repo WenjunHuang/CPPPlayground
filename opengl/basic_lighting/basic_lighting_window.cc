@@ -138,7 +138,7 @@ void BasicLightingWindow::paintGL()
     auto view = _camera.getViewMatrix();
     auto cameraPos = _camera.Position;
 
-    auto elapsed = _timer.elapsed() / 1000;
+    auto elapsed = _timer.elapsed() / 1000.0f;
     _lightColor.setX(sin(elapsed * 2.0f));
     _lightColor.setY(sin(elapsed * 0.7f));
     _lightColor.setZ(sin(elapsed * 1.3f));

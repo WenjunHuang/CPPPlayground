@@ -3,6 +3,8 @@
 #include <QOpenGLShaderProgram>
 #include <QSurfaceFormat>
 #include <QWindow>
+#include "../light_casters_directional/main_window.h"
+
 //
 // Created by rick on 2021/4/17.
 //

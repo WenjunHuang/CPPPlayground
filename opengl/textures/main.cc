@@ -104,9 +104,9 @@ class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
     void initialize() {
         _program = new QOpenGLShaderProgram(this);
         _program->addShaderFromSourceFile(QOpenGLShader::Vertex,
-                                          ":/basic_lighting_vs.glsl");
+                                          ":/vertex.glsl");
         _program->addShaderFromSourceFile(QOpenGLShader::Fragment,
-                                          ":/basic_lighting_fs.glsl");
+                                          ":/fragment.glsl");
         if (!_program->link()) {
             qDebug() << _program->log();
         }
@@ -168,7 +168,7 @@ class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
         qDebug() << "image width:" << image.width()
                  << ",height:" << image.height();
         _texture.setData(image);
-        _texture.generateMipMaps();
+//        _texture.generateMipMaps();
 
         _texture.setMinificationFilter(QOpenGLTexture::Linear);
         _texture.setMagnificationFilter(QOpenGLTexture::Linear);
@@ -179,7 +179,7 @@ class TextureWindow : public QWindow, private QOpenGLFunctions_3_3_Core {
 
 
         _texture1.setData(QImage(":/awesomeface.png").mirrored());
-        _texture1.generateMipMaps();
+//        _texture1.generateMipMaps();
 
         _texture.bind(1);
         _texture1.bind(2);
