@@ -16,6 +16,7 @@ class LightCastersDirectionalWindow : public QOpenGLWindow, private QOpenGLFunct
     Q_OBJECT
 public:
     LightCastersDirectionalWindow();
+    ~LightCastersDirectionalWindow();
 
 protected:
     void initializeGL() override;

@@ -1,0 +1,10 @@
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>light_casters_fs.glsl</file>
+        <file>light_casters_vs.glsl</file>
+        <file>light_cube_fs.glsl</file>
+        <file>light_cube_vs.glsl</file>
+        <file>container2.png</file>
+        <file>container2_specular.png</file>
+    </qresource>
+</RCC>

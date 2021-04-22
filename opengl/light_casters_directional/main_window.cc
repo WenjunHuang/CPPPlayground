@@ -244,3 +244,7 @@ bool LightCastersDirectionalWindow::event(QEvent* event)
     }
     return QOpenGLWindow::event(event);
 }
+LightCastersDirectionalWindow::~LightCastersDirectionalWindow()
+{
+    makeCurrent();
+}
