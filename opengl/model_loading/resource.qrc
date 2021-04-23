@@ -1,0 +1,15 @@
+<RCC version="1.0">
+    <qresource prefix="/">
+    </qresource>
+    <qresource prefix="model">
+<!--        <file>vertex.glsl</file>-->
+<!--        <file>fragment.glsl</file>-->
+        <file>model/ao.jpg</file>
+        <file>model/backpack.mtl</file>
+        <file>model/backpack.obj</file>
+        <file>model/diffuse.jpg</file>
+        <file>model/normal.png</file>
+        <file>model/roughness.jpg</file>
+        <file>model/specular.jpg</file>
+    </qresource>
+</RCC>

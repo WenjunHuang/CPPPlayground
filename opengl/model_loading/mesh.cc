@@ -3,6 +3,7 @@
 //
 #include "mesh.h"
 #include <range/v3/all.hpp>
+#include <optional>
 Mesh::Mesh(QVector<Vertex>&& vertices, QVector<uint32_t>&& indices, QVector<Texture>&& textures, QOpenGLFunctions_3_3_Core* functions)
     : vertices { std::move(vertices) }
     , indices { std::move(indices) }
@@ -11,6 +12,7 @@ Mesh::Mesh(QVector<Vertex>&& vertices, QVector<uint32_t>&& indices, QVector<Text
 {
     setupMesh();
 }
+
 void Mesh::setupMesh()
 {
     _vao = std::make_unique<QOpenGLVertexArrayObject>();
@@ -42,19 +44,21 @@ void Mesh::setupMesh()
 void Mesh::draw(QOpenGLShaderProgram* shader)
 {
     using namespace ranges;
-    for (uint32_t diffuseNr, specularNr = 1; auto&& [index, value] : textures | views::enumerate) {
+    for (int32_t diffuseNr = 1, specularNr = 1; auto&& [index, value] : textures | views::enumerate) {
         _functions->glActiveTexture(GL_TEXTURE0 + index);
-        QString number;
+        std::optional<int32_t> number;
         if (value.type == "texture_diffuse") {
             number = diffuseNr++;
         } else if (value.type == "texture_specular") {
             number = specularNr++;
         }
-        shader->setUniformValue(QString("material.%1%2").arg(value.type,number).toLatin1().constData(), (GLint)index);
-        value.texture->bind(index);
+        if(number) {
+            shader->setUniformValue(QString("material.%1%2").arg(value.type, number.value()).toLatin1().constData(), (GLint)index);
+            value.texture->bind(index);
+        }
     }
 
     // draw mesh
     QOpenGLVertexArrayObject::Binder bindGuard{_vao.get()};
-    glDrawElements(GL_TRIANGLES,indices.size(),GL_UNSIGNED_INT,0);
+    _functions->glDrawElements(GL_TRIANGLES,indices.size(),GL_UNSIGNED_INT,0);
 }
