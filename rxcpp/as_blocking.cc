@@ -8,7 +8,7 @@
 int main() {
     std::cout << "Main Thread: " << std::this_thread::get_id() << std::endl;
     rxcpp::schedulers::run_loop loop{};
-    rxcpp::schedulers::make_run_loop()
+    rxcpp::schedulers::make_run_loop();
     auto values = rxcpp::observable<>::from(rxcpp::observe_on_run_loop(),1,2,3)
         .tap([](int v) {
             std::cout << "[thread " << std::this_thread::get_id() << "] Emit value: " << v << std::endl;

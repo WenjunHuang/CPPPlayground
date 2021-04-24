@@ -9,6 +9,7 @@
 #include <range/v3/action.hpp>
 #include <range/v3/algorithm.hpp>
 #include <range/v3/range.hpp>
+#include <utility>
 #include <range/v3/view.hpp>
 #include <rxcpp/rx.hpp>
 #include <string>
@@ -166,8 +167,8 @@ namespace model {
             json tweet;
             vector<string> words;
             shared() {}
-            explicit shared(const json& t)
-                : tweet{t}, words(splitWords(tweetText(tweet))) {}
+            explicit shared(json  t)
+                : tweet{std::move(t)}, words(splitWords(tweetText(tweet))) {}
         };
         shared_ptr<const shared> data = make_shared<shared>();
 

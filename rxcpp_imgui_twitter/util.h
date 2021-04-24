@@ -12,6 +12,7 @@
 #include <sstream>
 #include <string>
 #include <filesystem>
+#include <ctime>
 #include <rxcpp/rx.hpp>
 
 using namespace std;
@@ -35,7 +36,7 @@ namespace util {
 
     enum class Split { KeepDelimiter, RemoveDelimiter, OnlyDelimiter };
 
-    auto split = [](string s, string d, Split m = Split::KeepDelimiter) {
+    auto split = [](string s, const string& d, Split m = Split::KeepDelimiter) {
         regex delim{d};
         cregex_token_iterator cursor(&s[0],&s[0] + s.size(),delim,m ==Split::KeepDelimiter? initializer_list<int>({-1,0}):(m==Split::RemoveDelimiter?initializer_list<int>({-1}):initializer_list<int>({0})));
         cregex_token_iterator end;
@@ -46,9 +47,10 @@ namespace util {
     inline string utcTextFrom(seconds time){
         stringstream buffer;
         time_t tb = time.count();
-        auto tmb = gmtime(&tb);
+        tm tmb{};
+        gmtime_s(&tmb,&tb);
 
-        buffer << put_time(tmb,"%a %b %d %H:%M:%S %Y");
+        buffer << put_time(&tmb,"%a %b %d %H:%M:%S %Y");
         return buffer.str();
     }
 

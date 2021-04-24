@@ -12,10 +12,11 @@ endif ()
 # 单个cc文件
 function(add_single_file_targets)
     include(CMakeParseArguments)
+    set(options TEST)
     set(singleValues DIR PREFIX)
     set(multiValues LIBS INCLUDES)
     cmake_parse_arguments(ARG
-            ""
+            "${options}"
             "${singleValues}"
             "${multiValues}"
             ${ARGN})
@@ -45,6 +46,9 @@ function(add_single_file_targets)
             endif ()
             if (ARG_INCLUDES)
                 target_include_directories(${TARGET} PRIVATE ${ARG_INCLUDES})
+            endif ()
+            if (ARG_TEST)
+                add_test(NAME ${TARGET} COMMAND ${TARGET})
             endif ()
         endforeach ()
     else ()
@@ -97,19 +101,19 @@ endfunction()
 #add_subdirectory(kqueue)
 #add_subdirectory(llvm)
 #add_subdirectory(qBittorrent)
-add_subdirectory(opengl)
+#add_subdirectory(opengl)
 #add_subdirectory(ffmpeg)
 #add_subdirectory(sqlite3)
 #add_subdirectory(cpp_concurrent)
-#add_subdirectory(rxcpp)
+add_subdirectory(rxcpp)
 #add_subdirectory(qt_with_rxcpp)
 #add_subdirectory(libtorrent)
 #add_subdirectory(imgui_play)
-#add_subdirectory(rxcpp_imgui_twitter)
+add_subdirectory(rxcpp_imgui_twitter)
 #add_subdirectory(catch2_learn)
 #add_subdirectory(modern_gui_dracular_qt_widgets)
-add_subdirectory(opengl_shader)
-
+#add_subdirectory(opengl_shader)
+add_subdirectory(doctest_learn)
 
 ## The gtest/gtest_main targets carry header search path
 ## dependencies automatically when using CMake 2.8.11 or
