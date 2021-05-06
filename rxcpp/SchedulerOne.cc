@@ -4,11 +4,13 @@
 #include <rx.hpp>
 int main() {
     std::cout << "Main Thread: " << std::this_thread::get_id() << '\n';
+
     auto coordination = rxcpp::serialize_new_thread();
     auto worker = coordination.create_coordinator()
     .get_worker();
-    auto subAction = rxcpp::schedulers::make_action([](const rxcpp::schedulers::schedulable&){
+    auto subAction = rxcpp::schedulers::make_action([](const rxcpp::schedulers::schedulable& sch){
         printf("Action Executed in Thread #: %d\n",std::this_thread::get_id());
+        sch.schedule();
     });
 
     auto scheduled = rxcpp::schedulers::make_schedulable(worker,subAction);
