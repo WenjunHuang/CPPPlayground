@@ -24,7 +24,7 @@ int main()
 {
     qDebug() << QString("[thread %1] Start task").arg(currentThreadId());
 
-    auto o1 = rxcpp::observable<>::timer(std::chrono::milliseconds(10)).map([](int) {
+    auto o1 = rxcpp::observable<>::timer(std::chrono::milliseconds(10),rxcpp::identity_current_thread()).map([](int) {
         qDebug() << QString("[thread %1] Timer1 fired").arg(currentThreadId());
         return 1;
     });
@@ -39,6 +39,7 @@ int main()
 
     auto base = rxcpp::observable<>::from(o1.as_dynamic(), o2, o3);
     auto values = base.merge(rxcpp::observe_on_new_thread());
+//    auto values = base.merge();
     values.as_blocking()
         .subscribe([](int v) { qDebug() << QString("[thread %1] OnNext: %2").arg(currentThreadId()).arg(v); },
             []() {

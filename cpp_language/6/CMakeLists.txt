@@ -1,5 +1,0 @@
-
-add_executable(cpp_language_6_move1 move1.cc)
-add_executable(cpp_language_6_move2 move2.cc)
-add_executable(cpp_language_6_specialmemtmpl1 specialmemtmpl1.cc)
-add_executable(cpp_language_6_specialmemtmpl2 specialmemtmpl2.cc)

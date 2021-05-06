@@ -3,6 +3,7 @@
 //
 #include <rx.hpp>
 int main() {
+    std::cout << "Main Thread: " << std::this_thread::get_id() << '\n';
     auto coordination = rxcpp::serialize_new_thread();
     auto worker = coordination.create_coordinator()
     .get_worker();

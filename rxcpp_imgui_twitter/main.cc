@@ -1,12 +1,7 @@
 //
 // Created by rick on 2020/11/14.
 //
-#include "json.hpp"
-#include "model.h"
-#include "rxcurl.h"
-#include "rximgui.h"
-#include "tweets.h"
-#include "util.h"
+
 #include <gl/glew.h>
 #include <GLFW/glfw3.h>
 #include <chrono>
@@ -28,6 +23,12 @@
 #include <stdlib.h>
 #include <unordered_map>
 
+#include "json.hpp"
+#include "model.h"
+#include "rxcurl.h"
+#include "rximgui.h"
+#include "tweets.h"
+#include "util.h"
 using json = nlohmann::json;
 using namespace std;
 using namespace std::chrono;

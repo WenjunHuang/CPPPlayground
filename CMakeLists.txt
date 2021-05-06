@@ -113,7 +113,10 @@ add_subdirectory(rxcpp_imgui_twitter)
 #add_subdirectory(catch2_learn)
 #add_subdirectory(modern_gui_dracular_qt_widgets)
 #add_subdirectory(opengl_shader)
-add_subdirectory(doctest_learn)
+#add_subdirectory(doctest_learn)
+#add_subdirectory(metaprogramming)
+add_subdirectory(curl)
+add_subdirectory(cpp_language)
 
 ## The gtest/gtest_main targets carry header search path
 ## dependencies automatically when using CMake 2.8.11 or
