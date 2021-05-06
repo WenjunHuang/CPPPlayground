@@ -194,84 +194,78 @@
        <height>58</height>
       </size>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="spacing">
-       <number>0</number>
+     <widget class="QFrame" name="topLogo">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>8</y>
+        <width>42</width>
+        <height>42</height>
+       </rect>
       </property>
-      <property name="sizeConstraint">
-       <enum>QLayout::SetNoConstraint</enum>
+      <property name="minimumSize">
+       <size>
+        <width>42</width>
+        <height>42</height>
+       </size>
       </property>
-      <property name="leftMargin">
-       <number>0</number>
+      <property name="maximumSize">
+       <size>
+        <width>42</width>
+        <height>42</height>
+       </size>
       </property>
-      <property name="topMargin">
-       <number>0</number>
+     </widget>
+     <widget class="QFrame" name="topLogoLabels">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>8</y>
+        <width>196</width>
+        <height>42</height>
+       </rect>
       </property>
-      <property name="rightMargin">
-       <number>0</number>
+      <property name="minimumSize">
+       <size>
+        <width>196</width>
+        <height>0</height>
+       </size>
       </property>
-      <property name="bottomMargin">
-       <number>0</number>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
       </property>
-      <item>
-       <widget class="QFrame" name="topLogo">
-        <property name="minimumSize">
-         <size>
-          <width>42</width>
-          <height>42</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>42</width>
-          <height>42</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QFrame" name="topLogoLabels">
-        <property name="minimumSize">
-         <size>
-          <width>196</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_7">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <property name="sizeConstraint">
-          <enum>QLayout::SetFixedSize</enum>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QLabel" name="label">
-           <property name="styleSheet">
-            <string notr="true">QWidget {
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="sizeConstraint">
+        <enum>QLayout::SetFixedSize</enum>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="styleSheet">
+          <string notr="true">QWidget {
   color: #f8f8f2;
   font: 10pt &quot;Segoe UI&quot;;
 }
@@ -291,23 +285,21 @@
 
 /*# sourceMappingURL=extraleftmenu.css.map */
 </string>
-           </property>
-           <property name="text">
-            <string>PyDracula</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Modern GUI / Flat Style</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-     </layout>
+         </property>
+         <property name="text">
+          <string>PyDracula</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Modern GUI / Flat Style</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
