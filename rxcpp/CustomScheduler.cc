@@ -229,6 +229,42 @@ private:
             : state { ws }
         {
         }
+
+        new_worker(composite_subscription cs,thread_factory& tf):state{std::make_shared<new_worker_state>(cs)}{
+            auto keepAlive = state;
+
+            state->lifetime.add([keepAlive](){
+                std::unique_lock<std::mutex> guard(keepAlive->lock);
+                auto expired = std::move(keepAlive->q);
+                keepAlive->q = new_worker_state::queue_item_time {};
+                if (!keepAlive->q.empty()) std::terminate();
+                keepAlive->wake.notify_one();
+
+                if (keepAlive->worker.joinable() && keepAlive->worker.get_id() != std::this_thread::get_id()) {
+                    guard.unlock();
+                    keepAlive->worker.join();
+                } else {
+                    keepAlive->worker.detach();
+                }
+            });
+
+            state->worker = tf([keepAlive](){
+                // take ownership
+                queue_type::ensure(std::make_shared<new_worker>(keepAlive));
+                // release ownership
+                RXCPP_UNWIND_AUTO([]{
+                    queue_type::destroy();
+                });
+                for(;;){
+                    std::unique_lock<std::mutex> guard{keepAlive->lock};
+                    if (keepAlive->q.empty()){
+                        keepAlive->wake.wait(guard,[keepAlive](){
+
+                        })
+                    }
+                }
+            });
+        }
     };
 };
 int main()

@@ -107,7 +107,7 @@ add_subdirectory(cpp_function_object)
 #add_subdirectory(sqlite3)
 #add_subdirectory(cpp_concurrent)
 add_subdirectory(rxcpp)
-add_subdirectory(cpp_clocks_timers)
+#add_subdirectory(cpp_clocks_timers)
 #add_subdirectory(qt_with_rxcpp)
 #add_subdirectory(libtorrent)
 #add_subdirectory(imgui_play)
@@ -116,6 +116,7 @@ add_subdirectory(cpp_clocks_timers)
 #add_subdirectory(modern_gui_dracular_qt_widgets)
 #add_subdirectory(opengl_shader)
 #add_subdirectory(doctest_learn)
+add_subdirectory(cpp_move)
 
 ## The gtest/gtest_main targets carry header search path
 ## dependencies automatically when using CMake 2.8.11 or
