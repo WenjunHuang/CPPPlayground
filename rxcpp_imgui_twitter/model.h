@@ -3,18 +3,19 @@
 //
 
 #pragma once
-#include "json.hpp"
-#include "util.h"
 #include <map>
-#include <range/v3/action.hpp>
-#include <range/v3/algorithm.hpp>
-#include <range/v3/range.hpp>
 #include <utility>
-#include <range/v3/view.hpp>
-#include <rxcpp/rx.hpp>
 #include <string>
 #include <unordered_set>
 #include <vector>
+#include <range/v3/action.hpp>
+#include <range/v3/algorithm.hpp>
+#include <range/v3/range.hpp>
+#include <range/v3/view.hpp>
+#include <rxcpp/rx.hpp>
+
+#include "json.hpp"
+#include "util.h"
 
 using namespace std;
 using namespace ::util;

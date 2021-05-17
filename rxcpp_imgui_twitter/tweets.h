@@ -3,6 +3,7 @@
 //
 
 #pragma once
+
 #include "model.h"
 #include "rxcurl.h"
 #include "util.h"
@@ -179,7 +180,139 @@ auto filechunks = [](observe_on_one_worker tweetthread, string filepath) {
             // tail recurse this same action to continue loop
             self();
         };
+
         controller.schedule(coordinator.act(producer));
     });
+};
+
+auto twitter_stream_reconnection = [](observe_on_one_worker tweetthread) {
+    return [=](observable<string> chunks) {
+        return chunks | timeout(seconds(90), tweetthread)
+            | on_error_resume_next([=](std::exception_ptr ep) -> observable<string> {
+                  try {
+                      rethrow_exception(ep);
+                  } catch (const HttpException& ex) {
+                      cerr << ex.what() << endl;
+                      switch (errorclassfrom(ex)) {
+                      case errorcodeclass::TcpRetry:
+                          cerr << "reconnecting after TCP error" << endl;
+                          return observable<>::empty<string>();
+                      case errorcodeclass::ErrorRetry:
+                          cerr << "error code (" << ex.code() << ") -";
+                      case errorcodeclass::StatusRetry:
+                          cerr << "http status (" << ex.httpStatus() << ") - waiting to retry.." << endl;
+                          return observable<>::timer(seconds(5), tweetthread) | stringAndIgnore();
+                      case errorcodeclass::RateLimited:
+                          cerr << "rate limited - waiting to retry.." << endl;
+                          return observable<>::timer(minutes(1), tweetthread) | stringAndIgnore();
+                      case errorcodeclass::Invalid:
+                          cerr << "invalid request - propagate" << endl;
+                      default:
+                          cerr << "unrecognized error  - propagate" << endl;
+                      };
+                  }
+                  //                  catch(const TimeoutError& ex) {
+                  //                      cerr << "reconnecting after timeout" <<endl;
+                  //                      return observable<>::empty<string>();
+                  //                  }
+                  catch (const exception& ex) {
+                      cerr << "unknown exception - terminate" << endl;
+                      cerr << ex.what() << endl;
+                      terminate();
+                  } catch (...) {
+                      cerr << "unknown exception - not derived from std::exception - terminate" << endl;
+                      terminate();
+                  }
+                  return observable<>::error<string>(ep, tweetthread);
+              })
+            | repeat();
+    };
+};
+
+auto twitterrequest = [](observe_on_one_worker tweetthread, ::rxcurl::RxCurl factory,
+                          string URL, string method, string CONS_KEY, string CONS_SEC, string ATOK_KEY, string ATOK_SEC) {
+    return observable<>::defer([=]() {
+        string url;
+        {
+            char* signedurl = nullptr;
+            RXCPP_UNWIND_AUTO([&]() {
+                if (signedurl != nullptr)
+                    free(signedurl);
+            });
+            //            utility::string_t consumer_key,
+            //            utility::string_t consumer_secret,
+            //            utility::string_t temp_endpoint,
+            //            utility::string_t auth_endpoint,
+            //            utility::string_t token_endpoint,
+            //            utility::string_t callback_uri,
+            //            oauth1_method method,
+            oauth1_config config {
+                utility::conversions::to_string_t(CONS_KEY),
+                utility::conversions::to_string_t(CONS_SEC),
+                U(""),
+                U(""),
+                U(""),
+                U(""),
+                oauth1_methods::hmac_sha1
+            };
+            oauth1_token token {};
+            //            config.set_token()
+            //            signedurl =
+            //TODO Oauth url
+        }
+
+        cerr << "start twitter stream request" << endl;
+
+        return factory.create(HttpRequest { url, method, {}, {} }) | rxo::map([](HttpResponse r) {
+            return r.body.chunks;
+        }) | finally([]() { cerr << "end twitter stream request" << endl; })
+            | merge(tweetthread);
+    }) | twitter_stream_reconnection(tweetthread);
+};
+
+auto sentimentrequest = [](observe_on_one_worker worker, ::rxcurl::RxCurl factory, string url, string key, vector<string> text) -> observable<string> {
+    static const regex nonascii(R"([^A-Za-z0-9])");
+
+    std::map<string, string> headers;
+    headers["Content-Type"] = "application/json";
+    headers["Authorization"] = "Bearer " + key;
+
+    auto body = json::parse(R"({"Inputs":{"input1":[]},"GlobalParameters":{}})");
+    auto& input1 = body["Inputs"]["input1"];
+    for (auto& t : text) {
+        auto ascii = regex_replace(t, nonascii, " ");
+        input1.push_back({ { "tweet_text", ascii } });
+    }
+
+    return observable<>::defer([=]() -> observable<string> {
+        return factory.create(HttpRequest { url, "POST", headers, body.dump() })
+            | rxo::map([](const HttpResponse& r) {
+                  return r.body.complete;
+              })
+            | merge(worker)
+            | tap([=](const exception_ptr&) {
+                  cout << body << endl;
+              });
+    });
+};
+
+auto perspectiverequest = [](observe_on_one_worker worker,::rxcurl::RxCurl factory,string url,string key,string text)->observable<string> {
+    std::map<string,string> headers;
+    headers["Content-Type"] = "application/json";
+    url += "?key=" + key;
+    auto body = json::parse(R"({"comment": {"text": ""}, "languages": ["en"], "requestedAttributes": {"TOXICITY":{}, "INFLAMMATORY":{}, "SPAM":{}}, "doNotStore": true })");
+    body["comment"]["text"] = text;
+
+    return observable<>::defer([=]()->observable<string>{
+      return factory.create(HttpRequest{url,"POST",headers,body.dump()})
+        | rxo::map([](const HttpResponse& r){
+                  return r.body.complete;
+              }) |
+      merge(worker) |
+      tap([=](const exception_ptr&){
+                cout << body << endl;
+            })
+    });
+
 };
 }

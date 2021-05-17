@@ -11,6 +11,7 @@
 #include <rxcpp/rx.hpp>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 using namespace std;
@@ -40,7 +41,7 @@ namespace rxcurl {
                                      message = curl_multi_info_read(curlm,
                                                                     &remaining);
                                      out.on_next(message);
-                                     if (!!message && remaining > 0) {
+                                     if (message != nullptr && remaining > 0) {
                                          continue;
                                      }
                                      break;
@@ -90,12 +91,12 @@ namespace rxcurl {
         vector<string> strings;
 
         HttpState(shared_ptr<RxCurlState> m, HttpRequest r)
-            : rxcurl{m}, request{r}, code{CURLE_OK},
+            : rxcurl{std::move(m)}, request{std::move(r)}, code{CURLE_OK},
               httpStatus{0}, curl{nullptr}, headers{nullptr} {
             error.resize(CURL_ERROR_SIZE);
         }
         ~HttpState() {
-            if (!!curl) {
+            if (curl != nullptr) {
                 // remove on worker thread
                 auto localcurl    = curl;
                 auto localHeaders = headers;
@@ -125,9 +126,9 @@ namespace rxcurl {
         explicit HttpException(const shared_ptr<HttpState>& s)
             : runtime_error{s->error}, state{s} {}
 
-        CURLcode code() const { return state->code; }
+        [[nodiscard]] CURLcode code() const { return state->code; }
 
-        int httpStatus() const { return state->httpStatus; }
+        [[nodiscard]] int httpStatus() const { return state->httpStatus; }
     };
 
     struct HttpBody {
@@ -157,7 +158,7 @@ namespace rxcurl {
     struct RxCurl {
         shared_ptr<RxCurlState> state;
 
-        observable<HttpResponse> create(HttpRequest request) const {
+        [[nodiscard]] observable<HttpResponse> create(const HttpRequest& request) const {
             return observable<>::create<HttpResponse>(
                 [=](subscriber<HttpResponse>& out) {
                     auto requestState = make_shared<HttpState>(state, request);
@@ -197,7 +198,7 @@ namespace rxcurl {
                                 headers = curl_slist_append(
                                     headers, strings.back().c_str());
                             }
-                            if (!!headers) {
+                            if (headers != nullptr) {
                                 curl_easy_setopt(curl, CURLOPT_HTTPHEADER,
                                                  headers);
                             }
@@ -212,8 +213,8 @@ namespace rxcurl {
                             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
                                              rxcurlHttpCallback);
                             // - Write data
-                            r.state->chunkout.reset(new subscriber<string>(
-                                r.state->chunkbus.get_subscriber()));
+                            r.state->chunkout = std::make_unique<subscriber<string>>(
+                                r.state->chunkbus.get_subscriber());
                             curl_easy_setopt(curl, CURLOPT_WRITEDATA,
                                              (void*)r.state->chunkout.get());
 
@@ -232,7 +233,7 @@ namespace rxcurl {
                     state->worker
                         .filter([wrs](CURLMsg* message) {
                             auto rs = wrs.lock();
-                            return !!rs && !!message &&
+                            return rs && message != nullptr &&
                                    message->easy_handle == rs->curl &&
                                    message->msg == CURLMSG_DONE;
                         })
