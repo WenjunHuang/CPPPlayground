@@ -4,17 +4,17 @@
 
 #include "Scene.h"
 #include <QFile>
-#include <QString>
 #include <skia/core/SkData.h>
 
 sk_sp<SkTypeface> Scene::inter = nullptr;
 sk_sp<SkTypeface> Scene::jbMono = nullptr;
-sk_sp<SkFont> Scene::inter13 = nullptr;
-sk_sp<SkPaint> Scene::blackFill = nullptr;
+SkFont Scene::inter13 ;
+SkPaint Scene::blackFill;
 
 QByteArray Scene::readResource(const QString& resource)
 {
-    QFile resourceFile { QString("qrc:%1").arg(resource) };
+    QFile resourceFile { QString(":%1").arg(resource) };
+    resourceFile.open(QFile::ReadOnly);
     return resourceFile.readAll();
 }
 
@@ -33,11 +33,12 @@ sk_sp<SkData> Scene::resourceAsData(const QString& path)
 
 void Scene::initializeResources()
 {
-    inter = SkTypeface::MakeFromData(resourceAsData("/fonts/InterHinted-Regular.ttf"));
-    jbMono = SkTypeface::MakeFromData(resourceAsData("/fonts/JetBrainsMono-Regular.ttf"));
-    inter13 = sk_make_sp<SkFont>(inter, 13);
-    inter13->setSubpixel(true);
+    inter = SkTypeface::MakeFromData(resourceAsData("/assets/fonts/InterHinted-Regular.ttf"));
+    jbMono = SkTypeface::MakeFromData(resourceAsData("/assets/fonts/JetBrainsMono-Regular.ttf"));
 
-    blackFill = sk_make_sp<SkPaint>();
-    blackFill->setColor(0xFF000000);
+    inter13.setTypeface(inter);
+    inter13.setSize(13);
+    inter13.setSubpixel(true);
+
+    blackFill.setColor(0xFF000000);
 }

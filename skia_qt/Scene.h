@@ -4,11 +4,14 @@
 
 #pragma once
 #include <QByteArray>
-#include <skia/core/SkPaint.h>
+#include <skia/core/SkCanvas.h>
 #include <skia/core/SkFont.h>
+#include <skia/core/SkPaint.h>
 #include <skia/core/SkTypeface.h>
 
 class Scene {
+public:
+    virtual void draw(SkCanvas* canvas, int width, int height, int xpos, int ypos) = 0;
 
 public:
     static void initializeResources();
@@ -18,6 +21,6 @@ public:
 
     static sk_sp<SkTypeface> inter;
     static sk_sp<SkTypeface> jbMono;
-    static sk_sp<SkFont> inter13;
-    static sk_sp<SkPaint> blackFill;
+    static SkFont inter13;
+    static SkPaint blackFill;
 };
