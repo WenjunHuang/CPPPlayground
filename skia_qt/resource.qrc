@@ -1,0 +1,7 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>assets/fonts/InterHinted-Regular.ttf</file>
+        <file>assets/fonts/JetBrainsMono-Regular.ttf</file>
+    </qresource>
+</RCC>
