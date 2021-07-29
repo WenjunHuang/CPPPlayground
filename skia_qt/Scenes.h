@@ -3,12 +3,22 @@
 //
 
 #pragma once
+#include "Hud.h"
+#include <QtCore>
+#include <memory>
 #include <skia/core/SkCanvas.h>
 
 class Scenes {
 public:
-    void draw(SkCanvas* canvas,int width,int height,float scale,int mouseX,int mouseY) {
-        canvas->clear(0xFFFFFFFF);
+  Scenes();
+  ~Scenes();
+  void draw(SkCanvas *canvas, int width, int height, float scale, int mouseX,
+            int mouseY);
 
-    }
+private:
+  using ScenePtr = std::shared_ptr<Scene>;
+  std::shared_ptr<HUD> _hud;
+  ScenePtr _current;
+  QVector<QString> _scenes;
+  QHash<QString, ScenePtr> _scenesMap;
 };

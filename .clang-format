@@ -1,4 +1,4 @@
-BasedOnStyle: WebKit
+BasedOnStyle: LLVM
 #IndentWidth: 4
 #Language: Cpp
 #DerivePointerAlignment: false
@@ -6,8 +6,8 @@ BasedOnStyle: WebKit
 #AlignConsecutiveAssignments: true
 #AlignEscapedNewlines: Right
 #AlignTrailingComments: true
-##AllowAllArgumentsOnNextLine: true
-##AllowAllConstructorInitializersOnNextLine: true
+#AllowAllArgumentsOnNextLine: true
+#AllowAllConstructorInitializersOnNextLine: true
 #AllowAllParametersOfDeclarationOnNextLine: true
 #AllowShortBlocksOnASingleLine: true
 #AllowShortCaseLabelsOnASingleLine: true
