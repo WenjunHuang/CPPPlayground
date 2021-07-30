@@ -120,6 +120,7 @@ endfunction()
 #add_subdirectory(immer)
 #add_subdirectory(fp_in_scala)
 add_subdirectory(skia_qt)
+add_subdirectory(range)
 
 ## The gtest/gtest_main targets carry header search path
 ## dependencies automatically when using CMake 2.8.11 or

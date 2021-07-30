@@ -4,15 +4,27 @@
 #include "QSkiaOpenGlWindow.h"
 #include "Scene.h"
 #include <QApplication>
-int main(int argc, char* argv[])
-{
-    QApplication app{argc,argv};
-    Scene::initializeResources();
+#include <QDesktopWidget>
+#include <QScreen>
 
-    QSkiaOpenGLWindow window;
-    window.setWidth(800);
-    window.setHeight(600);
-    window.show();
+int main(int argc, char *argv[]) {
+//  QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+//  QApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
+  QApplication app{argc, argv};
+  Scene::initializeResources();
 
-    return app.exec();
+//  auto screens = QApplication::screens();
+//  for(const auto& screen : screens){
+//    qDebug() << screen->physicalSize();
+//   qDebug() << screen->availableGeometry().width();
+//  }
+  auto screen = QApplication::primaryScreen();
+  auto screenSize = screen->availableSize();
+
+  QSkiaOpenGLWindow window{1.5f};
+  window.setScreen(screen);
+  window.resize(static_cast<int>(screenSize.width() * 0.75),static_cast<int>(screenSize.height() * 0.75));
+  window.show();
+
+  return app.exec();
 }

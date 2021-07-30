@@ -10,21 +10,33 @@
 #include <skia/core/SkTypeface.h>
 
 class Scene : public QObject {
-  Q_OBJECT
-public:
-  QVector<QString> variants;
+    Q_OBJECT
+  public:
+    QVector<QString> variants{QStringLiteral("Default")};
+    int              variantIdx = 0;
 
-  virtual void draw(SkCanvas *canvas, int width, int height, int xpos,
-                    int ypos) = 0;
+    virtual void draw(SkCanvas* canvas,
+                      int       width,
+                      int       height,
+                      float     scale,
+                      int       xpos,
+                      int       ypos) = 0;
 
-public:
-  static void initializeResources();
+    [[nodiscard]] QString variantTitle() const { return variants[variantIdx]; }
 
-  static QByteArray readResource(const QString &path);
-  static sk_sp<SkData> resourceAsData(const QString &path);
+    void changeVariant(int delta) {
+        variantIdx =
+            (variantIdx + variants.length() + delta) % variants.length();
+    }
 
-  static sk_sp<SkTypeface> inter;
-  static sk_sp<SkTypeface> jbMono;
-  static SkFont inter13;
-  static SkPaint blackFill;
+  public:
+    static void initializeResources();
+
+    static QByteArray    readResource(const QString& path);
+    static sk_sp<SkData> resourceAsData(const QString& path);
+
+    static sk_sp<SkTypeface> inter;
+    static sk_sp<SkTypeface> jbMono;
+    static SkFont            inter13;
+    static SkPaint           blackFill;
 };

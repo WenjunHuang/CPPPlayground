@@ -9,16 +9,31 @@
 #include <skia/core/SkCanvas.h>
 
 class Scenes {
-public:
-  Scenes();
-  ~Scenes();
-  void draw(SkCanvas *canvas, int width, int height, float scale, int mouseX,
-            int mouseY);
+  public:
+    using ScenePtr = std::shared_ptr<Scene>;
 
-private:
-  using ScenePtr = std::shared_ptr<Scene>;
-  std::shared_ptr<HUD> _hud;
-  ScenePtr _current;
-  QVector<QString> _scenes;
-  QHash<QString, ScenePtr> _scenesMap;
+    Scenes();
+    ~Scenes();
+    void draw(SkCanvas* canvas,
+              int       width,
+              int       height,
+              float     scale,
+              int       mouseX,
+              int       mouseY);
+
+    QMap<QString, ScenePtr>& scenesMap() { return _scenesMap; }
+    QVector<QString>&        sceneNames() { return _sceneNames; }
+    Scene*                   currentScene() { return _currentScene.get(); }
+    QString                  currentSceneName() { return _currentSceneName; }
+
+  private:
+    Scene* newScene(QString name);
+    Scene* setScene(QString scene);
+
+  private:
+    std::shared_ptr<HUD>    _hud;
+    ScenePtr                _currentScene;
+    QString                 _currentSceneName;
+    QVector<QString>        _sceneNames;
+    QMap<QString, ScenePtr> _scenesMap;
 };

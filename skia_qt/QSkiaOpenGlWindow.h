@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "Scenes.h"
 #include <QOpenGLWindow>
 #include <memory>
 
@@ -12,7 +13,7 @@ class SkCanvas;
 class QSkiaOpenGLWindow : public QOpenGLWindow {
     Q_OBJECT
 public:
-    QSkiaOpenGLWindow(QWindow* parent = nullptr);
+    QSkiaOpenGLWindow(float scale,QWindow* parent = nullptr);
     ~QSkiaOpenGLWindow() override;
 
 protected:
@@ -20,8 +21,9 @@ protected:
     void resizeGL(int w, int h) override;
     void paintGL() override;
     void draw(SkCanvas* canvas);
+    void mouseMoveEvent(QMouseEvent *event) override;
 
-private:
+  private:
     void init(int width,int height);
     void updateDimensions();
     void initSkia();
@@ -29,4 +31,5 @@ private:
 
 private:
     QSkiaOpenGLWindowPrivate *_dptr;
+    float _scale;
 };
