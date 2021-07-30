@@ -8,6 +8,9 @@
 #include <skia/core/SkBitmap.h>
 #include <skia/core/SkImage.h>
 #include <skia/core/SkMatrix.h>
+#include <skia/core/SkShader.h>
+#include <skia/core/SkImageFilter.h>
+#include <skia/effects/SkImageFilters.h>
 
 BitmapScene::BitmapScene() : _shapes{100} {
     for (int i = 0; i < 100; i++) {
@@ -59,6 +62,42 @@ void drawGray(SkCanvas* canvas, SkRect target, float scale) {
     canvas->drawRect(target, stroke);
 }
 
+void drawBlur(SkCanvas* canvas, SkRect target, int radius, float scale) {
+    SkBitmap bitmap;
+    auto     radiusScale = radius * scale;
+    auto     extended    = SkRect::MakeLTRB(target.left() - radiusScale,
+                                            target.top() - radiusScale,
+                                            target.right() + radiusScale,
+                                            target.bottom() + radiusScale);
+    bitmap.allocPixels(SkImageInfo::MakeS32(qRound(target.width() * scale),
+                                            qRound(target.height() * scale),
+                                            SkAlphaType::kOpaque_SkAlphaType));
+    if (canvas->readPixels(bitmap,
+                           qRound(target.left() * scale),
+                           qRound(target.right() * scale))) {
+        auto mat = SkMatrix::MakeScale(1.0f / scale);
+        auto shader = bitmap.makeShader(&mat);
+        auto blur = SkImageFilters::Blur(radiusScale,radiusScale,SkTileMode::kClamp,nullptr);
+        SkPaint fill;
+        fill.setShader(shader);
+        fill.setImageFilter(blur);
+
+        canvas->save();
+        canvas->translate(extended.left(),extended.top());
+        SkRect targetRelative{target};
+        targetRelative.offset(-extended.left(),-extended.top());
+        canvas->clipRect(targetRelative);
+        canvas->drawRect(SkRect::MakeXYWH(0,0,extended.width(),extended.height()),fill);
+        canvas->restore();
+    }
+
+    SkPaint stroke;
+    stroke.setColor(0xFFE5E5E5);
+    stroke.setStyle(SkPaint::kStroke_Style);
+    stroke.setStrokeWidth(1);
+    canvas->drawRect(target,stroke);
+}
+
 void BitmapScene::draw(
     SkCanvas* canvas, int width, int height, float scale, int xpos, int ypos) {
     SkPaint fill;
@@ -75,7 +114,12 @@ void BitmapScene::draw(
     auto screen = SkRect::MakeXYWH(0, 0, width, height);
     auto bw     = 200;
     auto bh     = 200;
-    auto left   = xpos - bw - 20 - bw / 2 - 10;
-    auto top    = ypos - bh - 20 - bh / 2 - 10;
+
+    auto left = xpos - bw - 20 - bw / 2 - 10;
+    auto top  = ypos - bh - 20 - bh / 2 - 10;
     drawGray(canvas, SkRect::MakeXYWH(left, top, bw, bh), scale);
+
+    left = xpos - bw / 2 -
+           10;
+    drawBlur(canvas, SkRect::MakeXYWH(left, top, bw, bh),20, scale);
 }
