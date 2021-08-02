@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
   auto screen = QApplication::primaryScreen();
   auto screenSize = screen->availableSize();
 
-  QSkiaOpenGLWindow window{1.5f};
+  QSkiaOpenGLWindow window{1.2f};
   window.setScreen(screen);
   window.resize(static_cast<int>(screenSize.width() * 0.75),static_cast<int>(screenSize.height() * 0.75));
   window.show();
