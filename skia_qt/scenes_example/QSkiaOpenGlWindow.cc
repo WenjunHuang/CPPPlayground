@@ -12,6 +12,7 @@
 #include <skia/effects/SkGradientShader.h>
 #include <skia/gpu/GrContext.h>
 #include <skia/gpu/gl/GrGLInterface.h>
+#include "Scenes.h"
 
 struct QSkiaOpenGLWindowPrivate {
     QOpenGLFunctions        funcs;
