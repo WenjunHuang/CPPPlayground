@@ -24,7 +24,7 @@ struct QSkiaOpenGLWindowPrivate {
     QPoint                  mousePos;
 };
 
-QSkiaOpenGLWindow::QSkiaOpenGLWindow(float scale,QWindow* parent)
+QSkiaOpenGLWindow::QSkiaOpenGLWindow(float scale, QWindow* parent)
     : QOpenGLWindow(QOpenGLWindow::UpdateBehavior::NoPartialUpdate, parent),
       _scale{scale}, _dptr{new QSkiaOpenGLWindowPrivate} {
     connect(&_dptr->timer,
