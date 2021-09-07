@@ -30,13 +30,18 @@ class Window {
 
  private:
   void CreateWindow(int x, int y, size_t width, size_t height) {
-    glfwDefaultWindowHints();
+    // Define version and compatibility settings
+//    glfwDefaultWindowHints();
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+//    glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+//    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
     window_ = glfwCreateWindow(width, height, "skia demo", nullptr, nullptr);
     if (window_ == nullptr) {
-      throw std::exception("Failed to create the GLFW window");
+      throw std::domain_error("Failed to create the GLFW window");
     }
 
     glfwSetWindowUserPointer(window_, this);
