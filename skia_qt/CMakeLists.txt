@@ -11,7 +11,12 @@ find_package(PkgConfig)
 find_package(skia CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
-add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS glfw skia skia::skia glad::glad)
+find_package(fmt CONFIG REQUIRED)
+
+add_library(commons INTERFACE window.h)
+#target_link_libraries(commons PUBLIC glfw skia skia::skia glad::glad)
+
+add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS glfw skia skia::skia glad::glad fmt::fmt-header-only commons)
 
 add_subdirectory(scenes_example)
 
