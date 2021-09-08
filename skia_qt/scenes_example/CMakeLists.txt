@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 list(APPEND CMAKE_PREFIX_PATH ${QT_CMAKE})
 #find_package(PkgConfig)
-find_package(QT NAMES Qt5 Qt6 COMPONENTS Core Widgets Network Quick Concurrent QuickControls2 REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets Network Quick Concurrent QuickControls2 REQUIRED)
+find_package(QT NAMES Qt5 Qt6 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets REQUIRED)
 find_package(range-v3 CONFIG REQUIRED)
 
-add_executable(skia_scenes_example resource.qrc main.cc QSkiaOpenGlWindow.cc QSkiaOpenGlWindow.h Scene.cc Scene.h Scenes.cc Scenes.h Hud.cc Hud.h scenes/BitmapScene.cc scenes/BitmapScene.h scenes/layer_scene.cc scenes/layer_scene.h ../window.h)
-target_link_libraries(skia_scenes_example PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::CorePrivate Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::Concurrent Qt${QT_VERSION_MAJOR}::QuickControls2 skia skia::skia  range-v3 range-v3-meta range-v3::meta range-v3-concepts)
+add_executable(skia_scenes_example resource.qrc main.cc QSkiaOpenGlWindow.cc QSkiaOpenGlWindow.h Scene.cc Scene.h Scenes.cc Scenes.h Hud.cc Hud.h scenes/BitmapScene.cc scenes/BitmapScene.h glfw_window.cc glfw_window.h)
+target_link_libraries(skia_scenes_example PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::CorePrivate Qt${QT_VERSION_MAJOR}::Widgets glfw glad::glad  skia skia::skia  range-v3 range-v3-meta range-v3::meta range-v3-concepts commons)

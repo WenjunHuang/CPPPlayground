@@ -10,13 +10,13 @@
 #include <skia/core/SkImage.h>
 #include <skia/core/SkSurface.h>
 #include <skia/effects/SkGradientShader.h>
-#include <skia/gpu/GrContext.h>
+#include <skia/gpu/GrDirectContext.h>
 #include <skia/gpu/gl/GrGLInterface.h>
 #include "Scenes.h"
 
 struct QSkiaOpenGLWindowPrivate {
     QOpenGLFunctions        funcs;
-    sk_sp<GrContext>        context    = nullptr;
+    sk_sp<GrDirectContext>        context    = nullptr;
     sk_sp<SkSurface>        gpuSurface = nullptr;
     QTimer                  timer;
     QTime                   lastTime;
@@ -36,7 +36,7 @@ QSkiaOpenGLWindow::QSkiaOpenGLWindow(float scale, QWindow* parent)
 
 void QSkiaOpenGLWindow::initializeGL() {
     _dptr->funcs.initializeOpenGLFunctions();
-    _dptr->context = GrContext::MakeGL();
+    _dptr->context = GrDirectContext::MakeGL();
     SkASSERT(_dptr->context);
 
     init(width(), height());
@@ -62,7 +62,6 @@ void QSkiaOpenGLWindow::paintGL() {
 }
 
 void QSkiaOpenGLWindow::init(int width, int height) {
-    qDebug() << __FUNCTION__ << width << height;
     updateDimensions();
     initSkia();
     _dptr->funcs.glViewport(0, 0, width, height);
@@ -78,7 +77,6 @@ QSkiaOpenGLWindow::~QSkiaOpenGLWindow() {
 void QSkiaOpenGLWindow::updateDimensions() {
     auto w = width();
     auto h = height();
-    qDebug() << QString("Size %1 x %2, scale: %3").arg(w).arg(h);
 }
 
 void QSkiaOpenGLWindow::initSkia() {

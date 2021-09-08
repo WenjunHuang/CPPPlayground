@@ -11,17 +11,18 @@ void Scenes::draw(SkCanvas* canvas,
                   float scale,
                   int mouseX,
                   int mouseY) {
-  canvas->clear(0xFFFFFFFF);
+  canvas->clear(SK_ColorWHITE);
   if (_currentScene) {
-    canvas->save();
+    int layer = canvas->save();
     canvas->scale(scale, scale);
     _currentScene->draw(canvas, width, height, scale, mouseX, mouseY);
-    canvas->restore();
+    canvas->restoreToCount(layer);
 
     _hud->tick();
-    canvas->save();
+    layer = canvas->save();
+    canvas->scale(scale, scale);
     _hud->draw(canvas, _currentScene.get(), width, height);
-    canvas->restore();
+    canvas->restoreToCount(layer);
   }
 }
 
@@ -29,18 +30,23 @@ Scenes::Scenes() : _hud{std::make_unique<HUD>(this)} {
   _currentScene = std::make_shared<BitmapScene>();
   _hud->extras["V"] = "OFF";
 
-  _sceneNames = {"Bitmap", "Layer"};
-  setScene("Layer");
+  qRegisterMetaType<BitmapScene*>("BitmapScene*");
+  _sceneNames = {"Bitmap"};
+  setScene("Bitmap");
 }
 
 Scenes::~Scenes() {}
 
 Scene* Scenes::newScene(QString name) {
-  auto id =
-      QMetaType::type(QString("%1Scene").arg(name.replace(" ", "")).toLatin1());
-  if (id != 0)
-    return static_cast<Scene*>(QMetaType::construct(id, nullptr, nullptr));
-  else
+  auto type = QString("%1Scene*").arg(name.replace(" ", "")).toLatin1();
+  auto id = QMetaType::type(type);
+  if (id != 0) {
+    const QMetaObject* mo = QMetaType::metaObjectForType(id);
+    if (!mo)
+      return nullptr;
+    QObject* instance = mo->newInstance();
+    return qobject_cast<Scene*>(instance);
+  } else
     return nullptr;
 }
 Scene* Scenes::setScene(QString name) {

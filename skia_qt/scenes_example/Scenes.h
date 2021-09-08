@@ -31,7 +31,7 @@ class Scenes {
     Scene* setScene(QString scene);
 
   private:
-    std::shared_ptr<HUD>    _hud;
+    std::unique_ptr<HUD>    _hud;
     ScenePtr                _currentScene;
     QString                 _currentSceneName;
     QVector<QString>        _sceneNames;

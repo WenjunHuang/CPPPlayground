@@ -8,7 +8,8 @@
 #include <skia/core/SkImage.h>
 #include <skia/core/SkSurface.h>
 #include <skia/effects/SkGradientShader.h>
-#include <skia/gpu/GrContext.h>
+#include <skia/gpu/GrBackendSurface.h>
+#include <skia/gpu/GrDirectContext.h>
 #include <cassert>
 #include <iostream>
 
@@ -31,11 +32,11 @@ class Window {
  private:
   void CreateWindow(int x, int y, size_t width, size_t height) {
     // Define version and compatibility settings
-//    glfwDefaultWindowHints();
-//    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-//    glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
-//    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    //    glfwDefaultWindowHints();
+    //    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    //    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    //    glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+    //    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
@@ -75,7 +76,8 @@ class Window {
     if (surface_)
       surface_.reset();
 
-    renderTarget_ = GrBackendRenderTarget(width_ * dpi_, height_ * dpi_, 0, 8,
+    renderTarget_ = GrBackendRenderTarget(width_ * dpi_,
+                                          height_ * dpi_, 0, 8,
                                           {
                                               0, 0x8058  // GR_GL_RGBA8
                                           });
@@ -84,6 +86,7 @@ class Window {
     surface_ = SkSurface::MakeFromBackendRenderTarget(
         context_.get(), renderTarget_,
         GrSurfaceOrigin::kBottomLeft_GrSurfaceOrigin,
+//        GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin,
         SkColorType::kRGBA_8888_SkColorType,
         SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
                               SkNamedGamut::kDisplayP3),
@@ -94,13 +97,13 @@ class Window {
   void Draw() {
     canvas_->save();
     OnDraw(canvas_);
-    canvas_->flush();
     canvas_->restore();
+    context_->flush();
     glfwSwapBuffers(window_);
   }
 
   void Loop() {
-    context_ = GrContext::MakeGL();
+    context_ = GrDirectContext::MakeGL();
     glfwSetWindowSizeCallback(window_, &WindowResized);
     glfwSetCursorPosCallback(window_, &WindowCursorPosCallback);
     glfwSetScrollCallback(window_, &WindowScrollCallback);
@@ -117,7 +120,7 @@ class Window {
     OnScroll(xoffset * dpi_, yoffset * dpi_);
   }
 
- private:
+ protected:
   GLFWwindow* window_;
   double xpos_;
   double ypos_;
@@ -126,7 +129,7 @@ class Window {
   double dpi_;
   SkCanvas* canvas_;
   sk_sp<SkSurface> surface_;
-  sk_sp<GrContext> context_;
+  sk_sp<GrDirectContext> context_;
   GrBackendRenderTarget renderTarget_;
 
   static void WindowKeyCallback(GLFWwindow* window,
@@ -178,7 +181,7 @@ class DefaultWindow : public Window {
   OnDrawCallback draw_callback_;
 };
 
-void Run(OnDrawCallback onDraw, int width = -1, int height = -1) {
+inline void Run(OnDrawCallback onDraw, int width = -1, int height = -1) {
   if (!glfwInit()) {
     // Initialization failed
     exit(1);
