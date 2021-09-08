@@ -7,12 +7,11 @@
 #include <skia/core/SkImage.h>
 #include <skia/core/SkImageFilter.h>
 #include <skia/core/SkMatrix.h>
+#include <skia/core/SkPixelRef.h>
 #include <skia/core/SkShader.h>
 #include <skia/effects/SkImageFilters.h>
 #include <QDebug>
 #include <algorithm>
-#include <range/v3/range.hpp>
-#include <range/v3/view/for_each.hpp>
 
 BitmapScene::BitmapScene() : _shapes{100} {
   for (int i = 0; i < 100; i++) {
@@ -68,7 +67,8 @@ void drawPixels(SkCanvas* canvas, SkIRect target, SkIRect screen, float scale) {
 
   auto inner = SkIRect::MakeXYWH(target.fLeft + 10, target.fTop + 10,
                                  target.width() - 20, target.height() - 20);
-  if (inner.isEmpty()) return;
+  if (inner.isEmpty())
+    return;
 
   SkBitmap bitmap;
   auto srcInfo =
@@ -78,34 +78,33 @@ void drawPixels(SkCanvas* canvas, SkIRect target, SkIRect screen, float scale) {
 
   if (canvas->readPixels(bitmap, target.fLeft * scale, target.fTop * scale)) {
     auto dstInfo =
-        SkImageInfo::Make(target.width() * scale, target.height() * scale,
+        SkImageInfo::Make(inner.width() * scale, inner.height() * scale,
                           SkColorType::kARGB_4444_SkColorType,
                           SkAlphaType::kUnpremul_SkAlphaType);
     auto rowBytes = dstInfo.minRowBytes();
-    QByteArray byteArray(
-        std::min<int>(bitmap.height(), dstInfo.height() - scale * 10) *
-            rowBytes,
-        '\0');
-    bitmap.readPixels(dstInfo, byteArray.data(), rowBytes, scale * 10,
-                      scale * 10);
+    QByteArray byteArray(dstInfo.height() * rowBytes, '\0');
+    if (bitmap.readPixels(dstInfo, byteArray.data(), rowBytes, scale * 10,
+                          scale * 10)) {
+      auto bpp = dstInfo.bytesPerPixel();
+      for (int i = 0; i < byteArray.size() / bpp / 2; i++) {
+        for (int j = 0; j < bpp; j++) {
+          auto i1 = i * bpp + j;
+          auto i2 = (byteArray.size() / bpp - i - 1) * bpp + j;
 
-    auto bpp = dstInfo.bytesPerPixel();
-    for (int i = 0; i < byteArray.size() / bpp / 2; i++) {
-      for (int j = 0; j < bpp; j++) {
-        auto i1 = i * bpp + j;
-        auto i2 = (byteArray.size() / bpp - i - 1) * bpp + j;
-
-        char b = byteArray[i1];
-        byteArray[i1] = byteArray[i2];
-        byteArray[i2] = b;
+          char b = byteArray[i1];
+          byteArray[i1] = byteArray[i2];
+          byteArray[i2] = b;
+        }
       }
+      bitmap.installPixels(dstInfo, byteArray.data(), rowBytes);
+      bitmap.notifyPixelsChanged();
+      bitmap.setImmutable();
+      auto image = SkImage::MakeFromBitmap(bitmap);
+      canvas->drawImageRect(image,
+                            SkRect::MakeWH(image->width(), image->height()),
+                            SkRect::Make(inner), SkSamplingOptions(), nullptr,
+                            SkCanvas::kStrict_SrcRectConstraint);
     }
-    bitmap.installPixels(dstInfo, byteArray.data(), rowBytes);
-    bitmap.notifyPixelsChanged();
-    bitmap.setImmutable();
-    auto image = SkImage::MakeFromBitmap(bitmap);
-    canvas->drawImageRect(image, SkRect::Make(inner), SkSamplingOptions(),
-                          nullptr);
   }
   drawFrame(canvas, SkRect::Make(target));
 }
@@ -146,12 +145,8 @@ void drawBitmapCanvas(SkCanvas* canvas, SkIRect target, float scale) {
   bitmap.setImmutable();
   auto image = SkImage::MakeFromBitmap(bitmap);
   canvas->drawImageRect(image, SkRect::Make(target), SkSamplingOptions());
-  SkPaint stroke2;
-  stroke2.setAntiAlias(true);
-  stroke2.setStyle(SkPaint::kStroke_Style);
-  stroke2.setColor(0xFFE5E5E5);
-  stroke2.setStrokeWidth(1);
-  canvas->drawRect(SkRect::Make(target), stroke2);
+
+  drawFrame(canvas, SkRect::Make(target));
 }
 
 void drawGray(SkCanvas* canvas, SkIRect target, float scale) {
@@ -166,19 +161,14 @@ void drawGray(SkCanvas* canvas, SkIRect target, float scale) {
                           SkSamplingOptions());
   }
 
-  SkPaint stroke;
-  stroke.setAntiAlias(true);
-  stroke.setColor(0xFFE5E5E5);
-  stroke.setStyle(SkPaint::kStroke_Style);
-  stroke.setStrokeWidth(1);
-  canvas->drawRect(SkRect::Make(target), stroke);
+  drawFrame(canvas, SkRect::Make(target));
 }
 
-void drawBlur(SkCanvas* canvas,
-              SkIRect target,
-              SkIRect screen,
-              int radius,
-              float scale) {
+static void drawBlur(SkCanvas* canvas,
+                     SkIRect target,
+                     SkIRect screen,
+                     int radius,
+                     float scale) {
   if (!target.intersect(screen))
     return;
   auto radiusScale = radius * scale;
@@ -216,12 +206,59 @@ void drawBlur(SkCanvas* canvas,
     canvas->restore();
   }
 
-  SkPaint stroke;
-  stroke.setAntiAlias(true);
-  stroke.setColor(0xFFE5E5E5);
-  stroke.setStyle(SkPaint::kStroke_Style);
-  stroke.setStrokeWidth(1);
-  canvas->drawRect(SkRect::Make(target), stroke);
+  drawFrame(canvas, SkRect::Make(target));
+}
+
+static void drawSubset(SkCanvas* canvas,
+                       SkIRect target,
+                       SkIRect screen,
+                       float scale) {
+  if (!target.intersect(screen))
+    return;
+
+  SkBitmap src;
+  SkBitmap dst;
+  SkImageInfo srcInfo = SkImageInfo::MakeS32(
+      target.width() * scale, target.height() * scale, kOpaque_SkAlphaType);
+  src.allocPixels(srcInfo);
+  if (canvas->readPixels(src, target.width() * scale,
+                         target.height() * scale)) {
+    src.extractSubset(&dst, SkIRect::MakeXYWH(target.width() / 4 * scale,
+                                              target.height() / 4 * scale,
+                                              target.width() / 2 * scale,
+                                              target.height() / 2 * scale));
+    dst.setImmutable();
+    auto image = dst.asImage();
+    canvas->drawImageRect(image, SkRect::Make(target), SkSamplingOptions(),
+                          nullptr);
+  }
+  drawFrame(canvas, SkRect::Make(target));
+}
+
+static void drawPixelRef(SkCanvas* canvas,
+                         SkIRect target,
+                         SkIRect screen,
+                         float scale) {
+  if (!target.intersect(screen))
+    return;
+
+  SkBitmap src, dst;
+  auto info = SkImageInfo::MakeS32(
+      target.width() * scale, target.height() * scale, kOpaque_SkAlphaType);
+  src.allocPixels(info);
+
+  if (canvas->readPixels(src, target.fLeft * scale, target.fTop * scale)) {
+    auto pixelRef = src.pixelRef();
+    dst.setInfo(
+        info.makeWH(target.width() / 2 * scale, target.height() / 2 * scale));
+    dst.setPixelRef(sk_ref_sp(pixelRef), target.width() / 4 * scale,
+                    target.height() / 4 * scale);
+    dst.setImmutable();
+    auto image = SkImage::MakeFromBitmap(dst);
+    canvas->drawImageRect(image, SkRect::Make(target), SkSamplingOptions(),
+                          nullptr);
+  }
+  drawFrame(canvas, SkRect::Make(target));
 }
 
 void BitmapScene::draw(SkCanvas* canvas,
@@ -258,7 +295,14 @@ void BitmapScene::draw(SkCanvas* canvas,
   left = xpos + 10 + bw / 2;
   drawBitmapCanvas(canvas, SkIRect::MakeXYWH(left, top, bw, bh), scale);
 
-  left = xpos - bw - 20 - bw / 2 - 10;
   top = ypos - bh / 2 - 10;
+
+  left = xpos - bw - 20 - bw / 2 - 10;
   drawPixels(canvas, SkIRect::MakeXYWH(left, top, bw, bh), screen, scale);
+
+  left = xpos - bw / 2 - 10;
+  drawSubset(canvas, SkIRect::MakeXYWH(left, top, bw, bh), screen, scale);
+
+  left = xpos + bw / 2 + 10;
+  drawPixelRef(canvas, SkIRect::MakeXYWH(left, top, bw, bh), screen, scale);
 }
