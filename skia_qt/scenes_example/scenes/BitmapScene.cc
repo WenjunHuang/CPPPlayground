@@ -261,6 +261,41 @@ static void drawPixelRef(SkCanvas* canvas,
   drawFrame(canvas, SkRect::Make(target));
 }
 
+static void drawAlpha(SkCanvas* canvas,
+                      SkIRect target,
+                      SkIRect screen,
+                      float scale) {
+  if (!target.intersect(screen))
+    return;
+  auto srcInfo = SkImageInfo::MakeS32(
+      target.width() * scale, target.height() * scale, kOpaque_SkAlphaType);
+  SkBitmap src;
+  src.allocPixels(srcInfo);
+  size_t len = target.width() * scale;
+  for (size_t x = 0; x < len; x++) {
+    int alpha = 255.0f * x / len;
+    int color = (alpha << 24) | (alpha << 16) | (0 << 8) | (255 - alpha);
+    src.erase(color, SkIRect::MakeXYWH(x, 0, 1, target.height() / 2 * scale));
+  }
+
+  src.setImmutable();
+  auto image = src.asImage();
+  canvas->drawImageRect(image,
+                        SkRect::MakeXYWH(target.fLeft, target.fTop,
+                                         target.width(), target.height() / 2),
+                        SkSamplingOptions(), nullptr);
+  SkBitmap dst;
+  if (src.extractAlpha(&dst)) {
+    dst.setImmutable();
+    canvas->drawImageRect(
+        dst.asImage(),
+        SkRect::MakeXYWH(target.fLeft, target.fTop + target.height() / 2,
+                         target.width(), target.height() / 2),
+        SkSamplingOptions(), nullptr);
+  }
+  drawFrame(canvas, SkRect::Make(target));
+}
+
 void BitmapScene::draw(SkCanvas* canvas,
                        int width,
                        int height,
@@ -305,4 +340,8 @@ void BitmapScene::draw(SkCanvas* canvas,
 
   left = xpos + bw / 2 + 10;
   drawPixelRef(canvas, SkIRect::MakeXYWH(left, top, bw, bh), screen, scale);
+
+  left = xpos - bw - 20 - bw / 2 - 10;
+  top = ypos + bh / 2 + 10;
+  drawAlpha(canvas, SkIRect::MakeXYWH(left, top, bw, bh), screen, scale);
 }

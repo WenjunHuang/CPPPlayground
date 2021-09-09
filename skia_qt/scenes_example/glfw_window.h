@@ -10,6 +10,7 @@ class GLFWWindow : public Window {
   GLFWWindow();
  protected:
   void OnDraw(SkCanvas* canvas) override;
+  void OnKey(int key,int action) override;
  private:
   std::unique_ptr<Scenes> scenes_;
 };

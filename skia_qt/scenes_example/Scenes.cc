@@ -3,6 +3,7 @@
 //
 
 #include "Scenes.h"
+#include "scenes/BitmapImageScene.h"
 #include "scenes/BitmapScene.h"
 
 void Scenes::draw(SkCanvas* canvas,
@@ -27,17 +28,17 @@ void Scenes::draw(SkCanvas* canvas,
 }
 
 Scenes::Scenes() : _hud{std::make_unique<HUD>(this)} {
-  _currentScene = std::make_shared<BitmapScene>();
   _hud->extras["V"] = "OFF";
 
   qRegisterMetaType<BitmapScene*>("BitmapScene*");
-  _sceneNames = {"Bitmap"};
-  setScene("Bitmap");
+  qRegisterMetaType<BitmapImageScene*>("BitmapImageScene*");
+  _sceneNames = {"Bitmap", "BitmapImage"};
+  _currentScene = setScene("BitmapImage");
 }
 
-Scenes::~Scenes() {}
+Scenes::~Scenes() = default;
 
-Scene* Scenes::newScene(QString name) {
+std::shared_ptr<Scene> Scenes::newScene(QString name) {
   auto type = QString("%1Scene*").arg(name.replace(" ", "")).toLatin1();
   auto id = QMetaType::type(type);
   if (id != 0) {
@@ -45,25 +46,45 @@ Scene* Scenes::newScene(QString name) {
     if (!mo)
       return nullptr;
     QObject* instance = mo->newInstance();
-    return qobject_cast<Scene*>(instance);
+    return std::shared_ptr<Scene>(qobject_cast<Scene*>(instance));
   } else
     return nullptr;
 }
-Scene* Scenes::setScene(QString name) {
-  _currentSceneName = name;
+std::shared_ptr<Scene> Scenes::setScene(QString name) {
   if (!_sceneNames.contains(name))
     return nullptr;
   else {
+    _currentSceneName = name;
     if (_scenesMap.contains(name))
-      return _scenesMap[name].get();
+      return _scenesMap[name];
     else {
       auto scene = newScene(name);
       if (scene == nullptr)
         return nullptr;
       else {
-        _scenesMap.insert(name, std::shared_ptr<Scene>(scene));
-        return scene;
+        std::shared_ptr<Scene> scenePtr(scene);
+        _scenesMap.insert(name, scenePtr);
+        return scenePtr;
       }
     }
   }
+}
+void Scenes::ShowNextScene() {
+  auto index = _sceneNames.indexOf(_currentSceneName);
+  if (index == -1)
+    return;
+
+  auto next_scene_name = _sceneNames[(index + 1) % _sceneNames.length()];
+  _currentScene = setScene(next_scene_name);
+}
+void Scenes::ShowPrevScene() {
+  auto index = _sceneNames.indexOf(_currentSceneName);
+  if (index == -1)
+    return;
+
+  auto prev = index - 1;
+  if (prev == -1)
+    prev = _sceneNames.length() - 1;
+  auto next_scene_name = _sceneNames[prev];
+  _currentScene = setScene(next_scene_name);
 }

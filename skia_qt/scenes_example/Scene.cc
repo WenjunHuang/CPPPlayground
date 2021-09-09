@@ -18,7 +18,7 @@ QByteArray Scene::readResource(const QString& resource)
     return resourceFile.readAll();
 }
 
-void ReleaseData(const void* ptr, void* context)
+static void ReleaseData(const void* ptr, void* context)
 {
     QByteArray* bytes = (QByteArray*)context;
     delete bytes;

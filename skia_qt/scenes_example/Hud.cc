@@ -104,10 +104,10 @@ void HUD::draw(SkCanvas* canvas, const Scene* scene, int width, int height) {
     drawStringCentered(canvas, u8"←→", 15, 10, Scene::inter13, fg);
 
     auto sceneIdx =
-        _scenes->scenesMap().keys().indexOf(_scenes->currentSceneName());
+        _scenes->sceneNames().indexOf(_scenes->currentSceneName());
     drawStringLeft(canvas,
                    QString("%1/%2 %3")
-                       .arg(sceneIdx)
+                       .arg(sceneIdx + 1)
                        .arg(_scenes->sceneNames().length())
                        .arg(_scenes->currentSceneName()),
                    labelBounds,

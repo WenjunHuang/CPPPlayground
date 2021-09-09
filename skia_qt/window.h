@@ -27,6 +27,7 @@ class Window {
 
  protected:
   virtual void OnDraw(SkCanvas* canvas) = 0;
+  virtual void OnKey(int key,int action) {}
   virtual void OnScroll(double xoffset, double yoffset){};
 
  private:
@@ -76,8 +77,7 @@ class Window {
     if (surface_)
       surface_.reset();
 
-    renderTarget_ = GrBackendRenderTarget(width_ * dpi_,
-                                          height_ * dpi_, 0, 8,
+    renderTarget_ = GrBackendRenderTarget(width_ * dpi_, height_ * dpi_, 0, 8,
                                           {
                                               0, 0x8058  // GR_GL_RGBA8
                                           });
@@ -86,7 +86,7 @@ class Window {
     surface_ = SkSurface::MakeFromBackendRenderTarget(
         context_.get(), renderTarget_,
         GrSurfaceOrigin::kBottomLeft_GrSurfaceOrigin,
-//        GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin,
+        //        GrSurfaceOrigin::kTopLeft_GrSurfaceOrigin,
         SkColorType::kRGBA_8888_SkColorType,
         SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB,
                               SkNamedGamut::kDisplayP3),
@@ -139,6 +139,8 @@ class Window {
                                 int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
       glfwSetWindowShouldClose(window, true);
+    auto w = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+    w->OnKey(key,action);
   }
 
   static void WindowResized(GLFWwindow* window, int width, int height) {

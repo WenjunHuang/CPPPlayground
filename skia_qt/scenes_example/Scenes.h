@@ -25,10 +25,12 @@ class Scenes {
     QVector<QString>&        sceneNames() { return _sceneNames; }
     Scene*                   currentScene() { return _currentScene.get(); }
     QString                  currentSceneName() { return _currentSceneName; }
+    void ShowNextScene();
+    void ShowPrevScene();
 
   private:
-    Scene* newScene(QString name);
-    Scene* setScene(QString scene);
+   std::shared_ptr<Scene> newScene(QString name);
+    std::shared_ptr<Scene> setScene(QString scene);
 
   private:
     std::unique_ptr<HUD>    _hud;
