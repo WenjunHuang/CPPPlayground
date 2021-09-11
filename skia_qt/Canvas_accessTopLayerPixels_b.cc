@@ -19,7 +19,6 @@ class MyWindow: public Window {
     SkImageInfo imageInfo;
     size_t rowBytes;
     SkIPoint origin;
-    uint32_t* access =
   }
 
 };

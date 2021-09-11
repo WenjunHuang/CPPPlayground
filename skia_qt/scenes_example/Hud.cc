@@ -181,7 +181,7 @@ void HUD::draw(SkCanvas* canvas, const Scene* scene, int width, int height) {
                    Scene::inter13,
                    fg);
     auto fps =
-        QString("%1 fps").arg(length > 0 ? 1000.0f / sum * length : 0.0,0,'g',2);
+        QString("%1 fps").arg(length > 0 ? 1000.0f / sum * length : 0.0,0,'f',2);
     drawStringLeft(canvas,
                    fps,
                    SkRect::MakeLTRB(_times.size() + 5, 25, 225, 40),
