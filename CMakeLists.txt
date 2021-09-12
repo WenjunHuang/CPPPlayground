@@ -14,7 +14,7 @@ function(add_single_file_targets)
     include(CMakeParseArguments)
     set(options TEST)
     set(singleValues DIR PREFIX)
-    set(multiValues LIBS INCLUDES)
+    set(multiValues LIBS INCLUDES DEPS)
     cmake_parse_arguments(ARG
             "${options}"
             "${singleValues}"
@@ -46,6 +46,9 @@ function(add_single_file_targets)
             endif ()
             if (ARG_INCLUDES)
                 target_include_directories(${TARGET} PRIVATE ${ARG_INCLUDES})
+            endif ()
+            if (ARG_DEPS)
+                add_dependencies(${TARGET} ${ARG_DEPS})
             endif ()
             if (ARG_TEST)
                 add_test(NAME ${TARGET} COMMAND ${TARGET})

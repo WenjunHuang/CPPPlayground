@@ -5,6 +5,7 @@
 #include "Scenes.h"
 #include "scenes/BitmapImageScene.h"
 #include "scenes/BitmapScene.h"
+#include "scenes/blends_scene.h"
 
 void Scenes::draw(SkCanvas* canvas,
                   int width,
@@ -32,8 +33,9 @@ Scenes::Scenes() : _hud{std::make_unique<HUD>(this)} {
 
   qRegisterMetaType<BitmapScene*>("BitmapScene*");
   qRegisterMetaType<BitmapImageScene*>("BitmapImageScene*");
-  _sceneNames = {"Bitmap", "BitmapImage"};
-  _currentScene = setScene("BitmapImage");
+  qRegisterMetaType<BlendsScene*>("BlendsScene*");
+  _sceneNames = {"Bitmap", "BitmapImage", "Blends"};
+  _currentScene = setScene("Blends");
 }
 
 Scenes::~Scenes() = default;

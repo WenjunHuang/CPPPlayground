@@ -182,4 +182,13 @@ void BitmapImageScene::draw(SkCanvas* canvas,
     canvas->drawString("Image.makeRaster", 0, 220, inter13, blackFill);
     dptr_->Advance(canvas, width);
   }
+
+  {
+    // Image.makeRaster + Data
+    auto imageFromData = SkImage::MakeRasterData(info,pixels,info.minRowBytes());
+    canvas->drawImageRect(imageFromData, SkRect::MakeXYWH(0, 0, 200, 200),
+                          SkSamplingOptions(), nullptr);
+    canvas->drawString("Image.makeRaster + Dat", 0, 220, inter13, blackFill);
+    dptr_->Advance(canvas, width);
+  }
 }
