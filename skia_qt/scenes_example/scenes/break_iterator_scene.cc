@@ -41,5 +41,5 @@ void BreakIteratorScene::draw(SkCanvas* canvas,
       "󠁿"
       "*"
       "️⃣ǍǍZ̵̡̢͇͓͎͖͎̪͑͜ͅͅबिक्";
-  SkTextBlob::MakeFromString()
+//  SkTextBlob::MakeFromString()
 }
