@@ -20,4 +20,7 @@ class BreakIteratorScene : public Scene {
   SkFont mono11_;
   int x_ = 0;
   int y_ = 0;
+
+  void DrawSubString(SkCanvas* canvas, const std::u16string& text, int height);
+  void DrawCharacter(SkCanvas* canvas, int height, const std::u16string& text);
 };
