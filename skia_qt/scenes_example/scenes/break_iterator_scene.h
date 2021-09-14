@@ -21,6 +21,12 @@ class BreakIteratorScene : public Scene {
   int x_ = 0;
   int y_ = 0;
 
-  void DrawSubString(SkCanvas* canvas, const std::u16string& text, int height);
-  void DrawCharacter(SkCanvas* canvas, int height, const std::u16string& text);
+  void DrawSubString(SkCanvas* canvas,
+                     const std::string& utf8_text,
+                     int height);
+  void DrawCharacter(SkCanvas* canvas,
+                     int height,
+                     const std::string& utf8_text);
+  void DrawUnicode(SkCanvas* canvas,
+                   const std::vector<std::string>& code_points);
 };

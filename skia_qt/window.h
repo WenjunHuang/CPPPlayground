@@ -27,7 +27,7 @@ class Window {
 
  protected:
   virtual void OnDraw(SkCanvas* canvas) = 0;
-  virtual void OnKey(int key,int action) {}
+  virtual void OnKey(int key, int action) {}
   virtual void OnScroll(double xoffset, double yoffset){};
 
  private:
@@ -140,7 +140,7 @@ class Window {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
       glfwSetWindowShouldClose(window, true);
     auto w = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
-    w->OnKey(key,action);
+    w->OnKey(key, action);
   }
 
   static void WindowResized(GLFWwindow* window, int width, int height) {
@@ -174,6 +174,7 @@ class Window {
 using OnDrawCallback = std::function<void(SkCanvas*)>;
 class DefaultWindow : public Window {
  public:
+  using CallbackType = OnDrawCallback;
   DefaultWindow(OnDrawCallback callback) : draw_callback_(callback) {}
 
  protected:
@@ -183,7 +184,24 @@ class DefaultWindow : public Window {
   OnDrawCallback draw_callback_;
 };
 
-inline void Run(OnDrawCallback onDraw, int width = -1, int height = -1) {
+using OnDrawWithSizeCallback = std::function<void(SkCanvas*, int, int)>;
+class DefaultWithSizeWindow : public Window {
+ public:
+  using CallbackType = OnDrawWithSizeCallback;
+  DefaultWithSizeWindow(OnDrawWithSizeCallback callback)
+      : draw_callback_(callback) {}
+
+ protected:
+  void OnDraw(SkCanvas* canvas) override {
+    draw_callback_(canvas, width_, height_);
+  }
+
+ private:
+  OnDrawWithSizeCallback draw_callback_;
+};
+
+template <typename T>
+void RunTemplate(typename T::CallbackType onDraw, int width, int height) {
   if (!glfwInit()) {
     // Initialization failed
     exit(1);
@@ -194,6 +212,16 @@ inline void Run(OnDrawCallback onDraw, int width = -1, int height = -1) {
   int xpos = std::max(0, (vidmode->width - width) / 2);
   int ypos = std::max(0, (vidmode->height - height) / 2);
 
-  DefaultWindow window(onDraw);
+  T window(onDraw);
   window.Run(xpos, ypos, w, h);
+}
+
+inline void Run(OnDrawCallback onDraw, int width = -1, int height = -1) {
+  RunTemplate<DefaultWindow>(onDraw, width, height);
+}
+
+inline void Run(OnDrawWithSizeCallback onDraw,
+                int width = -1,
+                int height = -1) {
+  RunTemplate<DefaultWithSizeWindow>(onDraw, width, height);
 }

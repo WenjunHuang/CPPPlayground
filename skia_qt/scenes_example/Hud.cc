@@ -101,7 +101,7 @@ void HUD::draw(SkCanvas* canvas, const Scene* scene, int width, int height) {
         SkRRect::MakeRectXY(SkRect::MakeLTRB(0, 0, 30, 20), 2, 2);
     auto labelBounds = SkRect::MakeLTRB(35, 0, 225, 20);
     canvas->drawRRect(buttonButtons, bg);
-    drawStringCentered(canvas, u8"←→", 15, 10, Scene::inter13, fg);
+    drawStringCentered(canvas, "←→", 15, 10, Scene::inter13, fg);
 
     auto sceneIdx =
         _scenes->sceneNames().indexOf(_scenes->currentSceneName());

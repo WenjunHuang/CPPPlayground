@@ -37,5 +37,6 @@ int main(int argc, char* argv[]) {
   int ypos = std::max(0, (vidmode->height - h) / 2);
 
   GLFWWindow window;
+  Scene::initializeResources();
   window.Run(xpos, ypos, w, h);
 }

@@ -1,13 +1,15 @@
 //
 // Created by HUANG WEN JUN on 2021/9/13.
 //
+#include <unicode/brkiter.h>
 #include <unicode/ubrk.h>
 #include <unicode/utext.h>
 #include <unicode/utypes.h>
-#include <iostream>
+#include <cassert>
 #include <iomanip>
+#include <iostream>
 
-int CountWords(const char* utf8_string) {
+int GetCodePointsWithCAPI(const char* utf8_string) {
   UText* ut = nullptr;
   UBreakIterator* bi = nullptr;
   int word_count = 0;
@@ -18,9 +20,10 @@ int CountWords(const char* utf8_string) {
   ubrk_setUText(bi, ut, &status);
   int start = 0, end = 0;
   while ((end = ubrk_next(bi)) != UBRK_DONE) {
-    auto sub_str = utext_openUTF8(nullptr,utf8_string + start,end - start,&status);
+    auto sub_str =
+        utext_openUTF8(nullptr, utf8_string + start, end - start, &status);
     UChar32 code_point;
-    while ((code_point = utext_next32(sub_str))!=U_SENTINEL) {
+    while ((code_point = utext_next32(sub_str)) != U_SENTINEL) {
       std::cout << "U+" << std::setfill('0') << std::setw(5) << std::hex
                 << code_point << " ";
     }
@@ -35,7 +38,37 @@ int CountWords(const char* utf8_string) {
   return word_count;
 }
 
+size_t GetCodePointWithCPPAPI(const char* utf8_string) {
+  using namespace icu;
+  UnicodeString str(utf8_string);
+  size_t word_count = 0;
+  UErrorCode status;
+  auto bi = std::unique_ptr<BreakIterator>(
+      BreakIterator::createWordInstance("en_us", status));
+  bi->setText(str);
+  int start = bi->first();
+  int end = start;
+  while ((end = bi->next()) !=BreakIterator::DONE) {
+    auto sub_str = str.tempSubStringBetween(start,end-start);
+    auto sub_str_bi = std::unique_ptr<BreakIterator>(
+        BreakIterator::createCharacterInstance("en_us", status));
+    sub_str_bi->setText(sub_str);
+    auto code_point = str.char32At(start);
+    std::cout << "U+" << std::setfill('0') << std::setw(5) << std::hex
+              << code_point << " ";
+    start = end;
+    word_count++;
+    std::cout << std::endl;
+
+  }
+  return word_count;
+}
+
 int main() {
-  std::cout << CountWords("🐉☺️❤️👮🏿👨‍👩‍👧‍👦")
+  std::cout << GetCodePointsWithCAPI(
+                   "🐉☺️❤️👮🏿👨‍👩‍👧‍👦")
+            << std::endl;
+  std::cout << GetCodePointWithCPPAPI(
+      "🐉☺️❤️👮🏿👨‍👩‍👧‍👦")
             << std::endl;
 }
