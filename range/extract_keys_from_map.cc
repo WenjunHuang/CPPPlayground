@@ -14,4 +14,8 @@ int main() {
                                                     {"green", "#00ff00"}};
   auto rng = m | views::keys;
   std::cout << fmt::format("{}",fmt::join(rng,",")) << std::endl;
+
+  auto values = m | views::values;
+  std::cout << fmt::format("{}",fmt::join(values,",")) << std::endl;
+
 }
