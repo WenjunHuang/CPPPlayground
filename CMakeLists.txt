@@ -91,9 +91,9 @@ function(add_dir_target)
 endfunction()
 
 
-add_subdirectory(skia_qt)
+#add_subdirectory(skia_qt)
 add_subdirectory(range)
-add_subdirectory(harfbuzz)
+#add_subdirectory(harfbuzz)
 #add_subdirectory(google_test)
 #add_subdirectory(icu)
 ## The gtest/gtest_main targets carry header search path

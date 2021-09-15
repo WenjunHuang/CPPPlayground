@@ -9,3 +9,8 @@
 #include <fmt/format.h>
 #include <map>
 using namespace ranges;
+
+template<typename Itr>void Print(Itr&& itr) {
+//  std::cout << fmt::format("{}",fmt::join(itr,",")) << std::endl;
+std::cout << itr << std::endl;
+}
