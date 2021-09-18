@@ -11,6 +11,6 @@ find_package(PkgConfig)
 find_package(fmt CONFIG REQUIRED)
 find_package(ICU REQUIRED COMPONENTS uc dt in io)
 
-add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ICU::uc ICU::dt ICU::in ICU::io)
+add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ICU::uc ICU::dt ICU::in ICU::io fmt::fmt)
 
 

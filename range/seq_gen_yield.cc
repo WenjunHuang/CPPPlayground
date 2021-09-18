@@ -15,12 +15,14 @@ int main() {
               views::take(4);
   Print(rng1);
 
+  // generate a range of ranges and flatten it
   auto rng2 = views::iota(7) | views::for_each([](int x) {
                 return yield_from(views::iota(x - 1, x + 1));
               }) |
               views::take(4);
   Print(rng2);
 
+  // generate a range of ranges and do not flatten it
   auto rng3 = views::iota(1) | views::transform([](int x) {
                 return yield_from(views::iota(x, x + 2));
               }) |
