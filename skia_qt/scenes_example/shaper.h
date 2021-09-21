@@ -6,8 +6,8 @@
 #include <skia/core/SkFont.h>
 #include <skia/core/SkFontMgr.h>
 #include <skia/core/SkTextBlob.h>
-#include <skia/modules/unicode/SkUnicode.h>
 #include <memory>
+#include "unicode.h"
 
 // learn how SkShaper with harfbuzz works
 class Shaper {
@@ -111,7 +111,7 @@ class Shaper {
   static std::unique_ptr<BiDiRunIterator>
   MakeBiDiRunIterator(const char* utf8, size_t utf8Bytes, uint8_t bidiLevel);
   static std::unique_ptr<BiDiRunIterator> MakeSkUnicodeBidiRunIterator(
-      SkUnicode* unicode,
+      Unicode* unicode,
       const char* utf8,
       size_t utf8Bytes,
       uint8_t bidiLevel);

@@ -10,12 +10,13 @@
 #include <iostream>
 
 int GetCodePointsWithCAPI(const char* utf8_string) {
+  UText mytext = UTEXT_INITIALIZER;
   UText* ut = nullptr;
   UBreakIterator* bi = nullptr;
   int word_count = 0;
   UErrorCode status = U_ZERO_ERROR;
 
-  ut = utext_openUTF8(ut, utf8_string, -1, &status);
+  ut = utext_openUTF8(&mytext, utf8_string, -1, &status);
   bi = ubrk_open(UBRK_WORD, "en_us", nullptr, 0, &status);
   ubrk_setUText(bi, ut, &status);
   int start = 0, end = 0;
@@ -23,7 +24,8 @@ int GetCodePointsWithCAPI(const char* utf8_string) {
     auto sub_str =
         utext_openUTF8(nullptr, utf8_string + start, end - start, &status);
     UChar32 code_point;
-    std::cout << std::string(utf8_string + start,end-start) << " ";
+    std::cout << std::string_view(utf8_string + start,end-start) << " ";
+    std::cout << "rule status: " << ubrk_getRuleStatus(bi) << " ";
     while ((code_point = utext_next32(sub_str)) != U_SENTINEL) {
       std::cout << "U+" << std::setfill('0') << std::setw(5) << std::hex
                 << code_point << " ";
@@ -33,8 +35,8 @@ int GetCodePointsWithCAPI(const char* utf8_string) {
     word_count++;
     start = end;
   }
-  utext_close(ut);
   ubrk_close(bi);
+  utext_close(ut);
   assert(U_SUCCESS(status));
   return word_count;
 }

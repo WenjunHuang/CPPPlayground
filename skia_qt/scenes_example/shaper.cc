@@ -18,9 +18,9 @@ using resource =
 
 using HBBuffer = resource<hb_buffer_t, hb_buffer_destroy>;
 
-using SkUnicodeBreak = std::unique_ptr<SkBreakIterator>;
-using SkUnicodeBidi = std::unique_ptr<SkBidiIterator>;
-using SkUnicodeScript = std::unique_ptr<SkScriptIterator>;
+using UnicodeBreak = std::unique_ptr<BreakIterator>;
+using UnicodeBidi = std::unique_ptr<SkBidiIterator>;
+using UnicodeScript = std::unique_ptr<SkScriptIterator>;
 
 struct ShapedGlyph {
   SkGlyphID fID;
@@ -358,8 +358,20 @@ std::unique_ptr<Shaper::BiDiRunIterator> Shaper::MakeBiDiRunIterator(
     const char* utf8,
     size_t utf8Bytes,
     uint8_t bidiLevel) {
-  auto unicode = SkUnicode::Make();
-  if (!unicode)
+  if (!SkTFitsIn<int32_t>(utf8Bytes)) {
+    SkDEBUGF
+  }
+  auto unicode = Unicode::Make();
+  if (!unicode) {
     return nullptr;
+  }
 
+
+}
+std::unique_ptr<Shaper::FontRunIterator> Shaper::MakeFontMgrRunIterator(
+    const char* utf8,
+    size_t utf8Bytes,
+    const SkFont& font,
+    sk_sp<SkFontMgr> fallback) {
+  return std::unique_ptr<FontRunIterator>();
 }

@@ -182,13 +182,13 @@ class Unicode {
   }
 
   template <typename Callback>
-  void forEachBidiRegion(const uint16_t utf16[],
+  void forEachBidiRegion(const char16_t utf16[],
                          int utf16Units,
                          BidiIterator::Direction dir,
                          Callback&& callback) {
     auto iter = makeBidiIterator(utf16, utf16Units, dir);
-    const uint16_t* start16 = utf16;
-    const uint16_t* end16 = utf16 + utf16Units;
+    const char16_t* start16 = utf16;
+    const char16_t* end16 = utf16 + utf16Units;
     BidiIterator::Level currentLevel = 0;
     BidiIterator::Position pos16 = 0;
 
@@ -225,8 +225,9 @@ class Unicode {
     } while (!iter->isDone());
   }
 
-  virtual void reorderVisual(const BidiLevel runLevels[],
+  void reorderVisual(const BidiLevel runLevels[],
                              int levelsCount,
-                             int32_t logicalFromVisual[]) = 0;
+                             int32_t logicalFromVisual[]);
+
   static std::unique_ptr<Unicode> Make();
 };

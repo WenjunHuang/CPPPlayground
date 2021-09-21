@@ -114,6 +114,8 @@ class IcuBreakIteratorCache {
           fBreakCache[type] = std::move(newIterator);
           cacheIterator = &fBreakCache[type];
         }
+      } else {
+        cacheIterator = &(itr->second);
       }
     }
     ICUBreakIterator  iterator;
