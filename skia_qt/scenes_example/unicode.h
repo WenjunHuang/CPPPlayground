@@ -111,15 +111,15 @@ class Unicode {
   }
   bool isSpace(SkUnichar utf8) { return u_isspace(utf8); }
 
-  SkString convertUtf16ToUtf8(const std::u16string& utf16) {
+  std::string convertUtf16ToUtf8(const std::u16string& utf16) {
     icu::UnicodeString unicodeString(utf16.data(), utf16.length());
-    SkString result;
-    unicodeString.toUTF8String(result);
-    return result;
+    std::string utf8String;
+    unicodeString.toUTF8String(utf8String);
+    return utf8String;
   }
 
   // Methods used in Shaper and Text
-  std::unique_ptr<BidiIterator> makeBidiIterator(const uint16_t text[],
+  std::unique_ptr<BidiIterator> makeBidiIterator(const char16_t text[],
                                                  int count,
                                                  BidiIterator::Direction);
   std::unique_ptr<BidiIterator> makeBidiIterator(const char text[],

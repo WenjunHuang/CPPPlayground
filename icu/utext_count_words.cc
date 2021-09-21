@@ -23,6 +23,7 @@ int GetCodePointsWithCAPI(const char* utf8_string) {
     auto sub_str =
         utext_openUTF8(nullptr, utf8_string + start, end - start, &status);
     UChar32 code_point;
+    std::cout << std::string(utf8_string + start,end-start) << " ";
     while ((code_point = utext_next32(sub_str)) != U_SENTINEL) {
       std::cout << "U+" << std::setfill('0') << std::setw(5) << std::hex
                 << code_point << " ";
@@ -66,9 +67,9 @@ size_t GetCodePointWithCPPAPI(const char* utf8_string) {
 
 int main() {
   std::cout << GetCodePointsWithCAPI(
-                   "🐉☺️❤️👮🏿👨‍👩‍👧‍👦")
+                   "fuck 🐉☺️❤️👮🏿👨‍👩‍👧‍👦")
             << std::endl;
-  std::cout << GetCodePointWithCPPAPI(
-      "🐉☺️❤️👮🏿👨‍👩‍👧‍👦")
-            << std::endl;
+//  std::cout << GetCodePointWithCPPAPI(
+//      "🐉☺️❤️👮🏿👨‍👩‍👧‍👦")
+//            << std::endl;
 }
