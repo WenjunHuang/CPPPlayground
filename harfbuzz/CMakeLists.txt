@@ -8,10 +8,10 @@ endif ()
 
 find_package(PkgConfig)
 find_package(fmt CONFIG REQUIRED)
-find_package(harfbuzz CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(freetype CONFIG REQUIRED)
+find_package(harfbuzz CONFIG REQUIRED)
 find_package(ICU REQUIRED COMPONENTS uc dt in io)
 
 set(DEPS harfbuzz glfw glad::glad freetype ICU::dt ICU::in ICU::io)

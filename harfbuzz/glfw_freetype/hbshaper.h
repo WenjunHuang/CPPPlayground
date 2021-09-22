@@ -122,7 +122,7 @@ class HBShaper {
       indices[4] = 2;
       indices[5] = 3;
 
-      gl::GLTexturePtr texture_id(gl::get_texture_id(twidth, theight));
+      gl::GLTexturePtr texture_id(gl::CreateTexture(twidth, theight));
       gl::UploadTextureData(texture_id.get(), twidth, theight, tdata.get());
 
       meshes.push_back(gl::Mesh{

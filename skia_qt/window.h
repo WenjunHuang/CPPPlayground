@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include <glad.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <skia/core/SkCanvas.h>
 #include <skia/core/SkImage.h>

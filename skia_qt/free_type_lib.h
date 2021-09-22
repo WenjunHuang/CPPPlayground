@@ -7,7 +7,7 @@
 #include FT_FREETYPE_H
 #include <cmath>
 #include <iostream>
-#include "../util.h"
+#include "util.h"
 
 using namespace std;
 
@@ -48,7 +48,8 @@ class FreeTypeLib {
     FT_Face f = nullptr;
     FT_Error status = FT_New_Face(lib_, font_name.c_str(), 0, &f);
     if (status != 0) {
-      std::cerr << FT_Error_String(FT_Err_Unknown_File_Format) << std::endl;
+      auto error_string = FT_Error_String(status);
+      std::cerr <<error_string << std::endl;
       return nullptr;
     }
     FTFacePtr face(f);

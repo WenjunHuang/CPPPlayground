@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glad/glad.h>
 #include <memory>
 #include <vector>
 #include "../util.h"
@@ -56,7 +56,7 @@ static const GLchar* vertex_src =
     "f_uv = a_uv;\n"
     "}\n";
 
-GLTexturePtr get_texture_id(int width, int height) {
+GLTexturePtr CreateTexture(int width, int height) {
   GLuint texture_id;
 
   glGenTextures(1, &texture_id);
@@ -67,12 +67,37 @@ GLTexturePtr get_texture_id(int width, int height) {
   return GLTexturePtr(new GLuint(texture_id));
 }
 
-void UploadTextureData(GLuint* texture_id,
-                       int width,
-                       int height,
-                       const unsigned char* data) {
-  glBindTexture(GL_TEXTURE_2D, *texture_id);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_ALPHA,
-               GL_UNSIGNED_BYTE, data);
+GLBufferPtr CreateVertexBuffer(const std::vector<Vertex>& vertices) {
+  std::vector<float> data;
+  for (const auto& vertex : vertices) {
+    data.push_back(vertex.x);
+    data.push_back(vertex.y);
+    data.push_back(vertex.s);
+    data.push_back(vertex.t);
+  }
+
+  GLuint vertex_buffer;
+  glGenBuffers(1, &vertex_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+  glBufferData(GL_ARRAY_BUFFER, data.size() * sizeof(float), data.data(),
+               GL_STATIC_DRAW);
+
+  return GLBufferPtr(new GLuint(vertex_buffer));
 }
+
+GLBufferPtr CreateIndexBuffer(const std::vector<unsigned short>& indices) {
+  GLuint index_buffer;
+  glGenBuffers(1, &index_buffer);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short),
+               indices.data(), GL_STATIC_DRAW);
+  return GLBufferPtr(new GLuint(index_buffer));
+}
+
+void Render(const std::vector<Mesh>& meshes) {
+  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+  glUseProgram(program);
+}
+
 }  // namespace gl
