@@ -22,8 +22,7 @@ class Shaper {
   class RunIterator {
    public:
     virtual ~RunIterator() = default;
-    /** Set state to that of current run and move iterator to end of that run.
-     */
+    /** Set state to that of current run and move iterator to end of that run. */
     virtual void consume() = 0;
 
     /** Offset to one past the last (utf8) element in the current run. */
@@ -52,7 +51,7 @@ class Shaper {
 
   class LanguageRunIterator : public RunIterator {
    public:
-    // shold be BCP-47, c locale names may also work.
+    // should be BCP-47, c locale names may also work.
     virtual const char* currentLanguage() const = 0;
   };
 
@@ -88,7 +87,6 @@ class Shaper {
       size_t utf8Bytes,
       const SkFont& font,
       sk_sp<SkFontMgr> fallback);
-
   static std::unique_ptr<FontRunIterator> MakeFontMgrRunIterator(
       const char* utf8,
       size_t utf8Bytes,
@@ -96,7 +94,8 @@ class Shaper {
       sk_sp<SkFontMgr> fallback,
       const char* requestName,
       SkFontStyle requestStyle,
-      const Shaper::LanguageRunIterator*);
+      const LanguageRunIterator*);
+
 
   class TrivialFontRunIterator : public TrivialRunIterator<FontRunIterator> {
    public:
@@ -110,11 +109,6 @@ class Shaper {
 
   static std::unique_ptr<BiDiRunIterator>
   MakeBiDiRunIterator(const char* utf8, size_t utf8Bytes, uint8_t bidiLevel);
-  static std::unique_ptr<BiDiRunIterator> MakeSkUnicodeBidiRunIterator(
-      Unicode* unicode,
-      const char* utf8,
-      size_t utf8Bytes,
-      uint8_t bidiLevel);
 
   class TrivialBiDiRunIterator : public TrivialRunIterator<BiDiRunIterator> {
    public:

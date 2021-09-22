@@ -5,6 +5,7 @@
 #include <fmt/format.h>
 #include <unicode/ucnv.h>
 #include <unicode/unistr.h>
+#include <cassert>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -35,7 +36,7 @@ int main() {
     fmt::print("error {}", u_errorName(status));
     return -1;
   }
-  assert(std::memcmp(utf16, fromUtf8.getBuffer(), sizeof(utf16)) == 0);
+  std::cout << "compare:" << std::memcmp(utf16, fromUtf8.getBuffer(), sizeof(utf16) - 1) << std::endl;
   toPrint.clear();
   fromUtf8.toUTF8String(toPrint);
   fmt::print("converted str: {}", toPrint);

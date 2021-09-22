@@ -5,10 +5,11 @@
 #include "shaper.h"
 #include <hb-ot.h>
 #include <hb.h>
-#include <skia/modules/unicode/SkUnicode.h>
 #include <unicode/unistr.h>
 #include <range/v3/algorithm.hpp>
 #include <set>
+#include "unicode.h"
+#include "font_mgr_run_iterator.h"
 using namespace ranges;
 namespace {
 template <typename T, auto* p>
@@ -17,10 +18,9 @@ using resource =
                     SkFunctionWrapper<std::remove_pointer_t<decltype(p)>, p>>;
 
 using HBBuffer = resource<hb_buffer_t, hb_buffer_destroy>;
-
 using UnicodeBreak = std::unique_ptr<BreakIterator>;
-using UnicodeBidi = std::unique_ptr<SkBidiIterator>;
-using UnicodeScript = std::unique_ptr<SkScriptIterator>;
+using UnicodeBidi = std::unique_ptr<BidiIterator>;
+using UnicodeScript = std::unique_ptr<ScriptIterator>;
 
 struct ShapedGlyph {
   SkGlyphID fID;
@@ -37,7 +37,7 @@ struct ShapedGlyph {
 struct ShapedRun {
   Shaper::RunHandler::Range fUtf8Range;
   SkFont fFont;
-  SkBidiIterator::Level fLevel;
+  BidiIterator::Level fLevel;
   std::unique_ptr<ShapedGlyph[]> fGlyphs;
   size_t fNumGlyphs;
   SkVector fAdvance;
@@ -95,17 +95,15 @@ class RunIteratorQueue {
   std::set<Entry> fEntries;
 };
 
-class SkUnicodeBidiRunIterator final : public Shaper::BiDiRunIterator {
+class UnicodeBidiRunIterator final : public Shaper::BiDiRunIterator {
  public:
-  SkUnicodeBidiRunIterator(const char* utf8,
-                           const char* end,
-                           SkUnicodeBidi bidi)
+  UnicodeBidiRunIterator(const char* utf8, const char* end, UnicodeBidi bidi)
       : fBidi(std::move(bidi)),
         fEndOfCurrentRun(utf8),
         fBegin(utf8),
         fEnd(end),
         fUTF16LogicalPosition(0),
-        fLevel(SkBidiIterator::kLTR) {}
+        fLevel(BidiIterator::kLTR) {}
 
   void consume() override {
     SkASSERT(fUTF16LogicalPosition < fBidi->getLength());
@@ -118,7 +116,7 @@ class SkUnicodeBidiRunIterator final : public Shaper::BiDiRunIterator {
     fEndOfCurrentRun += offset;
     fUTF16LogicalPosition += U16_LENGTH(u);
 
-    SkBidiIterator::Level level;
+    BidiIterator::Level level;
     while (fUTF16LogicalPosition < endPosition) {
       level = fBidi->getLevelAt(fUTF16LogicalPosition);
       if (level != fLevel) {
@@ -140,24 +138,22 @@ class SkUnicodeBidiRunIterator final : public Shaper::BiDiRunIterator {
     return fUTF16LogicalPosition == fBidi->getLength();
   }
 
-  [[nodiscard]] SkBidiIterator::Level currentLevel() const override {
+  [[nodiscard]] BidiIterator::Level currentLevel() const override {
     return fLevel;
   }
 
  private:
-  SkUnicodeBidi fBidi;
+  UnicodeBidi fBidi;
   const char* fEndOfCurrentRun;
   const char* const fBegin;
   const char* const fEnd;
   int32_t fUTF16LogicalPosition;
-  SkBidiIterator::Level fLevel;
+  BidiIterator::Level fLevel;
 };
 
-class SkUnicodeHbScriptRunIterator final : public Shaper::ScriptRunIterator {
+class UnicodeHbScriptRunIterator final : public Shaper::ScriptRunIterator {
  public:
-  SkUnicodeHbScriptRunIterator(SkUnicodeScript,
-                               const char* utf8,
-                               size_t utf8Bytes)
+  UnicodeHbScriptRunIterator(UnicodeScript, const char* utf8, size_t utf8Bytes)
       : fCurrent(utf8),
         fBegin(utf8),
         fEnd(fCurrent + utf8Bytes),
@@ -204,7 +200,7 @@ class SkUnicodeHbScriptRunIterator final : public Shaper::ScriptRunIterator {
 
   bool atEnd() const override { return fCurrent == fEnd; }
 
-  SkFourByteTag  currentScript() const override {
+  SkFourByteTag currentScript() const override {
     return SkSetFourByteTag(HB_UNTAG(fCurrentScript));
   }
 
@@ -214,11 +210,12 @@ class SkUnicodeHbScriptRunIterator final : public Shaper::ScriptRunIterator {
   char const* const fEnd;
   hb_script_t fCurrentScript;
 };
+
 class ShaperHarfBuzz : public Shaper {
  public:
-  ShaperHarfBuzz(std::unique_ptr<SkUnicode> unicode,
-                 SkUnicodeBreak lineIter,
-                 SkUnicodeBreak graphIter,
+  ShaperHarfBuzz(std::unique_ptr<Unicode> unicode,
+                 UnicodeBreak lineIter,
+                 UnicodeBreak graphIter,
                  HBBuffer buffer,
                  sk_sp<SkFontMgr> fontMgr)
       : fUnicode(std::move(unicode)),
@@ -229,9 +226,9 @@ class ShaperHarfBuzz : public Shaper {
         fUndefinedLanguage(hb_language_from_string("und", -1)) {}
 
  protected:
-  std::unique_ptr<SkUnicode> fUnicode;
-  SkUnicodeBreak fLineBreakIterator;
-  SkUnicodeBreak fGraphemeBreakIterator;
+  std::unique_ptr<Unicode> fUnicode;
+  UnicodeBreak fLineBreakIterator;
+  UnicodeBreak fGraphemeBreakIterator;
 
   ShapedRun shape(const char* utf8,
                   size_t utf8Bytes,
@@ -255,10 +252,10 @@ class ShaperHarfBuzz : public Shaper {
              bool leftToRight,
              SkScalar width,
              RunHandler* handler) const override {
-    SkBidiIterator::Level defaultLevel =
-        leftToRight ? SkBidiIterator::kLTR : SkBidiIterator::kRTL;
-    std::unique_ptr<BiDiRunIterator> bidi(MakeSkUnicodeBidiRunIterator(
-        fUnicode.get(), utf8, utf8Bytes, defaultLevel));
+    BidiIterator::Level defaultLevel =
+        leftToRight ? BidiIterator::kLTR : BidiIterator::kRTL;
+    std::unique_ptr<BiDiRunIterator> bidi(
+        MakeBidiRunIterator(fUnicode.get(), utf8, utf8Bytes, defaultLevel));
   }
 
   void shape(const char* utf8,
@@ -302,17 +299,16 @@ static std::unique_ptr<Shaper> MakeHarfBuzz(sk_sp<SkFontMgr> fontMgr,
     return nullptr;
   }
 
-  auto unicode = SkUnicode::Make();
+  auto unicode = Unicode::Make();
   if (!unicode)
     return nullptr;
 
-  auto lineIter =
-      unicode->makeBreakIterator("th", SkUnicode::BreakType::kLines);
+  auto lineIter = unicode->makeBreakIterator("th", Unicode::BreakType::kLines);
   if (!lineIter)
     return nullptr;
 
   auto graphIter =
-      unicode->makeBreakIterator("th", SkUnicode::BreakType::kGraphemes);
+      unicode->makeBreakIterator("th", Unicode::BreakType::kGraphemes);
   if (!graphIter)
     return nullptr;
 
@@ -328,8 +324,8 @@ std::unique_ptr<Shaper> Shaper::Make(sk_sp<SkFontMgr>) {
   return std::unique_ptr<Shaper>();
 }
 
-std::unique_ptr<Shaper::BiDiRunIterator> Shaper::MakeSkUnicodeBidiRunIterator(
-    SkUnicode* unicode,
+std::unique_ptr<Shaper::BiDiRunIterator> Shaper::MakeBiDiRunIterator(
+    Unicode* unicode,
     const char* utf8,
     size_t utf8Bytes,
     uint8_t bidiLevel) {
@@ -344,34 +340,38 @@ std::unique_ptr<Shaper::BiDiRunIterator> Shaper::MakeSkUnicodeBidiRunIterator(
     SkDEBUGF("Invalid utf8 input\n");
   }
 
-  auto bidiDir =
-      (bidiLevel % 2 == 0) ? SkBidiIterator::kLTR : SkBidiIterator::kRTL;
-  SkUnicodeBidi bidi = unicode->makeBidiIterator(
+  auto bidiDir = (bidiLevel % 2 == 0) ? BidiIterator::kLTR : BidiIterator::kRTL;
+  UnicodeBidi bidi = unicode->makeBidiIterator(
       (const uint16_t*)utf16.getBuffer(), utf16.length(), bidiDir);
   if (!bidi) {
     SkDEBUGF("Bidi error\n");
     return nullptr;
   }
-  return std::make_unique<SkUnicodeBidiRunIterator>(utf8,utf8+utf8Bytes,std::move(bidi));
+  return std::make_unique<UnicodeBidiRunIterator>(utf8, utf8 + utf8Bytes,
+                                                  std::move(bidi));
 }
-std::unique_ptr<Shaper::BiDiRunIterator> Shaper::MakeBiDiRunIterator(
-    const char* utf8,
-    size_t utf8Bytes,
-    uint8_t bidiLevel) {
-  if (!SkTFitsIn<int32_t>(utf8Bytes)) {
-    SkDEBUGF
-  }
-  auto unicode = Unicode::Make();
-  if (!unicode) {
-    return nullptr;
-  }
 
-
-}
 std::unique_ptr<Shaper::FontRunIterator> Shaper::MakeFontMgrRunIterator(
     const char* utf8,
     size_t utf8Bytes,
     const SkFont& font,
     sk_sp<SkFontMgr> fallback) {
-  return std::unique_ptr<FontRunIterator>();
+  return std::make_unique<FontMgrRunIterator>(utf8,utf8Bytes,font,std::move(fallback));
+}
+
+std::unique_ptr<Shaper::FontRunIterator> Shaper::MakeFontMgrRunIterator(
+    const char* utf8,
+    size_t utf8Bytes,
+    const SkFont& font,
+    sk_sp<SkFontMgr> fallback,
+    const char* requestName,
+    SkFontStyle requestStyle,
+    const Shaper::LanguageRunIterator* language) {
+  return std::make_unique<FontMgrRunIterator>(utf8,
+                                              utf8Bytes,
+                                              font,
+                                              std::move(fallback),
+                                              requestName,
+                                              requestStyle,
+                                              language);
 }
