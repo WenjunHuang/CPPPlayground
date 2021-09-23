@@ -3,8 +3,8 @@
 //
 
 #pragma once
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <glad.h>
 #include <cassert>
 #include <functional>
 #include <iostream>
@@ -13,6 +13,7 @@ class Window {
  public:
   void Run(int x, int y, size_t width, size_t height) {
     CreateWindow(x, y, width, height);
+    OnCreated();
     Loop();
 
     glfwDestroyWindow(window_);
@@ -21,6 +22,7 @@ class Window {
 
  protected:
   virtual void OnDraw() = 0;
+  virtual void OnCreated() = 0;
   virtual void OnKey(int key, int action) {}
   virtual void OnScroll(double xoffset, double yoffset){};
 
@@ -41,10 +43,23 @@ class Window {
     xpos_ = width / 2;
     ypos_ = height / 2;
 
+
+
     glfwMakeContextCurrent(window_);
     //    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     glfwSwapInterval(1);
     glfwShowWindow(window_);
+
+    glfwSetWindowSizeCallback(window_, &WindowResized);
+    glfwSetCursorPosCallback(window_, &WindowCursorPosCallback);
+    glfwSetScrollCallback(window_, &WindowScrollCallback);
+    glfwSetKeyCallback(window_, &WindowKeyCallback);
+    // glad:load all OpenGL function pointers
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+      std::cout << "Failed to initialize GLAD" << '\n';
+      return;
+    }
+
   }
 
   void UpdateDimensions() {
@@ -67,16 +82,7 @@ class Window {
   }
 
   void Loop() {
-    glfwSetWindowSizeCallback(window_, &WindowResized);
-    glfwSetCursorPosCallback(window_, &WindowCursorPosCallback);
-    glfwSetScrollCallback(window_, &WindowScrollCallback);
-    glfwSetKeyCallback(window_, &WindowKeyCallback);
 
-    // glad:load all OpenGL function pointers
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-      std::cout << "Failed to initialize GLAD" << '\n';
-      return;
-    }
 
     while (!glfwWindowShouldClose(window_)) {
       Draw();
@@ -135,34 +141,45 @@ class Window {
 };
 
 using OnDrawCallback = std::function<void()>;
+using OnPrepare = std::function<void()>;
 class DefaultWindow : public Window {
  public:
   using CallbackType = OnDrawCallback;
-  DefaultWindow(OnDrawCallback callback) : draw_callback_(callback) {}
+
+  DefaultWindow(OnPrepare onPrepare, OnDrawCallback callback)
+      : prepare_(onPrepare), draw_callback_(callback) {}
 
  protected:
-  void OnDraw() override { draw_callback_(); }
+  void OnDraw() override {
+    draw_callback_();
+  }
+  void OnCreated() override { prepare_(); }
 
  private:
   OnDrawCallback draw_callback_;
+  OnPrepare prepare_;
 };
 
 using OnDrawWithSizeCallback = std::function<void(int, int)>;
 class DefaultWithSizeWindow : public Window {
  public:
   using CallbackType = OnDrawWithSizeCallback;
-  DefaultWithSizeWindow(OnDrawWithSizeCallback callback)
-      : draw_callback_(callback) {}
+  DefaultWithSizeWindow(OnPrepare onPrepare,OnDrawWithSizeCallback callback)
+      : prepare_(onPrepare),draw_callback_(callback) {}
 
  protected:
-  void OnDraw() override { draw_callback_(width_, height_); }
+  void OnDraw() override {
+    draw_callback_(width_, height_);
+  }
+  void OnCreated() override { prepare_(); }
 
  private:
   OnDrawWithSizeCallback draw_callback_;
+  OnPrepare prepare_;
 };
 
 template <typename T>
-void RunTemplate(typename T::CallbackType onDraw, int width, int height) {
+void RunTemplate(OnPrepare onPrepare,typename T::CallbackType onDraw, int width, int height) {
   if (!glfwInit()) {
     // Initialization failed
     exit(1);
@@ -173,17 +190,19 @@ void RunTemplate(typename T::CallbackType onDraw, int width, int height) {
   int xpos = std::max(0, (vidmode->width - width) / 2);
   int ypos = std::max(0, (vidmode->height - height) / 2);
 
-  T window(onDraw);
+  T window(onPrepare,onDraw);
   window.Run(xpos, ypos, w, h);
 }
 
-inline void Run(OnDrawCallback onDraw, int width = -1, int height = -1) {
-  RunTemplate<DefaultWindow>(onDraw, width, height);
-}
-
-inline void Run(OnDrawWithSizeCallback onDraw,
+inline void Run(OnPrepare onPrepare,
+                OnDrawCallback onDraw,
                 int width = -1,
                 int height = -1) {
-  RunTemplate<DefaultWithSizeWindow>(onDraw, width, height);
+  RunTemplate<DefaultWindow>(onPrepare,onDraw, width, height);
 }
 
+inline void Run(OnPrepare onPrepare,OnDrawWithSizeCallback onDraw,
+                int width = -1,
+                int height = -1) {
+  RunTemplate<DefaultWithSizeWindow>(onPrepare,onDraw, width, height);
+}

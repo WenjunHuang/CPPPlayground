@@ -64,7 +64,8 @@ class FreeTypeLib {
                   flags);
 
     FT_GlyphSlot slot = face->glyph;
-    FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL);
+    auto result = FT_Render_Glyph(slot, FT_RENDER_MODE_NORMAL);
+
     FT_Bitmap ftBitmap = slot->bitmap;
     return std::make_unique<Glyph>(ftBitmap.buffer, ftBitmap.width, ftBitmap.rows,
                                    slot->bitmap_left, slot->bitmap_top);

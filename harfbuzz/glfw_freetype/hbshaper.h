@@ -45,7 +45,7 @@ using HBBufferPtr =
 
 class HBShaper {
  public:
-  HBShaper(const string& font_file, std::unique_ptr<FreeTypeLib> lib)
+  HBShaper(const string& font_file, std::shared_ptr<FreeTypeLib> lib)
       : lib_(std::move(lib)) {
     float size = 50;
     face_ = lib_->LoadFace(font_file, size * 64, 72, 72);
@@ -87,6 +87,8 @@ class HBShaper {
       int twidth = pow(2, ceil(log(glyph->width) / log(2)));
       int theight = pow(2, ceil(log(glyph->height) / log(2)));
 
+      auto buffer = glyph->buffer;
+
       auto tdata = std::make_unique<unsigned char[]>(twidth * theight);
       for (int iy = 0; iy < glyph->height; ++iy) {
         memcpy(tdata.get() + iy * twidth, glyph->buffer + iy * glyph->width,
@@ -123,16 +125,14 @@ class HBShaper {
       indices[5] = 3;
 
       gl::GLTexturePtr texture_id(gl::CreateTexture(twidth, theight));
-      gl::UploadTextureData(texture_id.get(), twidth, theight, tdata.get());
+      auto vertex_buffer = gl::CreateVertexBuffer(vertices.get(), 4);
+      auto index_buffer = gl::CreateIndexBuffer(indices.get(), 6);
+      gl::UploadTextureData(*texture_id, twidth, theight, tdata.get());
 
-      meshes.push_back(gl::Mesh{
-          std::move(indices),
-          6,
-          std::move(tdata),
-          std::move(vertices),
-          4,
-          std::move(texture_id),
-      });
+      meshes.push_back(gl::Mesh{std::move(indices), 6, std::move(tdata),
+                                std::move(vertices), 4, std::move(texture_id),
+                                std::move(vertex_buffer),
+                                std::move(index_buffer)});
 
       x += xa;
       y += ya;
@@ -141,7 +141,7 @@ class HBShaper {
   }
 
  private:
-  std::unique_ptr<FreeTypeLib> lib_;
+  std::shared_ptr<FreeTypeLib> lib_;
   FTFacePtr face_;
   HBBufferPtr buffer_;
   HBFontPtr font_;

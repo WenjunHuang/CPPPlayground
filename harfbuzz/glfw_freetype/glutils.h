@@ -56,8 +56,14 @@ static const GLchar* vertex_src =
     "f_uv = a_uv;\n"
     "}\n";
 
+static const GLchar* fragmentSrc =
+    "uniform sampler2D u_tex;\n"
+    "varying vec2 f_uv;\n"
+    "void main() {\n"
+    "    gl_FragColor = texture2D(u_tex, f_uv);\n"
+    "}\n";
 GLTexturePtr CreateTexture(int width, int height) {
-  GLuint texture_id;
+  GLuint texture_id = 0;
 
   glGenTextures(1, &texture_id);
   glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -67,9 +73,15 @@ GLTexturePtr CreateTexture(int width, int height) {
   return GLTexturePtr(new GLuint(texture_id));
 }
 
-GLBufferPtr CreateVertexBuffer(const std::vector<Vertex>& vertices) {
+void UploadTextureData(GLuint texture_id,int width,int height,unsigned char* data) {
+  glBindTexture(GL_TEXTURE_2D,texture_id);
+  glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_ALPHA,GL_UNSIGNED_BYTE,data);
+}
+
+GLBufferPtr CreateVertexBuffer(const Vertex vertices[], int count) {
   std::vector<float> data;
-  for (const auto& vertex : vertices) {
+  for (int i = 0; i < count; i++) {
+    auto& vertex = vertices[i];
     data.push_back(vertex.x);
     data.push_back(vertex.y);
     data.push_back(vertex.s);
@@ -85,19 +97,63 @@ GLBufferPtr CreateVertexBuffer(const std::vector<Vertex>& vertices) {
   return GLBufferPtr(new GLuint(vertex_buffer));
 }
 
-GLBufferPtr CreateIndexBuffer(const std::vector<unsigned short>& indices) {
+GLBufferPtr CreateIndexBuffer(const unsigned short indices[], int count) {
   GLuint index_buffer;
   glGenBuffers(1, &index_buffer);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short),
-               indices.data(), GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned short), indices,
+               GL_STATIC_DRAW);
   return GLBufferPtr(new GLuint(index_buffer));
 }
 
 void Render(const std::vector<Mesh>& meshes) {
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glUseProgram(program);
+  for (auto& mesh : meshes) {
+    glBindBuffer(GL_ARRAY_BUFFER, *(mesh.vertex_buffer.get()));
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *(mesh.index_buffer.get()));
+    glBindTexture(GL_TEXTURE_2D, *(mesh.texture_id.get()));
+
+    glEnableVertexAttribArray(position_loc);
+    glVertexAttribPointer(position_loc, 2, GL_FLOAT, GL_FALSE,
+                          4 * sizeof(float), 0);
+    glEnableVertexAttribArray(uv_loc);
+    glVertexAttribPointer(uv_loc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
+                          (const GLvoid*)(2 * sizeof(float)));
+
+    glDrawElements(GL_TRIANGLES, mesh.nb_indices, GL_UNSIGNED_SHORT, 0);
+  }
+  glUseProgram(0);
+}
+
+void CreateShaderProgram() {
+  program = glCreateProgram();
+  vertex = glCreateShader(GL_VERTEX_SHADER);
+  fragment = glCreateShader(GL_FRAGMENT_SHADER);
+
+  glShaderSource(fragment, 1, &fragmentSrc, nullptr);
+  glCompileShader(fragment);
+  glAttachShader(program, fragment);
+
+  glShaderSource(vertex, 1, &vertex_src, nullptr);
+  glCompileShader(vertex);
+  glAttachShader(program, vertex);
+
+  glLinkProgram(program);
+  GLint isLinked = 0;
+  glGetProgramiv(program, GL_LINK_STATUS, &isLinked);
+  if (isLinked == GL_FALSE) {
+    char infoLog[512];
+    glGetShaderInfoLog(vertex, 512, NULL, infoLog);
+    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
+              << infoLog << std::endl;
+  }
+
+  glUniform1i(glGetUniformLocation(program, "u_tex"), 0);
+
+  position_loc = glGetAttribLocation(program, "a_position");
+  uv_loc = glGetAttribLocation(program, "a_uv");
 }
 
 }  // namespace gl
