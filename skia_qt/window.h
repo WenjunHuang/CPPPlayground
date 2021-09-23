@@ -97,6 +97,7 @@ class Window {
 
   void Draw() {
     canvas_->save();
+    canvas_->scale(dpi_,dpi_);
     OnDraw(canvas_);
     canvas_->restore();
     context_->flush();
