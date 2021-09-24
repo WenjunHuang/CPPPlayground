@@ -21,20 +21,7 @@ set(DEP_LIBS
 add_executable(skia_scenes_example ${SRC_SET})
 target_link_libraries(skia_scenes_example PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::CorePrivate Qt${QT_VERSION_MAJOR}::Widgets glfw glad::glad skia skia::skia range-v3 range-v3-meta range-v3::meta range-v3-concepts ICU::uc commons fmt::fmt harfbuzz)
 
-function(create_test)
-    include(CMakeParseArguments)
-    set(singleValues NAME)
-    set(multiValues SRCS LIBS)
-    cmake_parse_arguments(ARG
-            ""
-            "${singleValues}"
-            "${multiValues}"
-            ${ARGN})
-    add_executable(${ARG_NAME} ${ARG_SRCS})
-    target_link_libraries(${ARG_NAME} PRIVATE
-            "${ARG_LIBS}"
-            GTest::gmock GTest::gtest GTest::gtest_main)
-endfunction()
+
 
 create_test(NAME unicode_test SRCS shaper/unicode_test.cc shaper/unicode.cc LIBS ${DEP_LIBS})
 #add_executable(unicode_test unicode_test.cc unicode.cc)

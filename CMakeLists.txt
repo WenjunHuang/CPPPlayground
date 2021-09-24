@@ -4,6 +4,7 @@ enable_testing()
 set(CMAKE_CXX_STANDARD 20)
 if (MSVC)
     add_compile_options("/Zc:__cplusplus" "/utf-8" "/std:c++latest")
+#    add_compile_options("-fsanitize=address")
 endif ()
 if (APPLE)
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -53,6 +54,12 @@ function(add_single_file_targets)
             if (ARG_TEST)
                 add_test(NAME ${TARGET} COMMAND ${TARGET})
             endif ()
+#            if (WIN32)
+#                target_compile_options(${TARGET} PRIVATE -fsanitize=address)
+#                target_link_directories(${TARGET} PRIVATE "$ENV{ProgramFiles\(x86\)}/Microsoft Visual Studio/2019/Community/VC/Tools/Llvm/x64/lib/clang/12.0.0/lib/windows")
+#                target_link_libraries(${TARGET} PRIVATE clang_rt.asan_dynamic-x86_64 clang_rt.asan_dynamic_runtime_thunk-x86_64)
+#                target_link_options(${TARGET} PRIVATE /wholearchive:clang_rt.asan_dynamic_runtime_thunk-x86_64.lib)
+#            endif ()
         endforeach ()
     else ()
         message(FATAL_ERROR "please specify DIR")
@@ -93,7 +100,25 @@ function(add_dir_target)
     endif ()
 endfunction()
 
+function(create_test)
+    include(CMakeParseArguments)
+    set(singleValues NAME)
+    set(multiValues SRCS LIBS)
+    cmake_parse_arguments(ARG
+            ""
+            "${singleValues}"
+            "${multiValues}"
+            ${ARGN})
+    add_executable(${ARG_NAME} ${ARG_SRCS})
+    target_link_libraries(${ARG_NAME} PRIVATE
+            "${ARG_LIBS}"
+            GTest::gmock GTest::gtest GTest::gtest_main)
+endfunction()
 
+# common assets files used in sub projects
+add_custom_target(assets
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
+        )
 add_subdirectory(skia_qt)
 #add_subdirectory(range)
 add_subdirectory(harfbuzz)

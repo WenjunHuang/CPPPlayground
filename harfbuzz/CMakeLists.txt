@@ -13,13 +13,12 @@ find_package(glad CONFIG REQUIRED)
 find_package(freetype CONFIG REQUIRED)
 find_package(harfbuzz CONFIG REQUIRED)
 find_package(ICU REQUIRED COMPONENTS uc dt in io)
+find_package(GTest CONFIG REQUIRED)
 
-add_custom_target(hf_assets
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/glfw_freetype/fonts ${CMAKE_CURRENT_BINARY_DIR}/fonts
-        )
-set(DEPS harfbuzz glfw glad::glad freetype ICU::dt ICU::in ICU::io)
-add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${DEPS} DEPS hf_assets)
-add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${DEPS} DEPS hf_assets)
+
+set(DEPS harfbuzz glfw glad::glad freetype ICU::dt ICU::in ICU::io GTest::gtest fmt::fmt)
+add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${DEPS} DEPS assets)
+add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ${DEPS} DEPS assets)
 
 
 
