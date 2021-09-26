@@ -14,6 +14,8 @@ int main(int argc, char* argv[]) {
     auto default_dpi = platform_screen->logicalBaseDpi();
     auto dpi = platform_screen->logicalDpi();
     qDebug() << QString("screen %1").arg(screen->name());
+    qDebug() << QString("device pixel ratio: %1")
+        .arg(screen->devicePixelRatio());
     qDebug() << QString("default dpi:{%1, %2}")
                     .arg(default_dpi.first)
                     .arg(default_dpi.second);
