@@ -60,6 +60,12 @@ TEST(face,Create) {
   EXPECT_NE(face,hb_face_get_empty());
 
   hb_font_t* font = hb_font_create(face);
+  int x_scale = 0;
+  int y_scale = 0;
+  hb_font_get_scale(font,&x_scale,&y_scale);
+  fmt::print("x scale: {}, y scale: {}\n",x_scale,y_scale);
+//  hb_font_set_scale(font,20,20);
+
 
   char text[] = u8"中";
   int i = 0;
@@ -74,7 +80,7 @@ TEST(face,Create) {
   int32_t x = 0;
   int32_t y = 0;
   hb_font_get_glyph_advance_for_direction(font,glyph,
-                                          HB_DIRECTION_TTB,&x,&y);
+                                          HB_DIRECTION_LTR,&x,&y);
   fmt::print("horizontal advance: {}, vertical advance: {}\n",x,y);
 
 }
