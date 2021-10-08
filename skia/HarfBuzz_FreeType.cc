@@ -22,7 +22,7 @@ int main() {
   //  auto face = freeTypeLib.LoadFace("assets/fonts/Inter-Regular.otf",
   //                                   kFontSize * 64, 0, 0);
   auto data =
-      SkData::MakeFromFileName("assets/fonts/amiri-regular.ttf");
+      SkData::MakeFromFileName("../assets/fonts/amiri-regular.ttf");
   assert(data != nullptr);
 
   auto skia_typeface =
@@ -78,8 +78,8 @@ int main() {
   for (int i = 0; i < glyph_count; i++) {
     auto& gi = glyph_info[i];
     auto& gp = glyph_pos[i];
-    auto px = x + glyph_pos[i].x_offset / kFontSizeScale;
-    auto py = y - glyph_pos[i].y_offset / kFontSizeScale;
+    auto px = x + glyph_pos[i].x_offset / kFontSize;
+    auto py = y - glyph_pos[i].y_offset / kFontSize;
     run_buffer.glyphs[i] = glyph_info[i].codepoint;
     run_buffer.points()[i] =
         SkPoint::Make(x,y);
