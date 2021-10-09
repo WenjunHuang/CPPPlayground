@@ -80,6 +80,7 @@ TEST(face, Create) {
 }
 
 TEST(cluster, Create) {
+  hb_unicode_compose_func_t
   hb_blob_t* blob =
       hb_blob_create_from_file("../assets/fonts/NotoColorEmoji.ttf");
   hb_face_t* face = hb_face_create(blob, 0);
