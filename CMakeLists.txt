@@ -119,7 +119,8 @@ endfunction()
 add_custom_target(assets
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
         )
-add_subdirectory(skia_qt)
+add_subdirectory(freetype)
+add_subdirectory(skia)
 add_subdirectory(qt5)
 #add_subdirectory(range)
 add_subdirectory(harfbuzz)
