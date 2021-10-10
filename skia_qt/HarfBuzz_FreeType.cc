@@ -1,13 +1,13 @@
 //
 // Created by HUANG WEN JUN on 2021/9/22.
 //
+#include <fmt/printf.h>
 #include <harfbuzz/hb-ft.h>
 #include <harfbuzz/hb-icu.h>
 #include <harfbuzz/hb.h>
 #include <skia/core/SkTextBlob.h>
 #include <cassert>
 #include <memory>
-#include <fmt/printf.h>
 #include "free_type_lib.h"
 #include "window.h"
 using HBBufferPtr =
@@ -17,12 +17,12 @@ using HBBlobPtr = std::unique_ptr<hb_blob_t, FunctionWrapper<hb_blob_destroy>>;
 using HBFacePtr = std::unique_ptr<hb_face_t, FunctionWrapper<hb_face_destroy>>;
 
 int main() {
-  constexpr int kFontSize = 40;
+  constexpr int kFontSizePt = 16;  // point 1/72 inch
+  constexpr int kFontSizePx = kFontSizePt * 72 / 72;
   //  FreeTypeLib freeTypeLib;
   //  auto face = freeTypeLib.LoadFace("assets/fonts/Inter-Regular.otf",
   //                                   kFontSize * 64, 0, 0);
-  auto data =
-      SkData::MakeFromFileName("../assets/fonts/amiri-regular.ttf");
+  auto data = SkData::MakeFromFileName("../assets/fonts/amiri-regular.ttf");
   assert(data != nullptr);
 
   auto skia_typeface =
@@ -39,6 +39,9 @@ int main() {
 
   HBFacePtr face(hb_face_create(blob.get(), 0));
   HBFontPtr font(hb_font_create(face.get()));
+  hb_font_set_ptem(font.get(), kFontSizePt);
+  auto upem = hb_face_get_upem(face.get());
+  auto ppu = (float)kFontSizePx / upem;
 
   //  - create buffer
   //  - add text to buffer    ---> buffer contains Unicode text now
@@ -51,7 +54,7 @@ int main() {
   hb_buffer_set_language(buf.get(), hb_language_from_string("ar", -1));
 
   // layout the text
-  const char arb[] =u8"تسجّل يتكلّم";
+  const char arb[] = u8"تسجّل يتكلّم";
   hb_buffer_add_utf8(buf.get(), arb, -1, 0, -1);
   hb_shape(font.get(), buf.get(), nullptr, 0);
 
@@ -66,61 +69,57 @@ int main() {
   SkFont paint_font;
   paint_font.setTypeface(skia_typeface);
   paint_font.setSubpixel(true);
-  paint_font.setSize(kFontSize);
+  paint_font.setSize(kFontSizePt);
 
   auto run_buffer = text_blob_builder.allocRunPos(paint_font, glyph_count);
   double x = 0;
   double y = 0;
-  constexpr float kFontSizeScale = 64.0;
   std::vector<SkPoint> points;
   int text_bound_width = 0;
   int text_bound_height = 0;
   for (int i = 0; i < glyph_count; i++) {
     auto& gi = glyph_info[i];
     auto& gp = glyph_pos[i];
-    auto px = x + glyph_pos[i].x_offset / kFontSize;
-    auto py = y - glyph_pos[i].y_offset / kFontSize;
-    run_buffer.glyphs[i] = glyph_info[i].codepoint;
-    run_buffer.points()[i] =
-        SkPoint::Make(x,y);
-    x += glyph_pos[i].x_advance / kFontSize;
-    y += glyph_pos[i].y_advance / kFontSize;
-    points.push_back(SkPoint::Make(px,py));
+    auto px = x + glyph_pos[i].x_offset * ppu;
+    auto py = y - glyph_pos[i].y_offset * ppu;
 
-    text_bound_width += glyph_pos[i].x_advance / kFontSize;
-    text_bound_height += glyph_pos[i].y_advance / kFontSize;
+    run_buffer.glyphs[i] = glyph_info[i].codepoint;
+    run_buffer.points()[i] = SkPoint::Make(x, y);
+    x += glyph_pos[i].x_advance * ppu;
+    y += glyph_pos[i].y_advance * ppu;
+    points.push_back(SkPoint::Make(px, py));
+
+    text_bound_width += glyph_pos[i].x_advance * ppu;
+    text_bound_height += glyph_pos[i].y_advance * ppu;
   }
   auto text_blob = text_blob_builder.make();
 
   Run([&](auto canvas, int width, int height) {
-//    fmt::print("width:{},height:{}\n",width,height);
+    //    fmt::print("width:{},height:{}\n",width,height);
     SkPaint borderPaint;
     borderPaint.setStyle(SkPaint::kStroke_Style);
     borderPaint.setStrokeWidth(1);
-    borderPaint.setColor(SK_ColorBLUE);
+    borderPaint.setColor(SK_ColorBLACK);
 
     SkPaint paint;
     paint.setAntiAlias(true);
-    paint.setColor(SK_ColorBLUE);
-    canvas->clear(SK_ColorBLACK);
-    canvas->drawTextBlob(text_blob, width / 2,height / 2, paint);
-    canvas->drawString(arb,width / 2,height / 2 + 100,paint_font,paint);
+    paint.setColor(SK_ColorBLACK);
+    canvas->clear(SK_ColorWHITE);
+    canvas->drawTextBlob(text_blob, width / 2, height / 2, paint);
 
-    auto bounds = SkRect::MakeWH(text_bound_width,text_bound_height);
-    canvas->drawRect(bounds.makeOffset(width/2,height/2), borderPaint);
-    auto point = SkPoint::Make(width/2,height/2);
+    auto bounds = SkRect::MakeWH(text_bound_width, text_bound_height);
+    canvas->drawRect(bounds.makeOffset(width / 2, height / 2), borderPaint);
+    auto point = SkPoint::Make(width / 2, height / 2);
 
     paint.setStrokeCap(SkPaint::kRound_Cap);
     paint.setColor(SK_ColorRED);
     paint.setStrokeWidth(5);
-    canvas->drawLine(point,point,paint);
+    canvas->drawLine(point, point, paint);
 
-    for (auto& p:points) {
-//      p.offset(width / 2,height/2);
-      SkPoint dp = SkPoint::Make(p.x() + width / 2,p.y()+height/2);
-      canvas->drawLine(dp,dp,paint);
+    for (auto& p : points) {
+      p.offset(width / 2, height / 2);
+      SkPoint dp = SkPoint::Make(p.x() + width / 2, p.y() + height / 2);
+      canvas->drawLine(dp, dp, paint);
     }
-
-
   });
 }
