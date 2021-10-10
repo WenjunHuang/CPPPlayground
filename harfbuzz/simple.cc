@@ -6,9 +6,9 @@
 #include <hb.h>
 #include <unicode/utf8.h>
 #include <cassert>
+#include <iostream>
 #include <memory>
 #include <string>
-#include <iostream>
 
 struct BufferDeleter {
   void operator()(hb_buffer_t* buffer) { hb_buffer_destroy(buffer); }
@@ -78,9 +78,38 @@ TEST(face, Create) {
                                           &y);
   fmt::print("horizontal advance: {}, vertical advance: {}\n", x, y);
 }
+TEST(Cluster, PlainEnglishCluster) {
+  hb_blob_t* blob =
+      hb_blob_create_from_file("../assets/fonts/NotoSansSC-Regular.otf");
+  hb_face_t* face = hb_face_create(blob, 0);
 
-TEST(cluster, Create) {
-  hb_unicode_compose_func_t
+  EXPECT_NE(face, hb_face_get_empty());
+
+  auto buffer = hb_buffer_create();
+  hb_buffer_add_utf8(buffer, u8"ABC", -1, 0, -1);
+  hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
+  unsigned int glyph_length = 0;
+  auto glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
+  EXPECT_EQ(glyph_length, 3);
+  fmt::print("cluster 1 :{}, codepoint: U+{:x} \n", glyph_infos[0].cluster,
+             glyph_infos[0].codepoint);
+  fmt::print("cluster 2 :{}, codepoint: U+{:x} \n", glyph_infos[1].cluster,
+             glyph_infos[1].codepoint);
+  fmt::print("cluster 3 :{}, codepoint: U+{:x} \n", glyph_infos[2].cluster,
+             glyph_infos[2].codepoint);
+
+  // shape
+  auto font = hb_font_create(face);
+  hb_shape(font, buffer, nullptr, 0);
+  glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
+  EXPECT_EQ(glyph_length, 3);
+
+  fmt::print("cluster 1 :{} \n", glyph_infos[0].cluster);
+  fmt::print("cluster 2 :{} \n", glyph_infos[1].cluster);
+  fmt::print("cluster 3 :{} \n", glyph_infos[2].cluster);
+}
+
+TEST(Cluster, EmojiCluster) {
   hb_blob_t* blob =
       hb_blob_create_from_file("../assets/fonts/NotoColorEmoji.ttf");
   hb_face_t* face = hb_face_create(blob, 0);
@@ -90,15 +119,21 @@ TEST(cluster, Create) {
 
   auto buffer = hb_buffer_create();
   hb_buffer_add_utf8(buffer, u8"👨‍👩‍👧‍👦", -1, 0, -1);
-  hb_buffer_set_direction(buffer,HB_DIRECTION_LTR);
-
+  hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
+  unsigned int glyph_length = 0;
+  auto glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
+  EXPECT_EQ(glyph_length, 7);
+  for (int i = 0; i < glyph_length; i++)
+    fmt::print("cluster {} :{}, codepoint: U+{:x} \n", i + 1,
+               glyph_infos[i].cluster, glyph_infos[i].codepoint);
 
   auto font = hb_font_create(face);
 
   hb_shape(font, buffer, nullptr, 0);
-  unsigned int glyph_length = 0;
-  auto glyph_infos = hb_buffer_get_glyph_infos(buffer,&glyph_length);
-  EXPECT_EQ(glyph_length,1);
+  glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
+  EXPECT_EQ(glyph_length, 1);
+
+  fmt::print("cluster :{}", glyph_infos[0].cluster);
 }
 
 // int main() {

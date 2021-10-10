@@ -122,6 +122,7 @@ add_custom_target(assets
 add_subdirectory(freetype)
 add_subdirectory(skia)
 add_subdirectory(qt5)
+add_subdirectory(imgui_play)
 #add_subdirectory(range)
 add_subdirectory(harfbuzz)
 #add_subdirectory(google_test)

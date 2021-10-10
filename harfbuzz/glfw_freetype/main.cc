@@ -5,7 +5,7 @@
 #include "hbshaper.h"
 int main() {
   auto lib = std::make_shared<FreeTypeLib>();
-  HBShaper latinShaper("fonts/DejaVuSerif.ttf", lib);
+  HBShaper latinShaper("../assets/fonts/DejaVuSerif.ttf", lib);
   HBText hbt1 = {"ficellé fffffi. VAV.", "fr", HB_SCRIPT_LATIN,
                  HB_DIRECTION_LTR};
   latinShaper.Init();
