@@ -120,6 +120,8 @@ TEST(Cluster, EmojiCluster) {
   auto buffer = hb_buffer_create();
   hb_buffer_add_utf8(buffer, u8"👨‍👩‍👧‍👦", -1, 0, -1);
   hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
+  hb_buffer_set_cluster_level(buffer,HB_BUFFER_CLUSTER_LEVEL_MONOTONE_GRAPHEMES);
+
   unsigned int glyph_length = 0;
   auto glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
   EXPECT_EQ(glyph_length, 7);
@@ -127,13 +129,21 @@ TEST(Cluster, EmojiCluster) {
     fmt::print("cluster {} :{}, codepoint: U+{:x} \n", i + 1,
                glyph_infos[i].cluster, glyph_infos[i].codepoint);
 
+  uint32_t position_length = 0;
+  auto position_infos = hb_buffer_get_glyph_positions(buffer,&position_length);
+  EXPECT_EQ(position_length,7);
+  for (int i = 0; i < glyph_length; i++)
+    fmt::print("position {},({},{},{},{})  \n", i + 1,
+               position_infos[i].x_offset,position_infos[i].y_offset,
+               position_infos[i].x_advance,position_infos[i].y_advance);
+
   auto font = hb_font_create(face);
 
   hb_shape(font, buffer, nullptr, 0);
   glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
   EXPECT_EQ(glyph_length, 1);
 
-  fmt::print("cluster :{}", glyph_infos[0].cluster);
+  fmt::print("cluster {}, glyph index: {}", glyph_infos[0].cluster,glyph_infos[0].codepoint);
 }
 
 // int main() {
