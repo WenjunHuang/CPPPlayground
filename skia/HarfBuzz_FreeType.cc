@@ -18,7 +18,8 @@ using HBFacePtr = std::unique_ptr<hb_face_t, FunctionWrapper<hb_face_destroy>>;
 
 int main() {
   constexpr int kFontSizePt = 16;  // point 1/72 inch
-  constexpr int kFontSizePx = kFontSizePt * 72 / 72;
+  constexpr int kFontSizePx = kFontSizePt * 72  // DPI
+                              / 72;
   //  FreeTypeLib freeTypeLib;
   //  auto face = freeTypeLib.LoadFace("assets/fonts/Inter-Regular.otf",
   //                                   kFontSize * 64, 0, 0);

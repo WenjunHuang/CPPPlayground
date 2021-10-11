@@ -7,13 +7,13 @@
 #include FT_TYPES_H
 #include FT_OUTLINE_H
 #include FT_RENDER_H
+#include <unicode/utf16.h>
 #include <QApplication>
 #include <QPainter>
 #include <QWidget>
 #include <cassert>
 #include <memory>
 #include <utility>
-#include <unicode/utf16.h>
 
 template <auto* P>
 struct FunctionWrapper {
@@ -41,7 +41,7 @@ class Widget : public QWidget {
     QChar::requiresSurrogates(utf16_char);
     UChar32 unicode;
     int i = 0;
-    U16_NEXT_OR_FFFD(&utf16_char,i,2,unicode);
+    U16_NEXT_OR_FFFD(&utf16_char, i, 2, unicode);
 
     FT_UInt glyph_index = FT_Get_Char_Index(face_, unicode);
     FT_Load_Glyph(face_, glyph_index, FT_LOAD_DEFAULT);
@@ -70,8 +70,15 @@ class Widget : public QWidget {
       QPainter painter(this);
       auto s = size() / 2;
       painter.translate(QPoint(s.width(), s.height()));
-      //      size()
-            painter.translate(glyph_rect_.x(),glyph_rect_.y());
+
+      {
+        // Draw center point
+        painter.save();
+        painter.setBrush(QColor(255, 0, 0));
+        painter.drawRect(0, 0, 2, 2);
+        painter.restore();
+      }
+
       if (direct_render_) {
         painter.setPen(Qt::black);
 
@@ -86,20 +93,18 @@ class Widget : public QWidget {
 
         auto outline = &face_->glyph->outline;
         FT_Outline_Render(library_, outline, &params);
-      }else {
-        FT_Render_Glyph(face_->glyph,
-                        FT_RENDER_MODE_NORMAL);
+      } else {
+        FT_Render_Glyph(face_->glyph, FT_RENDER_MODE_NORMAL);
         QImage glyph_image(face_->glyph->bitmap.buffer,
                            face_->glyph->bitmap.width,
                            face_->glyph->bitmap.rows,
-                           face_->glyph->bitmap.pitch,
-                           QImage::Format_Indexed8);
+                           face_->glyph->bitmap.pitch, QImage::Format_Indexed8);
         QVector<QRgb> color_table;
-        for (int i =0;i< 256;i++) {
-          color_table << qRgba(0,0,0,i);
+        for (int i = 0; i < 256; i++) {
+          color_table << qRgba(0, 0, 0, i);
         }
         glyph_image.setColorTable(std::move(color_table));
-        painter.drawImage(QPoint(0,0),glyph_image);
+        painter.drawImage(QPoint(0, 0), glyph_image);
       }
     }
   }
@@ -113,8 +118,7 @@ class Widget : public QWidget {
   static void graySpans(int y, int count, const FT_Span_* spans, void* user) {
     QPainter* painter = reinterpret_cast<QPainter*>(user);
     painter->save();
-    painter->scale(1, -1);
-        y = -y;
+    y = -y;
 
     for (int i = 0; i < count; i++) {
       const auto& span = spans[i];
@@ -130,7 +134,7 @@ class Widget : public QWidget {
 };
 int main(int argc, char* argv[]) {
   QApplication app(argc, argv);
-  Widget w("../assets/fonts/NotoColorEmoji.ttf", U'\U0001F600', 48, true);
+  Widget w("../assets/fonts/NotoSansSC-Regular.otf", U'国', 40, true);
   w.show();
   return app.exec();
 }
