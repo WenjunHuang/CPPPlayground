@@ -54,8 +54,7 @@ TEST(buffer, SaveSetSegmentProps) {
 }
 
 TEST(face, Create) {
-  hb_blob_t* blob =
-      hb_blob_create_from_file("../assets/fonts/NotoSansSC-Regular.otf");
+  hb_blob_t* blob = hb_blob_create_from_file("./fonts/NotoSansSC-Regular.otf");
   EXPECT_NE(blob, hb_blob_get_empty());
 
   hb_face_t* face = hb_face_create(blob, 0);
@@ -113,6 +112,7 @@ TEST(Cluster, EmojiCluster) {
   hb_blob_t* blob =
       hb_blob_create_from_file("../assets/fonts/NotoColorEmoji.ttf");
   hb_face_t* face = hb_face_create(blob, 0);
+  auto font = hb_font_create(face);
   std::cout << hb_face_get_upem(face) << std::endl;
 
   EXPECT_NE(face, hb_face_get_empty());
@@ -127,13 +127,33 @@ TEST(Cluster, EmojiCluster) {
     fmt::print("cluster {} :{}, codepoint: U+{:x} \n", i + 1,
                glyph_infos[i].cluster, glyph_infos[i].codepoint);
 
-  auto font = hb_font_create(face);
-
   hb_shape(font, buffer, nullptr, 0);
   glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
   EXPECT_EQ(glyph_length, 1);
 
   fmt::print("cluster :{}", glyph_infos[0].cluster);
+}
+
+TEST(Font, FontScale) {
+  hb_blob_t* blob = hb_blob_create_from_file("./fonts/MyFont-Regular.ttf");
+  hb_face_t* face = hb_face_create(blob, 0);
+  auto upem = hb_face_get_upem(face);
+  EXPECT_EQ(1000, upem);
+
+  hb_font_t* font = hb_font_create(face);
+  hb_font_set_scale(font, upem, upem);
+
+  hb_buffer_t* buf = hb_buffer_create();
+  hb_buffer_set_direction(buf, HB_DIRECTION_LTR);
+
+  hb_buffer_add_utf8(buf, u8"ABC", -1, 0, -1);
+  hb_shape(font, buf, nullptr, 0);
+  unsigned int position_length = 0;
+  auto position_infos = hb_buffer_get_glyph_positions(buf, &position_length);
+  EXPECT_EQ(3, position_length);
+  EXPECT_EQ(544, position_infos[0].x_advance);
+  EXPECT_EQ(588, position_infos[1].x_advance);
+  EXPECT_EQ(632, position_infos[2].x_advance);
 }
 
 // int main() {

@@ -120,13 +120,14 @@ add_custom_target(assets
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
         )
 add_subdirectory(freetype)
-add_subdirectory(skia)
-add_subdirectory(qt5)
-add_subdirectory(imgui_play)
+#add_subdirectory(skia)
+#add_subdirectory(qt5)
+#add_subdirectory(imgui_play)
 #add_subdirectory(range)
 add_subdirectory(harfbuzz)
 #add_subdirectory(google_test)
 add_subdirectory(icu)
+add_subdirectory(libtxt)
 ## The gtest/gtest_main targets carry header search path
 ## dependencies automatically when using CMake 2.8.11 or
 ## later. Otherwise we have to add them here ourselves.
