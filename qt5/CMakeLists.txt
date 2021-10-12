@@ -1,7 +1,6 @@
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
-list(APPEND CMAKE_PREFIX_PATH ${QT_CMAKE})
 find_package(PkgConfig)
 find_package(Qt5 COMPONENTS Core Widgets Network Quick Concurrent QuickControls2 REQUIRED)
 

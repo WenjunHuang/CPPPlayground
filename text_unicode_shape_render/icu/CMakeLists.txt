@@ -1,7 +1,6 @@
 list(APPEND CMAKE_PREFIX_PATH ${QT_CMAKE})
 
 set(PREFIX ICU)
-set(CMAKE_CXX_STANDARD 17)
 if (MSVC)
     add_compile_options("/Zc:__cplusplus" "/utf-8")
 #"/fsanitize=address")

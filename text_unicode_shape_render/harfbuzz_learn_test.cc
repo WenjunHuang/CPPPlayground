@@ -21,24 +21,27 @@ int main(int argc, char** argv) {
   return RUN_ALL_TESTS();
 }
 
-std::string text = u8"中华人民共和国❤️";
-
-TEST(buffer, AddUtf8) {
+class HBTest : public ::testing::Test {
+ protected:
+  std::u8string utf8_chinese_emoji = u8"中华人民共和国❤️";
+};
+TEST_F(HBTest, AddUtf8) {
   hb_buffer_t* buf = hb_buffer_create();
   hb_buffer_content_type_t content_type = hb_buffer_get_content_type(buf);
 
   EXPECT_EQ(content_type, HB_BUFFER_CONTENT_TYPE_INVALID);
 
-  hb_buffer_add_utf8(buf, text.c_str(), text.size(), 0, text.size());
+  hb_buffer_add_utf8(buf, (const char*)utf8_chinese_emoji.c_str(),
+                     utf8_chinese_emoji.size(), 0, utf8_chinese_emoji.size());
   content_type = hb_buffer_get_content_type(buf);
   EXPECT_EQ(content_type, HB_BUFFER_CONTENT_TYPE_UNICODE);
 
   hb_buffer_destroy(buf);
 }
 
-TEST(buffer, SaveSetSegmentProps) {
+TEST_F(HBTest, SaveSetSegmentProps) {
   hb_buffer_t* buf = hb_buffer_create();
-  hb_buffer_add_utf8(buf, text.c_str(), -1, 0, -1);
+  hb_buffer_add_utf8(buf, (const char*)utf8_chinese_emoji.c_str(), -1, 0, -1);
   hb_buffer_set_direction(buf, HB_DIRECTION_LTR);
   hb_buffer_set_script(buf, HB_SCRIPT_HAN);
   hb_buffer_set_language(buf, hb_language_from_string("zh", -1));
@@ -62,7 +65,7 @@ TEST(face, Create) {
 
   hb_font_t* font = hb_font_create(face);
 
-  char text[] = u8"中";
+  char8_t text[] = u8"中";
   int i = 0;
   UChar32 code_point;
   U8_NEXT_OR_FFFD(text, i, -1, code_point);
@@ -85,7 +88,7 @@ TEST(Cluster, PlainEnglishCluster) {
   EXPECT_NE(face, hb_face_get_empty());
 
   auto buffer = hb_buffer_create();
-  hb_buffer_add_utf8(buffer, u8"ABC", -1, 0, -1);
+  hb_buffer_add_utf8(buffer, (const char*)u8"ABC", -1, 0, -1);
   hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
   unsigned int glyph_length = 0;
   auto glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
@@ -117,9 +120,11 @@ TEST(Cluster, EmojiCluster) {
   EXPECT_NE(face, hb_face_get_empty());
 
   auto buffer = hb_buffer_create();
-  hb_buffer_add_utf8(buffer, u8"👨‍👩‍👧‍👦", -1, 0, -1);
+  hb_buffer_add_utf8(buffer, (const char*)u8"👨‍👩‍👧‍👦", -1, 0,
+                     -1);
   hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
-  hb_buffer_set_cluster_level(buffer,HB_BUFFER_CLUSTER_LEVEL_MONOTONE_GRAPHEMES);
+  hb_buffer_set_cluster_level(buffer,
+                              HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS);
 
   unsigned int glyph_length = 0;
   auto glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
@@ -129,12 +134,12 @@ TEST(Cluster, EmojiCluster) {
                glyph_infos[i].cluster, glyph_infos[i].codepoint);
 
   uint32_t position_length = 0;
-  auto position_infos = hb_buffer_get_glyph_positions(buffer,&position_length);
-  EXPECT_EQ(position_length,7);
+  auto position_infos = hb_buffer_get_glyph_positions(buffer, &position_length);
+  EXPECT_EQ(position_length, 7);
   for (int i = 0; i < glyph_length; i++)
     fmt::print("position {},({},{},{},{})  \n", i + 1,
-               position_infos[i].x_offset,position_infos[i].y_offset,
-               position_infos[i].x_advance,position_infos[i].y_advance);
+               position_infos[i].x_offset, position_infos[i].y_offset,
+               position_infos[i].x_advance, position_infos[i].y_advance);
 
   auto font = hb_font_create(face);
 
@@ -142,7 +147,38 @@ TEST(Cluster, EmojiCluster) {
   glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
   EXPECT_EQ(glyph_length, 1);
 
-  fmt::print("cluster {}, glyph index: {}", glyph_infos[0].cluster,glyph_infos[0].codepoint);
+  fmt::print("cluster {}, glyph index: {}", glyph_infos[0].cluster,
+             glyph_infos[0].codepoint);
+}
+
+TEST(Cluster, Latin) {
+  hb_blob_t* blob =
+      hb_blob_create_from_file("../assets/fonts/NotoSansSC-Regular.ttf");
+  hb_face_t* face = hb_face_create(blob, 0);
+
+  const char16_t text[] =
+      u"ç¶§ç·\u0081ç·\u0085 è¥\u008Fè¥\u0086èŽ\u0082 å³·æ\u0095\u008Aæµ\u00AD";
+  auto buffer = hb_buffer_create();
+  hb_buffer_add_utf16(buffer, (const uint16_t*)text, -1, 0, -1);
+  hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
+//  hb_buffer_set_cluster_level(buffer,
+//                              HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS);
+
+  unsigned int glyph_length = 0;
+  fmt::print("Before Shape--------\n");
+  auto glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
+  for (int i = 0; i < glyph_length; i++)
+    fmt::print("cluster {} :{}, codepoint: U+{:x} \n", i + 1,
+               glyph_infos[i].cluster, glyph_infos[i].codepoint);
+
+  auto font = hb_font_create(face);
+
+  hb_shape(font, buffer, nullptr, 0);
+  fmt::print("After Shape--------\n");
+  glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
+  for (int i = 0; i < glyph_length; i++)
+    fmt::print("cluster {} :{}, glyphIndex: {} \n", i + 1,
+               glyph_infos[i].cluster, glyph_infos[i].codepoint);
 }
 
 TEST(Font, FontScale) {
@@ -157,7 +193,7 @@ TEST(Font, FontScale) {
   hb_buffer_t* buf = hb_buffer_create();
   hb_buffer_set_direction(buf, HB_DIRECTION_LTR);
 
-  hb_buffer_add_utf8(buf, u8"ABC", -1, 0, -1);
+  hb_buffer_add_utf8(buf, (const char*)u8"ABC", -1, 0, -1);
   hb_shape(font, buf, nullptr, 0);
   unsigned int position_length = 0;
   auto position_infos = hb_buffer_get_glyph_positions(buf, &position_length);
