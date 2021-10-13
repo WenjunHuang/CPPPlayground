@@ -22,7 +22,8 @@ add_library(libtxt STATIC src/minikin/SparseBitSet.cpp
         src/minikin/Hyphenator.cpp
         src/minikin/Hyphenator.h src/minikin/minikin_internal.h src/minikin/hb_font_cache.cc src/minikin/hb_font_cache.h
         src/log/log.cc
-        src/log/log.h src/minikin/minikin_internal.cc src/minikin/font_language_list_cache.cc src/minikin/font_language_list_cache.h src/minikin/font_language.cc src/minikin/font_language.h)
+        src/log/log.h src/minikin/minikin_internal.cc src/minikin/font_language_list_cache.cc src/minikin/font_language_list_cache.h src/minikin/font_language.cc src/minikin/font_language.h
+        src/utils/JenkinsHash.cpp)
 target_link_libraries(libtxt PUBLIC ${DEPS})
 target_include_directories(libtxt PUBLIC "${CMAKE_CURRENT_LIST_DIR}/src")
 

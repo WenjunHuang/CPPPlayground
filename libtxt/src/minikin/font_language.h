@@ -7,6 +7,7 @@
 #include <harfbuzz/hb.h>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace minikin {
 // Due to the limits in font fallback score calculation, we can't use anything
@@ -39,22 +40,23 @@ class FontLanguage {
   // Parse from string
   FontLanguage(const char* buf, size_t length);
 
-  bool isUnsupported() const { return language_ == INVALID_CODE; }
-  EmojiStyle getEmojiStyle() const { return emoji_style_; }
-  hb_language_t getHbLanguage() const { return hbLanguage_; }
-  bool isEqualScript(const FontLanguage& other) const;
+  [[nodiscard]] bool isUnsupported() const { return language_ == INVALID_CODE; }
+  [[nodiscard]] EmojiStyle getEmojiStyle() const { return emoji_style_; }
+  [[nodiscard]] hb_language_t getHbLanguage() const { return hbLanguage_; }
+  [[nodiscard]] bool isEqualScript(const FontLanguage& other) const;
 
   // Returns true if this script supports the given script. For example, ja-Jpan
   // supports Hira, ja-Hira doesn't support Jpan.
-  bool supportsHbScript(hb_script_t script) const;
+  [[nodiscard]] bool supportsHbScript(hb_script_t script) const;
 
-  std::string getString() const;
+  [[nodiscard]] std::string getString() const;
 
   // Calculates a matching score. This score represents how well the input
   // languages cover this language. The maximum score in the language list is
   // returned. 0 = no match, 1 = script match, 2 = script and primary language
   // match.
   int calcScoreFor(const FontLanguages& supported) const;
+
   uint64_t getIdentifier() const {
     return ((uint64_t)language_ << 49) | ((uint64_t)script_ << 17) |
            ((uint64_t)region_ << 2) | emoji_style_;
@@ -92,6 +94,7 @@ class FontLanguage {
   EmojiStyle emoji_style_;
 
   static uint8_t scriptToSubScriptBits(uint32_t script);
+
   static EmojiStyle resolveEmojiStyle(const char* buf,
                                       size_t length,
                                       uint32_t script);
@@ -99,5 +102,30 @@ class FontLanguage {
   // bits. Note that this function returns false if the requested subscript bits
   // are empty.
   static bool supportsScript(uint8_t providedBits, uint8_t requestedBits);
+};
+
+// An immutable list of languages.
+class FontLanguages {
+ public:
+  explicit FontLanguages(std::vector<FontLanguage>&& languages);
+  FontLanguages()
+      : union_of_subscript_bits_(0), is_all_the_same_language_(false) {}
+  FontLanguages(FontLanguages&&) = default;
+
+  FontLanguages(FontLanguage&) = delete;
+  FontLanguages& operator=(FontLanguages&) = delete;
+
+  size_t size() const { return languages_.size(); }
+  bool empty() const { return languages_.empty(); }
+  const FontLanguage& operator[](size_t n) const { return languages_[n]; }
+
+ private:
+  friend struct FontLanguage;  // for calcScoreFor
+  std::vector<FontLanguage> languages_;
+  uint8_t union_of_subscript_bits_;
+  bool is_all_the_same_language_;
+
+  uint8_t getUnionOfSubScriptBits() const { return union_of_subscript_bits_; }
+  bool isAllTheSameLanguage() const { return is_all_the_same_language_; }
 };
 }  // namespace minikin

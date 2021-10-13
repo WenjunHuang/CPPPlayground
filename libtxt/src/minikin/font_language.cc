@@ -3,12 +3,27 @@
 //
 
 #include "font_language.h"
+#include <algorithm>
 #include <cctype>
 namespace {
 #define SCRIPT_TAG(c1, c2, c3, c4)                                           \
   (((uint32_t)(c1)) << 24 | ((uint32_t)(c2)) << 16 | ((uint32_t)(c3)) << 8 | \
    ((uint32_t)(c4)))
 
+// Check if a language code supports emoji according to its subtag
+static bool isEmojiSubtag(const char* buf,
+                          size_t bufLen,
+                          const char* subtag,
+                          size_t subtagLen) {
+  if (bufLen < subtagLen) {
+    return false;
+  }
+  if (strncmp(buf, subtag, subtagLen) != 0) {
+    return false;  // no match between two strings
+  }
+  return (bufLen == subtagLen || buf[subtagLen] == '\0' ||
+          buf[subtagLen] == '-' || buf[subtagLen] == '_');
+}
 size_t nextDelimiterIndex(const char* buffer,
                           size_t bufferLength,
                           size_t startOffset) {
@@ -93,13 +108,13 @@ FontLanguage::FontLanguage(const char* buf, size_t length) {
     }
 
     if (nextDelimiterPos == length) {
-      hbLanguage_ = hb_language_from_string(getString().c_str(),-1);
-      emoji_style_ = resolveEmojiStyle(buf,length,script_);
-      return; // No region code.
+      hbLanguage_ = hb_language_from_string(getString().c_str(), -1);
+      emoji_style_ = resolveEmojiStyle(buf, length, script_);
+      return;  // No region code.
     }
 
     nextComponentStartPos = nextDelimiterPos + 1;
-    nextDelimiterPos = nextDelimiterIndex(buf,length,nextComponentStartPos);
+    nextDelimiterPos = nextDelimiterIndex(buf, length, nextComponentStartPos);
     componentLength = nextDelimiterPos - nextComponentStartPos;
   }
 
@@ -107,6 +122,7 @@ FontLanguage::FontLanguage(const char* buf, size_t length) {
     // Possibly region code.
   }
 }
+
 std::string FontLanguage::getString() const {
   if (isUnsupported()) {
     return "und";
@@ -114,10 +130,11 @@ std::string FontLanguage::getString() const {
 
   char buf[16];
 }
+
 uint8_t FontLanguage::scriptToSubScriptBits(uint32_t script) {
   uint8_t subScriptBits = 0u;
-  switch(script) {
-    case SCRIPT_TAG('B','o','p','o'):
+  switch (script) {
+    case SCRIPT_TAG('B', 'o', 'p', 'o'):
       subScriptBits = kBopomofoFlag;
       break;
     case SCRIPT_TAG('H', 'a', 'n', 'g'):
@@ -153,5 +170,112 @@ uint8_t FontLanguage::scriptToSubScriptBits(uint32_t script) {
       break;
   }
   return subScriptBits;
+}
+
+bool FontLanguage::isEqualScript(const FontLanguage& other) const {
+  return other.script_ == script_;
+}
+
+bool FontLanguage::supportsHbScript(hb_script_t script) const {
+  static_assert(
+      SCRIPT_TAG('J', 'p', 'a', 'n') == HB_TAG('J', 'p', 'a', 'n'),
+      "The Minikin script and HarfBuzz hb_script_t have different encodings.");
+  if (script == script_)
+    return true;
+  return supportsScript(sub_script_bits_, scriptToSubScriptBits(script));
+}
+
+bool FontLanguage::supportsScript(uint8_t providedBits, uint8_t requestedBits) {
+  return requestedBits != 0 && (providedBits & requestedBits) == requestedBits;
+}
+int FontLanguage::calcScoreFor(const FontLanguages& supported) const {
+  bool languageScriptMatch = false;
+  bool subtagMatch = false;
+  bool scriptMatch = false;
+
+  for (size_t i = 0; i < supported.size(); ++i) {
+    if (emoji_style_ != EMSTYLE_EMPTY &&
+        emoji_style_ == supported[i].emoji_style_) {
+      subtagMatch = true;
+      if (language_ == supported[i].language_) {
+        return 4;
+      }
+    }
+
+    if (isEqualScript(supported[i]) ||
+        supportsScript(supported[i].sub_script_bits_, sub_script_bits_)) {
+      scriptMatch = true;
+      if (language_ == supported[i].language_) {
+        languageScriptMatch = true;
+      }
+    }
+  }
+
+  if (supportsScript(supported.getUnionOfSubScriptBits(), sub_script_bits_)) {
+    scriptMatch = true;
+    if (language_ == supported[0].language_ &&
+        supported.isAllTheSameLanguage()) {
+      return 3;
+    }
+  }
+
+  if (languageScriptMatch) {
+    return 3;
+  } else if (subtagMatch) {
+    return 2;
+  } else if (scriptMatch) {
+    return 1;
+  }
+  return 0;
+}
+FontLanguage::EmojiStyle FontLanguage::resolveEmojiStyle(const char* buf,
+                                                         size_t length,
+                                                         uint32_t script) {
+  // First, lookup emoji subtag.
+  // 10 is the length of "-u-em-text", which is the shortest emoji subtag,
+  // unnecessary comparison can be avoided if total length is smaller than 10.
+  const size_t kMinSubtagLength = 10;
+  static const char kPrefix[] = "-u-em-";
+  if (length >= kMinSubtagLength) {
+    auto pos =
+        std::search(buf, buf + length, kPrefix, kPrefix + strlen(kPrefix));
+    if (pos != buf + length) {  // found
+      pos += strlen(kPrefix);
+      auto remainingLength = length - (pos - buf);
+      if (isEmojiSubtag(pos, remainingLength, "emoji", 5)) {
+        return EMSTYLE_EMOJI;
+      } else if (isEmojiSubtag(pos, remainingLength, "text", 4)) {
+        return EMSTYLE_TEXT;
+      } else if (isEmojiSubtag(pos, remainingLength, "default", 7)) {
+        return EMSTYLE_DEFAULT;
+      }
+    }
+  }
+
+  // If no emoji subtag was provided, resolve the emoji style from script code.
+  if (script == SCRIPT_TAG('Z', 's', 'y', 'e')) {
+    return EMSTYLE_EMOJI;
+  } else if (script == SCRIPT_TAG('Z', 's', 'y', 'm')) {
+    return EMSTYLE_TEXT;
+  }
+  return EMSTYLE_EMPTY;
+}
+
+FontLanguages::FontLanguages(std::vector<FontLanguage>&& languages)
+    : languages_(std::move(languages)) {
+  if (languages_.empty())
+    return;
+
+  const auto& lang = languages_[0];
+
+  is_all_the_same_language_ = true;
+  union_of_subscript_bits_ = lang.sub_script_bits_;
+  for (size_t i = 1; i < languages_.size(); ++i) {
+    union_of_subscript_bits_ |= languages_[i].sub_script_bits_;
+    if (is_all_the_same_language_ &&
+        lang.language_ != languages_[i].language_) {
+      is_all_the_same_language_ = false;
+    }
+  }
 }
 }  // namespace minikin

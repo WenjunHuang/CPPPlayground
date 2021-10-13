@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Font TypeSetting</title>
+    <style>
+        @font-face {
+            font-family: MyFont;
+            src: url(MyFont-Regular.ttf);
+        }
+
+
+        div {
+            font-family: MyFont;
+        }
+
+        .bg-pink {
+            background-color: pink;
+        }
+
+        .bg-green {
+            background-color: green;
+        }
+
+        .bg-aqua {
+            background-color: aqua;
+        }
+
+        .bg-yellow {
+            background-color: yellow;
+        }
+
+        .sz-14 {
+            font-size: 14px;
+        }
+
+        .sz-20 {
+            font-size: 20px;
+        }
+
+        .container {
+            border: 1px red solid;
+            width: 100%;
+            height: 100%;
+        }
+
+        .line2 {
+            font-variant-caps: small-caps;
+        }
+
+        .line3 {
+            background-color: green;
+            font-variant-caps: small-caps;
+        }
+
+        .input1 {
+            font-family: MyFont;
+        }
+
+        .lh-1_2 {
+            line-height: 1.2;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="sz-14 bg-pink">ABC</div>
+    <div class="sz-14 lh-1_2 bg-aqua">ABC</div>
+
+    <div class="line2 bg-yellow">AAAC</div>
+    <div class="line3 bg-green">ABCFF=>C</div>
+    <div> िकि</div>
+    <div><input type="text" class="input1"/></div>
+
+    <div class="bg-pink lh-1_2"></div>
+</div>
+</body>
+
+</html>

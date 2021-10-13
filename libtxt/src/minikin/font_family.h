@@ -5,6 +5,9 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include "utils/TypeHelpers.h"
+
 namespace minikin {
 class MinikinFont;
 
@@ -20,14 +23,23 @@ class FontStyle {
   FontStyle(int variant, int weight, bool italic);
   FontStyle(uint32_t langListId, int variant, int weight, bool italic);
 
-  int getWeight() const { return bits_ & kWeightMask; }
-  bool getItalic() const { return (bits_ & kItalicMask) != 0; }
-  int getVariant() const { return (bits_ >> kVariantShift) & kVariantMask; }
-  uint32_t getLanguageListId() const { return language_list_id_; }
+  [[nodiscard]] int getWeight() const { return bits_ & kWeightMask; }
+  [[nodiscard]] bool getItalic() const { return (bits_ & kItalicMask) != 0; }
+  [[nodiscard]] int getVariant() const {
+    return (bits_ >> kVariantShift) & kVariantMask;
+  }
+  [[nodiscard]] uint32_t getLanguageListId() const { return language_list_id_; }
 
   bool operator==(const FontStyle& other) const {
     return bits_ == other.bits_ && language_list_id_ == language_list_id_;
   }
+
+  android::hash_t hash() const;
+
+  // Looks up a language list from an internal cache and returns its ID.
+  // If the passed language list is not in the cache, registers it and returns
+  // newly assigned ID.
+  static uint32_t registerLanguageList(const std::string& languages);
 
  private:
   static constexpr uint32_t kWeightMask = (1 << 4) - 1;
@@ -36,6 +48,8 @@ class FontStyle {
   static constexpr uint32_t kVariantMask = (1 << 2) - 1;
   uint32_t bits_;
   uint32_t language_list_id_;
+
+  static uint32_t pack(int variant, int weight, bool italic);
 };
 
 using AxisTag = uint32_t;
