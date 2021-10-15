@@ -71,11 +71,38 @@ uint16_t packLanguageOrRegion(const char* c,
   }
 }
 
+size_t unpackLanguageOrRegion(uint16_t in,
+                              char* out,
+                              uint8_t twoLetterBase,
+                              uint8_t threeLetterBase) {
+  uint8_t first = (in >> 10) & 0x1f;
+  uint8_t second = (in >> 5) & 0x1f;
+  uint8_t third = in & 0x1f;
+  if (first == 0x1f) {
+    out[0] = second + twoLetterBase;
+    out[1] = third + twoLetterBase;
+    return 2;
+  } else {
+    out[0] = first + threeLetterBase;
+    out[1] = second + threeLetterBase;
+    out[2] = third + threeLetterBase;
+    return 3;
+  }
+}
+
 // Returns true if buffer is valid for script code. The length of buffer must
 // be 4.
 bool isValidScriptCode(const char* buffer) {
   return std::isupper(buffer[0]) && std::islower(buffer[1]) &&
          std::islower(buffer[2]) && std::islower(buffer[3]);
+}
+
+// Returns true if the buffer is valid for region code.
+bool isValidRegionCode(const char* buffer, size_t length) {
+  return (length == 2 && std::isupper(buffer[0]) &&
+          std::isupper(buffer[1]))  // ISO-3166
+         || (length == 3 && std::isdigit(buffer[0]) &&
+             std::isdigit(buffer[1]) && std::isdigit(buffer[2]));  // UN M.49
 }
 
 }  // namespace
@@ -120,7 +147,13 @@ FontLanguage::FontLanguage(const char* buf, size_t length) {
 
   if (componentLength == 2 || componentLength == 3) {
     // Possibly region code.
+    auto p = buf + nextComponentStartPos;
+    if (isValidRegionCode(p, componentLength)) {
+      region_ = packLanguageOrRegion(p, componentLength, 'A', '0');
+    }
   }
+  hbLanguage_ = hb_language_from_string(getString().c_str(), -1);
+  emoji_style_ = resolveEmojiStyle(buf, length, script_);
 }
 
 std::string FontLanguage::getString() const {
@@ -129,6 +162,19 @@ std::string FontLanguage::getString() const {
   }
 
   char buf[16];
+  size_t i = unpackLanguageOrRegion(language_, buf, 'a', 'a');
+  if (script_ != 0) {
+    buf[i++] = '-';
+    buf[i++] = (script_ >> 24) & 0xFFu;
+    buf[i++] = (script_ >> 16) & 0xFFu;
+    buf[i++] = (script_ >> 8) & 0xFFu;
+    buf[i++] = script_ & 0xFFu;
+  }
+  if (region_ != INVALID_CODE) {
+    buf[i++] = '-';
+    i += unpackLanguageOrRegion(region_, buf + i, 'A', '0');
+  }
+  return std::string(buf, i);
 }
 
 uint8_t FontLanguage::scriptToSubScriptBits(uint32_t script) {
@@ -167,6 +213,8 @@ uint8_t FontLanguage::scriptToSubScriptBits(uint32_t script) {
       break;
     case SCRIPT_TAG('K', 'o', 'r', 'e'):
       subScriptBits = kHanFlag | kHangulFlag;
+      break;
+    default:
       break;
   }
   return subScriptBits;

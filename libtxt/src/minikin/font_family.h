@@ -5,7 +5,10 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
+#include <unordered_set>
+#include "SparseBitSet.h"
 #include "utils/TypeHelpers.h"
 
 namespace minikin {
@@ -31,7 +34,7 @@ class FontStyle {
   [[nodiscard]] uint32_t getLanguageListId() const { return language_list_id_; }
 
   bool operator==(const FontStyle& other) const {
-    return bits_ == other.bits_ && language_list_id_ == language_list_id_;
+    return bits_ == other.bits_ && language_list_id_ == other.language_list_id_;
   }
 
   android::hash_t hash() const;
@@ -39,7 +42,8 @@ class FontStyle {
   // Looks up a language list from an internal cache and returns its ID.
   // If the passed language list is not in the cache, registers it and returns
   // newly assigned ID.
-  static uint32_t registerLanguageList(const std::string& languages);
+  [[maybe_unused]] static uint32_t registerLanguageList(
+      const std::string& languages);
 
  private:
   static constexpr uint32_t kWeightMask = (1 << 4) - 1;
@@ -52,7 +56,16 @@ class FontStyle {
   static uint32_t pack(int variant, int weight, bool italic);
 };
 
-using AxisTag = uint32_t;
+enum FontVariant {
+  VARIANT_DEFAULT = 0,
+  VARIANT_COMPACT = 1,
+  VARIANT_ELEGANT = 2,
+};
+
+inline android::hash_t hash_type(const FontStyle& style) {
+  return style.hash();
+}
+
 // attributes representing transforms (fake bold, fake italic) to match styles
 class FontFakery {
  public:
@@ -68,6 +81,22 @@ class FontFakery {
   bool fake_italic_;
 };
 
+struct FakedFont {
+  // ownership is the enclosing FontCollection
+  MinikinFont* font;
+  FontFakery fakery;
+};
+
+using AxisTag = uint32_t;
+struct Font {
+  Font(std::shared_ptr<MinikinFont> typeface, FontStyle style);
+
+  std::shared_ptr<MinikinFont> typeface;
+  FontStyle style;
+
+  [[nodiscard]] std::unordered_set<AxisTag> getSupportedAxesLocked() const;
+};
+
 struct FontVariation {
   FontVariation(AxisTag axisTag, float value)
       : axisTag(axisTag), value(value) {}
@@ -75,5 +104,57 @@ struct FontVariation {
   float value;
 };
 
-class FontFamily {};
+class FontFamily {
+ public:
+  explicit FontFamily(std::vector<Font>&& fonts);
+  FontFamily(int variant, std::vector<Font>&& fonts);
+  FontFamily(uint32_t langId, int variant, std::vector<Font>&& fonts);
+
+  static bool analyzeStyle(const std::shared_ptr<MinikinFont>& typeface,
+                           int* weight,
+                           bool* italic);
+
+  [[nodiscard]] FakedFont getClosestMatch(FontStyle style) const;
+  [[nodiscard]] uint32_t langId() const { return lang_id_; }
+  [[nodiscard]] int variant() const { return variant_; }
+
+  // API's for enumerating the fonts in a family. These don't guarantee any
+  // particular order
+  [[nodiscard]] size_t getNumFonts() const { return fonts_.size(); }
+  [[nodiscard]] const std::shared_ptr<MinikinFont>& getFont(size_t index) const {
+    return fonts_[index].typeface;
+  }
+
+  [[nodiscard]] FontStyle getStyle(size_t index) const { return fonts_[index].style; }
+  [[nodiscard]] bool isColorEmojiFamily() const;
+  [[nodiscard]] const std::unordered_set<AxisTag>& supportedAxes() const {
+    return supported_axes_;
+  }
+
+  // Get Unicode coverage.
+  [[nodiscard]] const SparseBitSet& getCoverage() const { return coverage_; }
+
+  // Returns true if the font has a glyph for the code point and variation
+  // selector pair. Caller should acquire a lock before calling the method.
+  [[nodiscard]] bool hasGlyph(uint32_t codepoint, uint32_t variantSelector) const;
+
+  // Returns true if this font family has a variation sequence table (cmap
+  // format14 subtable).
+  [[nodiscard]] bool hasVSTable() const { return has_vs_table_; }
+
+  // Creates new FontFamily based on this family while applying font variations.
+  // Returns nullptr if none of variations apply to this family.
+  std::shared_ptr<FontFamily> createFamilyWithVariation(
+      const std::vector<FontVariation>& variations) const;
+
+ private:
+  void computeCoverage();
+
+  uint32_t lang_id_;
+  int variant_;
+  std::vector<Font> fonts_;
+  std::unordered_set<AxisTag> supported_axes_;
+  SparseBitSet coverage_;
+  bool has_vs_table_;
+};
 }  // namespace minikin

@@ -40,7 +40,7 @@
 #endif
 
 #ifndef ALOGD
-#define ALOGD(message, ...) FML_DLOG(INFO) << (message)
+#define ALOGD(message, ...) (spdlog::debug(message))
 #endif
 
 #ifndef ALOGW

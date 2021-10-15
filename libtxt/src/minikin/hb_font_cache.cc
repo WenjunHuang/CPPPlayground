@@ -31,6 +31,7 @@ class HbFontCache : private android::OnEntryRemoved<int32_t, hb_font_t*> {
 };
 
 HbFontCache* getFontCacheLocked() {
+  assertMinikinLocked();
   static HbFontCache* cache = nullptr;
   if (cache == nullptr) {
     cache = new HbFontCache();
@@ -44,14 +45,6 @@ void purgeHbFontCacheLocked() {
 }
 hb_font_t* getHbFontLocked(const MinikinFont* minikinFont) {
   assertMinikinLocked();
-
-  static hb_font_t* nullFaceFont = nullptr;
-  if (minikinFont == nullptr) {
-    if (nullFaceFont == nullptr) {
-      nullFaceFont = hb_font_create(nullptr);
-    }
-    return hb_font_reference(nullFaceFont);
-  }
 
   HbFontCache* fontCache = getFontCacheLocked();
   const int32_t fontId = minikinFont->GetUniqueId();

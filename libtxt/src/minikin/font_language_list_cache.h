@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <gtest/gtest_prod.h>
 #include <unordered_map>
 #include <vector>
 #include "font_language.h"
@@ -20,16 +21,19 @@ class FontLanguageListCache {
   static uint32_t getId(const std::string& languages);
 
   // Caller should acquire a lock before calling the method.
-  static const FontLanguages& getById(uint32_t  id);
+  static const FontLanguages& getById(uint32_t id);
+
  private:
-  FontLanguageListCache() {}
-  ~FontLanguageListCache() {}
+  FRIEND_TEST(FontLanguageListCacheTest, DefaultEmptyLanguageList);
+  FRIEND_TEST(FontLanguageListCacheTest, SingleLanguage);
+  FontLanguageListCache() = default;
+  ~FontLanguageListCache() = default;
 
   // Caller should acquire a lock before calling the method.
   static FontLanguageListCache* getInstance();
   std::vector<FontLanguages> language_lists_;
 
   // A map from string representation of the font language list to the ID.
-  std::unordered_map<std::string,uint32_t> language_list_lookup_table_;
+  std::unordered_map<std::string, uint32_t> language_list_lookup_table_;
 };
 }  // namespace minikin
