@@ -122,7 +122,7 @@ add_custom_target(assets
 #add_subdirectory(qt5)
 #add_subdirectory(imgui_play)
 #add_subdirectory(range)
-add_subdirectory(text_unicode_shape_render)
+#add_subdirectory(text_unicode_shape_render)
 #add_subdirectory(google_test)
 add_subdirectory(libtxt)
 ## The gtest/gtest_main targets carry header search path

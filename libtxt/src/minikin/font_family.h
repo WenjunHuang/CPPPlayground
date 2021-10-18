@@ -121,11 +121,14 @@ class FontFamily {
   // API's for enumerating the fonts in a family. These don't guarantee any
   // particular order
   [[nodiscard]] size_t getNumFonts() const { return fonts_.size(); }
-  [[nodiscard]] const std::shared_ptr<MinikinFont>& getFont(size_t index) const {
+  [[nodiscard]] const std::shared_ptr<MinikinFont>& getFont(
+      size_t index) const {
     return fonts_[index].typeface;
   }
 
-  [[nodiscard]] FontStyle getStyle(size_t index) const { return fonts_[index].style; }
+  [[nodiscard]] FontStyle getStyle(size_t index) const {
+    return fonts_[index].style;
+  }
   [[nodiscard]] bool isColorEmojiFamily() const;
   [[nodiscard]] const std::unordered_set<AxisTag>& supportedAxes() const {
     return supported_axes_;
@@ -136,7 +139,8 @@ class FontFamily {
 
   // Returns true if the font has a glyph for the code point and variation
   // selector pair. Caller should acquire a lock before calling the method.
-  [[nodiscard]] bool hasGlyph(uint32_t codepoint, uint32_t variantSelector) const;
+  [[nodiscard]] bool hasGlyph(uint32_t codepoint,
+                              uint32_t variantSelector) const;
 
   // Returns true if this font family has a variation sequence table (cmap
   // format14 subtable).
@@ -144,7 +148,7 @@ class FontFamily {
 
   // Creates new FontFamily based on this family while applying font variations.
   // Returns nullptr if none of variations apply to this family.
-  std::shared_ptr<FontFamily> createFamilyWithVariation(
+  [[nodiscard]] std::shared_ptr<FontFamily> createFamilyWithVariation(
       const std::vector<FontVariation>& variations) const;
 
  private:

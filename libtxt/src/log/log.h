@@ -44,11 +44,11 @@
 #endif
 
 #ifndef ALOGW
-#define ALOGW(message, ...) FML_LOG(WARNING) << (message)
+#define ALOGW(message, ...) (spdlog::warn(message))
 #endif
 
 #ifndef ALOGE
-#define ALOGE(message, ...) FML_LOG(ERROR) << (message)
+#define ALOGE(message, ...) (spdlog::error(message))
 #endif
 
 #define android_errorWriteLog(tag, subTag) \

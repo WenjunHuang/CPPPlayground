@@ -55,6 +55,7 @@ struct MinikinRect {
 
 // Callback for freeing data
 typedef void (*MinikinDestroyFunc)(void* data);
+
 class MinikinFont {
  public:
   explicit MinikinFont(int32_t unique_id) : unique_id_(unique_id) {}
@@ -66,7 +67,9 @@ class MinikinFont {
                          const MinikinPaint& paint) const = 0;
 
   virtual hb_face_t* CreateHarfBuzzFace() const { return nullptr; }
+
   virtual const std::vector<minikin::FontVariation>& GetAxes() const = 0;
+
   virtual std::shared_ptr<MinikinFont> CreateFontWithVariation(
       const std::vector<FontVariation>&) const {
     return nullptr;
@@ -77,7 +80,7 @@ class MinikinFont {
            (uint32_t)c4;
   }
 
-  int32_t GetUniqueId() const { return unique_id_; }
+  [[nodiscard]] int32_t GetUniqueId() const { return unique_id_; }
 
  private:
   const int32_t unique_id_;

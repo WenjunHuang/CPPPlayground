@@ -3,7 +3,9 @@
 //
 
 #include "cmap_coverage.h"
+#include <log/log.h>
 #include <vector>
+#include "minikin_internal.h"
 namespace minikin {
 
 // Lower value has higher priority. 0 for the highest priority table.
@@ -50,15 +52,28 @@ static uint32_t readU32(const uint8_t* data, size_t offset) {
          ((uint32_t)data[offset + 2]) << 8 | ((uint32_t)data[offset + 3]);
 }
 
-// Get the coverage information out of a Format4 subtable, storing it in the
+static void addRange(std::vector<uint32_t>& coverage,
+                     uint32_t start,
+                     uint32_t end) {
+#ifdef VERBOSE_DEBUG
+  ALOGD("adding range %d-%d\n", start, end);
+#endif
+  if (coverage.empty() || coverage.back() < start) {
+    coverage.push_back(start);
+    coverage.push_back(end);
+  } else {
+    coverage.back() = end;
+  }
+}
+// Get the coverage information out of a Format 4 subtable, storing it in the
 // coverage vector
 static bool getCoverageFormat4(std::vector<uint32_t>& coverage,
                                const uint8_t* data,
                                size_t size) {
-  constexpr size_t kSegCountOffset = 6;
-  constexpr size_t kEndCountOffset = 14;
-  constexpr size_t kHeaderSize = 16;
-  constexpr size_t kSegmentSize =
+  const size_t kSegCountOffset = 6;
+  const size_t kEndCountOffset = 14;
+  const size_t kHeaderSize = 16;
+  const size_t kSegmentSize =
       8;  // total size of array elements for one segment
   if (kEndCountOffset > size) {
     return false;
@@ -69,16 +84,88 @@ static bool getCoverageFormat4(std::vector<uint32_t>& coverage,
   }
   for (size_t i = 0; i < segCount; i++) {
     uint32_t end = readU16(data, kEndCountOffset + 2 * i);
-    uint32_t start = readU16(data,kHeaderSize + 2 *(segCount + i));
+    uint32_t start = readU16(data, kHeaderSize + 2 * (segCount + i));
     if (end < start) {
       // invalid segment range: size must be positive
+      android_errorWriteLog(0x534e4554, "26413177");
       return false;
     }
-    uint32_t rangeOffset = readU16(data,kHeaderSize + 2 * (3 * segCount + 1));
+    uint32_t rangeOffset = readU16(data, kHeaderSize + 2 * (3 * segCount + i));
     if (rangeOffset == 0) {
-
+      uint32_t delta = readU16(data, kHeaderSize + 2 * (2 * segCount + i));
+      if (((end + delta) & 0xffff) > end - start) {
+        addRange(coverage, start, end + 1);
+      } else {
+        for (uint32_t j = start; j < end + 1; j++) {
+          if (((j + delta) & 0xffff) != 0) {
+            addRange(coverage, j, j + 1);
+          }
+        }
+      }
+    } else {
+      for (uint32_t j = start; j < end + 1; j++) {
+        uint32_t actualRangeOffset =
+            kHeaderSize + 6 * segCount + rangeOffset + (i + j - start) * 2;
+        if (actualRangeOffset + 2 > size) {
+          // invalid rangeOffset is considered a "warning" by OpenType Sanitizer
+          continue;
+        }
+        uint32_t glyphId = readU16(data, actualRangeOffset);
+        if (glyphId != 0) {
+          addRange(coverage, j, j + 1);
+        }
+      }
     }
   }
+  return true;
+}
+
+// Get the coverage information out of a Format 12 subtable, storing it in the
+// coverage vector
+static bool getCoverageFormat12(std::vector<uint32_t>& coverage,
+                                const uint8_t* data,
+                                size_t size) {
+  const size_t kNGroupsOffset = 12;
+  const size_t kFirstGroupOffset = 16;
+  const size_t kGroupSize = 12;
+  const size_t kStartCharCodeOffset = 0;
+  const size_t kEndCharCodeOffset = 4;
+  const size_t kMaxNGroups =
+      0xfffffff0 / kGroupSize;  // protection against overflow
+  // For all values < kMaxNGroups, kFirstGroupOffset + nGroups * kGroupSize fits
+  // in 32 bits.
+  if (kFirstGroupOffset > size) {
+    return false;
+  }
+  uint32_t nGroups = readU32(data, kNGroupsOffset);
+  if (nGroups >= kMaxNGroups ||
+      kFirstGroupOffset + nGroups * kGroupSize > size) {
+    android_errorWriteLog(0x534e4554, "25645298");
+    return false;
+  }
+  for (uint32_t i = 0; i < nGroups; i++) {
+    uint32_t groupOffset = kFirstGroupOffset + i * kGroupSize;
+    uint32_t start = readU32(data, groupOffset + kStartCharCodeOffset);
+    uint32_t end = readU32(data, groupOffset + kEndCharCodeOffset);
+    if (end < start) {
+      // invalid group range: size must be positive
+      android_errorWriteLog(0x534e4554, "26413177");
+      return false;
+    }
+
+    // No need to read outside of Unicode code point range.
+    if (start > MAX_UNICODE_CODE_POINT) {
+      return true;
+    }
+    if (end > MAX_UNICODE_CODE_POINT) {
+      // file is inclusive, vector is exclusive
+      addRange(coverage, start, MAX_UNICODE_CODE_POINT + 1);
+      return true;
+    }
+    addRange(coverage, start,
+             end + 1);  // file is inclusive, vector is exclusive
+  }
+  return true;
 }
 
 SparseBitSet CmapCoverage::getCoverage(const uint8_t* cmap_data,
@@ -117,6 +204,7 @@ SparseBitSet CmapCoverage::getCoverage(const uint8_t* cmap_data,
       continue;  // Invalid table: not enough space to read.
     }
     const uint16_t format = readU16(cmap_data, offset + kFormatOffset);
+
     if (platformId == 0 /* Unicode */ &&
         encodingId == 5 /* Variation Sequences */) {
       if (!(*has_cmap_format14_subtable) && format == 14) {
@@ -178,13 +266,19 @@ SparseBitSet CmapCoverage::getCoverage(const uint8_t* cmap_data,
   if (bestTableOffset == kInvalidOffset) {
     return SparseBitSet();
   }
-
   const uint8_t* tableData = cmap_data + bestTableOffset;
   const size_t tableSize = cmap_size - bestTableOffset;
   std::vector<uint32_t> coverageVec;
   bool success;
   if (bestTableFormat == 4) {
     success = getCoverageFormat4(coverageVec, tableData, tableSize);
+  } else {
+    success = getCoverageFormat12(coverageVec, tableData, tableSize);
+  }
+  if (success && (coverageVec.size() != 0)) {
+    return SparseBitSet(&coverageVec.front(), coverageVec.size() >> 1);
+  } else {
+    return SparseBitSet();
   }
 }
 }  // namespace minikin

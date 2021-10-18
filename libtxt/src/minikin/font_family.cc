@@ -140,13 +140,13 @@ bool FontFamily::hasGlyph(uint32_t codepoint, uint32_t variantSelector) const {
 }
 std::shared_ptr<FontFamily> FontFamily::createFamilyWithVariation(
     const std::vector<FontVariation>& variations) const {
-  if (variations.empty() || supported_axes_.empty()){
+  if (variations.empty() || supported_axes_.empty()) {
     return nullptr;
   }
 
   bool hasSupportedAxis = false;
-  for (const auto& variation:variations) {
-    if (supported_axes_.find(variation.axisTag) != supported_axes_.end()){
+  for (const auto& variation : variations) {
+    if (supported_axes_.find(variation.axisTag) != supported_axes_.end()) {
       hasSupportedAxis = true;
       break;
     }
@@ -157,13 +157,13 @@ std::shared_ptr<FontFamily> FontFamily::createFamilyWithVariation(
   }
 
   std::vector<Font> fonts;
-  for (const auto& font:fonts_) {
+  for (const auto& font : fonts_) {
     bool supportedVariations = false;
     std::scoped_lock lock(gMinikinLock);
     std::unordered_set<AxisTag> supportedAxes = font.getSupportedAxesLocked();
-    if (!supportedAxes.empty()){
-      for (const auto& variation:variations){
-        if (supportedAxes.find(variation.axisTag) != supportedAxes.end()){
+    if (!supportedAxes.empty()) {
+      for (const auto& variation : variations) {
+        if (supportedAxes.find(variation.axisTag) != supportedAxes.end()) {
           supportedVariations = true;
           break;
         }
@@ -173,26 +173,32 @@ std::shared_ptr<FontFamily> FontFamily::createFamilyWithVariation(
     if (supportedVariations) {
       minikinFont = font.typeface->CreateFontWithVariation(variations);
     }
-    if (minikinFont == nullptr){
+    if (minikinFont == nullptr) {
       minikinFont = font.typeface;
     }
-    fonts.emplace_back(std::move(minikinFont),font.style);
+    fonts.emplace_back(std::move(minikinFont), font.style);
   }
 
-  return std::make_shared<FontFamily>(lang_id_,variant_,std::move(fonts));
+  return std::make_shared<FontFamily>(lang_id_, variant_, std::move(fonts));
 }
 void FontFamily::computeCoverage() {
   std::scoped_lock lock(gMinikinLock);
   const FontStyle defaultStyle;
   const MinikinFont* typeface = getClosestMatch(defaultStyle).font;
-  const uint32_t cmapTag = MinikinFont::MakeTag('c','m','a','p');
-  HbBlob cmapTable(getFontTable(typeface,cmapTag));
-  if (cmapTable.get() == nullptr){
+  const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
+  HbBlob cmapTable(getFontTable(typeface, cmapTag));
+  if (cmapTable.get() == nullptr) {
     // Missing or corrupt font cmap table; bail out.
     // The cmap table maps charcodes to glyph indices in a font.
     return;
   }
-  coverage_ = CmapCoverage::getCoverage(cmapTable.get(),cmapTable.size(),&has_vs_table_);
+  coverage_ = CmapCoverage::getCoverage(cmapTable.get(), cmapTable.size(),
+                                        &has_vs_table_);
+  for (size_t i = 0; i < fonts_.size(); ++i) {
+    std::unordered_set<AxisTag> supportedAxes =
+        fonts_[i].getSupportedAxesLocked();
+    supported_axes_.insert(supportedAxes.begin(), supportedAxes.end());
+  }
 }
 
 }  // namespace minikin
