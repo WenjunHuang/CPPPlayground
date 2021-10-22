@@ -17,6 +17,20 @@ namespace minikin {
 class MinikinFont;
 
 struct MinikinPaint {
+  MinikinPaint()
+      : font(nullptr),
+        size(0),
+        scaleX(0),
+        skewX(0),
+        letterSpacing(0),
+        wordSpacing(0),
+        paintFlags(0),
+        fakery(),
+        hyphenEdit(),
+        fontFeatureSettings() {}
+
+  bool skipCache() const { return !fontFeatureSettings.empty(); }
+
   MinikinFont* font;
   float size;
   float scaleX;

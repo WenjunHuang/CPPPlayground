@@ -70,10 +70,13 @@ class SparseBitSet {
 
   static const uint32_t kMaximumCapacity = 0xFFFFFF;
   static const int kLogValuesPerPage = 8;
-  static const int kPageMask = (1 << kLogValuesPerPage) - 1;
+  static const int kPageMask = (1 << kLogValuesPerPage) - 1; // 0xFFFF
+
   static const int kLogBytesPerEl = 2;
+
   static const int kLogBitsPerEl = kLogBytesPerEl + 3;
-  static const int kElMask = (1 << kLogBitsPerEl) - 1;
+  static const int kElMask = (1 << kLogBitsPerEl) - 1; // 0x1F
+
   // invariant: sizeof(element) == (1 << kLogBytesPerEl)
   typedef uint32_t element;
   static const element kElAllOnes = ~((element)0);

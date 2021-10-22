@@ -24,14 +24,17 @@ namespace minikin {
 TEST(SparseBitSetTest, smallAmount) {
   std::vector<uint32_t> range;
   range.push_back(1);
-  range.push_back(128);
+  range.push_back(2);
 //  for (uint32_t i = 1; i <= 128; ++i) {
 //    range.push_back(i);
 //  }
   SparseBitSet bitset(range.data(), 1);
-  for (uint32_t ch = 1; ch < 128; ch++) {
-    ASSERT_TRUE(bitset.get(ch)) << ch;
-  }
+//  for (uint32_t ch = 1; ch < 256; ch++) {
+//    ASSERT_TRUE(bitset.get(ch)) << ch;
+//  }
+//  ASSERT_FALSE(bitset.get(9391231));
+  ASSERT_TRUE(bitset.get(1));
+  ASSERT_FALSE(bitset.get(2));
 //  for (uint32_t ch = 129; ch < 256; ch++) {
 //    ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
 //  }

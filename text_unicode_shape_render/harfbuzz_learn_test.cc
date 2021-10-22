@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
 class HBTest : public ::testing::Test {
  protected:
-  std::u8string utf8_chinese_emoji = u8"中华人民共和国❤️";
+  std::string utf8_chinese_emoji = u8"中华人民共和国❤️";
 };
 TEST_F(HBTest, AddUtf8) {
   hb_buffer_t* buf = hb_buffer_create();
@@ -65,7 +65,7 @@ TEST(face, Create) {
 
   hb_font_t* font = hb_font_create(face);
 
-  char8_t text[] = u8"中";
+  char text[] = u8"中";
   int i = 0;
   UChar32 code_point;
   U8_NEXT_OR_FFFD(text, i, -1, code_point);
@@ -150,10 +150,39 @@ TEST(Cluster, EmojiCluster) {
   fmt::print("cluster {}, glyph index: {}", glyph_infos[0].cluster,
              glyph_infos[0].codepoint);
 }
+TEST(Cluster, Other) {
 
+      hb_blob_t* blob =
+          hb_blob_create_from_file("../assets/fonts/Inter-V.ttf");
+  hb_face_t* face = hb_face_create(blob, 0);
+
+  const char16_t text[] =
+      u"\u0061\u0308\u0303\u0323\u032D\u0308\u0303\u0323\u032D";
+  auto buffer = hb_buffer_create();
+  hb_buffer_add_utf16(buffer, (const uint16_t*)text, -1, 0, -1);
+  hb_buffer_set_direction(buffer, HB_DIRECTION_LTR);
+  //  hb_buffer_set_cluster_level(buffer,
+  //                              HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS);
+
+  unsigned int glyph_length = 0;
+  fmt::print("Before Shape--------\n");
+  auto glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
+  for (int i = 0; i < glyph_length; i++)
+    fmt::print("cluster {} :{}, codepoint: U+{:x} \n", i + 1,
+               glyph_infos[i].cluster, glyph_infos[i].codepoint);
+
+  auto font = hb_font_create(face);
+
+  hb_shape(font, buffer, nullptr, 0);
+  fmt::print("After Shape--------\n");
+  glyph_infos = hb_buffer_get_glyph_infos(buffer, &glyph_length);
+  for (int i = 0; i < glyph_length; i++)
+    fmt::print("cluster {} :{}, glyphIndex: {} \n", i + 1,
+               glyph_infos[i].cluster, glyph_infos[i].codepoint);
+}
 TEST(Cluster, Latin) {
   hb_blob_t* blob =
-      hb_blob_create_from_file("../assets/fonts/NotoSansSC-Regular.ttf");
+      hb_blob_create_from_file("../assets/fonts/Inter-V.ttf");
   hb_face_t* face = hb_face_create(blob, 0);
 
   const char16_t text[] =
