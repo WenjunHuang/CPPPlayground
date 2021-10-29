@@ -16,6 +16,9 @@ class FontCollection {
   explicit FontCollection();
 
  public:
+  static std::shared_ptr<FontCollection> Create(
+      const std::vector<std::shared_ptr<FontFamily>>& typefaces);
+
   // libtxt extension: an interface for looking up fallback fonts for characters
   // that do not match this collection's font families.
   class FallbackFontProvider {
@@ -53,6 +56,12 @@ class FontCollection {
 
   const std::unordered_set<AxisTag>& getSupportedTags() const {
     return supported_axes_;
+  }
+
+  uint32_t getId() const;
+
+  void set_fallback_font_provider(std::unique_ptr<FallbackFontProvider> ffp){
+    fallback_font_provider_ = std::move(ffp);
   }
 
  private:

@@ -107,7 +107,7 @@ bool isValidRegionCode(const char* buffer, size_t length) {
 
 }  // namespace
 namespace minikin {
-FontLanguage::FontLanguage(const char* buf, size_t length) {
+FontLanguage::FontLanguage(const char* buf, size_t length):FontLanguage() {
   size_t firstDelimiterPos = nextDelimiterIndex(buf, length, 0);
   if (isValidLanguageCode(buf, firstDelimiterPos)) {
     language_ = packLanguageOrRegion(buf, firstDelimiterPos, 'a', 'a');

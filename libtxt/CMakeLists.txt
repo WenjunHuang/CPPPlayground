@@ -29,7 +29,7 @@ add_library(libtxt STATIC src/minikin/SparseBitSet.cpp
         src/minikin/hb_font_cache.cc src/minikin/hb_font_cache.h
         src/log/log.cc
         src/log/log.h src/minikin/minikin_internal.cc src/minikin/font_language_list_cache.cc src/minikin/font_language_list_cache.h src/minikin/font_language.cc src/minikin/font_language.h
-        src/utils/JenkinsHash.cpp src/minikin/font_utils.cc src/minikin/font_utils.h src/minikin/cmap_coverage.cc src/minikin/cmap_coverage.h src/minikin/grapheme_break.cc src/minikin/grapheme_break.h src/minikin/font_collection.cc src/minikin/font_collection.h src/minikin/line_breaker.cc src/minikin/line_breaker.h src/minikin/word_breaker.cc src/minikin/word_breaker.h src/minikin/emoji.cc src/minikin/emoji.h)
+        src/utils/JenkinsHash.cpp src/minikin/font_utils.cc src/minikin/font_utils.h src/minikin/cmap_coverage.cc src/minikin/cmap_coverage.h src/minikin/grapheme_break.cc src/minikin/grapheme_break.h src/minikin/font_collection.cc src/minikin/font_collection.h src/minikin/line_breaker.cc src/minikin/line_breaker.h src/minikin/word_breaker.cc src/minikin/word_breaker.h src/minikin/emoji.cc src/minikin/emoji.h src/minikin/layout.cc src/minikin/layout.h)
 target_link_libraries(libtxt PUBLIC ${DEPS})
 target_include_directories(libtxt PUBLIC "${CMAKE_CURRENT_LIST_DIR}/src"
         $<TARGET_PROPERTY:GTest::gtest,INCLUDE_DIRECTORIES>)
@@ -46,7 +46,7 @@ add_custom_target(libtxt_fonts
 # test
 add_executable(libtxt_test test/main.cc test/HbFontCacheTest.cc
         test/SparseBitSetTest.cpp
-        test/minikin_font_for_test.cc test/minikin_font_for_test.h test/FontLanguageListCacheTest.cc test/CmapCoverageTest.cc test/FontCollectionTest.cc test/WordBreakerTest.cc)
+        test/minikin_font_for_test.cc test/minikin_font_for_test.h test/FontLanguageListCacheTest.cc test/CmapCoverageTest.cc test/FontCollectionTest.cc test/WordBreakerTest.cc test/FontFamilyTest.cc)
 target_link_libraries(libtxt_test PRIVATE libtxt GTest::gtest)
 add_dependencies(libtxt_test libtxt_fonts)
 

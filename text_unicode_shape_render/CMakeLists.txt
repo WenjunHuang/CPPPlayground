@@ -8,6 +8,7 @@ find_package(harfbuzz CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(rapidcheck CONFIG REQUIRED)
 
 set(PREFIX text)
 add_custom_target(${PREFIX}_fonts
@@ -20,6 +21,8 @@ add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS
         harfbuzz::harfbuzz
         GTest::gtest
         fmt::fmt
+        rapidcheck
+        rapidcheck_gmock
         DEPS ${PREFIX}_fonts assets
         INCLUDES ${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 add_subdirectory(icu)

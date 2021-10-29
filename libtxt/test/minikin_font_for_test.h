@@ -18,10 +18,11 @@ class MinikinFontForTest : public MinikinFont {
 
   MinikinFontForTest(MinikinFontForTest&&) = delete;
   MinikinFontForTest& operator=(MinikinFontForTest&&) = delete;
+
   hb_face_t* CreateHarfBuzzFace() const override;
-  [[nodiscard]] float GetHorizontalAdvance(
-      uint32_t glyph_id,
-      const MinikinPaint& paint) const override;
+
+  [[nodiscard]] float GetHorizontalAdvance(uint32_t glyph_id,
+                             const MinikinPaint& paint) const override;
 
   void GetBounds(MinikinRect* bounds,
                  uint32_t glyph_id,

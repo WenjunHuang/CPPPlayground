@@ -64,10 +64,6 @@ class SparseBitSet {
   uint32_t nextSetBit(uint32_t fromIndex) const;
 
   static const uint32_t kNotFound = ~0u;
-
- private:
-  void initFromRanges(const uint32_t* ranges, size_t nRanges);
-
   static const uint32_t kMaximumCapacity = 0xFFFFFF;
   static const int kLogValuesPerPage = 8;
   static const int kPageMask = (1 << kLogValuesPerPage) - 1; // 0xFFFF
@@ -77,13 +73,18 @@ class SparseBitSet {
   static const int kLogBitsPerEl = kLogBytesPerEl + 3;
   static const int kElMask = (1 << kLogBitsPerEl) - 1; // 0x1F
 
+  static uint32_t calcNumPages(const uint32_t* ranges, size_t nRanges);
+ private:
+  void initFromRanges(const uint32_t* ranges, size_t nRanges);
+
+
+
   // invariant: sizeof(element) == (1 << kLogBytesPerEl)
   typedef uint32_t element;
   static const element kElAllOnes = ~((element)0);
   static const element kElFirst = ((element)1) << kElMask;
   static const uint16_t noZeroPage = 0xFFFF;
 
-  static uint32_t calcNumPages(const uint32_t* ranges, size_t nRanges);
   static int CountLeadingZeros(element x);
 
   uint32_t mMaxVal;
