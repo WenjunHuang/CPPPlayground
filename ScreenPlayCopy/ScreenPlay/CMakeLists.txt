@@ -29,11 +29,11 @@ find_package(
 
 set(src
         app.cc
-        )
+        src/global_variables.cc)
 
 set(headers
         app.h
-        )
+        src/global_variables.h)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     qt_add_resources(resources ScreenPlayQML.qrc)

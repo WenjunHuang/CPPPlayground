@@ -62,13 +62,9 @@ void SparseBitSet::initFromRanges(const uint32_t* ranges, size_t nRanges) {
     return;
   }
   mMaxVal = maxVal;
-  auto indexSize = (mMaxVal + kPageMask) >> kLogValuesPerPage;
-  mIndices.reset(new uint16_t[indexSize]);
+  mIndices.reset(new uint16_t[(mMaxVal + kPageMask) >> kLogValuesPerPage]);
   uint32_t nPages = calcNumPages(ranges, nRanges);
-
-  int pageElements = kLogValuesPerPage - kLogBitsPerEl;
-  auto elementSize = nPages << pageElements;
-  mBitmaps.reset(new element[elementSize]());
+  mBitmaps.reset(new element[nPages << (kLogValuesPerPage - kLogBitsPerEl)]());
   mZeroPageIndex = noZeroPage;
   uint32_t nonzeroPageEnd = 0;
   uint32_t currentPage = 0;
@@ -81,26 +77,20 @@ void SparseBitSet::initFromRanges(const uint32_t* ranges, size_t nRanges) {
     if (startPage >= nonzeroPageEnd) {
       if (startPage > nonzeroPageEnd) {
         if (mZeroPageIndex == noZeroPage) {
-          mZeroPageIndex = (currentPage++) << pageElements;
+          mZeroPageIndex = (currentPage++)
+                           << (kLogValuesPerPage - kLogBitsPerEl);
         }
         for (uint32_t j = nonzeroPageEnd; j < startPage; j++) {
           mIndices[j] = mZeroPageIndex;
         }
       }
-      mIndices[startPage] = (currentPage++) << pageElements;
+      mIndices[startPage] = (currentPage++)
+                            << (kLogValuesPerPage - kLogBitsPerEl);
     }
 
-    size_t index = ((currentPage - 1)
-                    << pageElements)  // 每个page占据8个(1 <<(kLogValuesPerPage
-                                      // - kLogBitsPerEl)) mBitmaps槽位
-                   + ((start & kPageMask) >> kLogBitsPerEl);
+    size_t index = ((currentPage - 1) << (kLogValuesPerPage - kLogBitsPerEl)) +
+                   ((start & kPageMask) >> kLogBitsPerEl);
     size_t nElements = (end - (start & ~kElMask) + kElMask) >> kLogBitsPerEl;
-        size_t nMyElements = (end - start + kElMask) >> kLogBitsPerEl;
-//    size_t nMyElements = (end - start + kElMask)
-        ALOGE("nElements: {},nMyElements:{}", nElements, nMyElements);
-    if (nElements != nMyElements)
-      ALOGE("start: {},end:{}", start, end);
-
     if (nElements == 1) {
       mBitmaps[index] |= (kElAllOnes >> (start & kElMask)) &
                          (kElAllOnes << ((~end + 1) & kElMask));
@@ -112,11 +102,12 @@ void SparseBitSet::initFromRanges(const uint32_t* ranges, size_t nRanges) {
       mBitmaps[index + nElements - 1] |= kElAllOnes << ((~end + 1) & kElMask);
     }
     for (size_t j = startPage + 1; j < endPage + 1; j++) {
-      mIndices[j] = (currentPage++) << pageElements;
+      mIndices[j] = (currentPage++) << (kLogValuesPerPage - kLogBitsPerEl);
     }
     nonzeroPageEnd = endPage + 1;
   }
 }
+
 
 #if defined(_WIN32)
 int SparseBitSet::CountLeadingZeros(element x) {

@@ -22,12 +22,17 @@
 namespace minikin {
 
 TEST(SparseBitSetTest, calcNumPages) {
+  std::vector<uint32_t> bigRangePage;
+  bigRangePage.push_back(SparseBitSet::kMaximumCapacity - 215);
+  bigRangePage.push_back(SparseBitSet::kMaximumCapacity - 1);
+  SparseBitSet sbt0(bigRangePage.data(), 1);
+
   std::vector<uint32_t> singleInFirstPage;
   singleInFirstPage.push_back(SparseBitSet::kPageMask / 5);
   singleInFirstPage.push_back(SparseBitSet::kPageMask / 3);
-  EXPECT_EQ(1,SparseBitSet::calcNumPages(singleInFirstPage.data(),1));
-  SparseBitSet sbs1(singleInFirstPage.data(),1);
-  EXPECT_EQ(singleInFirstPage[0],sbs1.nextSetBit(0));
+  EXPECT_EQ(1, SparseBitSet::calcNumPages(singleInFirstPage.data(), 1));
+  SparseBitSet sbs1(singleInFirstPage.data(), 1);
+  EXPECT_EQ(singleInFirstPage[0], sbs1.nextSetBit(0));
 
   std::vector<uint32_t> singleRangeFromBegin;
   singleRangeFromBegin.push_back(0 + SparseBitSet::kPageMask / 5);
@@ -57,12 +62,13 @@ TEST(SparseBitSetTest, calcNumPages) {
 
 TEST(SparseBitSetTest, my) {
   std::vector<uint32_t> data;
-  data.push_back(32);
-  data.push_back(65);
-  SparseBitSet sbs(data.data(),data.size()/2);
-  for (auto ch=32;ch < 65;ch++){
+  data.push_back(0);
+  data.push_back(3);
+  SparseBitSet sbs(data.data(), data.size() / 2);
+  for (auto ch = 0; ch < 2; ch++) {
     ASSERT_TRUE(sbs.get(ch)) << ch;
   }
+  EXPECT_EQ(0, sbs.nextSetBit(1));
 }
 TEST(SparseBitSetTest, randomTest) {
   const uint32_t kTestRangeNum = 4096;
@@ -77,21 +83,32 @@ TEST(SparseBitSetTest, randomTest) {
 
   SparseBitSet bitset(range.data(), range.size() / 2);
 
-//  uint32_t ch = 0;
-//  for (size_t i = 0; i < range.size() / 2; ++i) {
-//    uint32_t start = range[i * 2];
-//    uint32_t end = range[i * 2 + 1];
-//
-//    for (; ch < start; ch++) {
-//      ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
-//    }
-//    for (; ch < end; ch++) {
-//      ASSERT_TRUE(bitset.get(ch)) << std::hex << ch;
-//    }
-//  }
-//  for (; ch < 0x1FFFFFF; ++ch) {
-//    ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
-//  }
+    uint32_t ch = 0;
+    for (size_t i = 0; i < range.size() / 2; ++i) {
+      uint32_t start = range[i * 2];
+      uint32_t end = range[i * 2 + 1];
+
+      for (; ch < start; ch++) {
+        ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
+      }
+      for (; ch < end; ch++) {
+        ASSERT_TRUE(bitset.get(ch)) << std::hex << ch;
+      }
+    }
+    for (; ch < 0x1FFFFFF; ++ch) {
+      ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
+    }
+    EXPECT_EQ(range[0],bitset.nextSetBit(0));
 }
+
+uint32_t createBitVector(uint32_t from, uint32_t to) {
+  // 给定一个范围，0-31，返回对应的bit vector
+  if (from > to || to > 31)
+    return 0;
+  constexpr uint32_t kAllOnes = ~0;
+  constexpr const int kLogBitsPerEl = 5;
+  static const int kElMask = (1 << kLogBitsPerEl) - 1;  // 0x1F
+}
+TEST(SparseBitSetTest, setBitsAlgorithm) {}
 
 }  // namespace minikin

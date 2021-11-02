@@ -13,6 +13,7 @@ find_package(GTest CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(skia CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
+find_package(benchmark CONFIG REQUIRED)
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 
 
@@ -44,10 +45,27 @@ add_custom_target(libtxt_fonts
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/fonts ${CMAKE_CURRENT_BINARY_DIR}/fonts)
 
 # test
-add_executable(libtxt_test test/main.cc test/HbFontCacheTest.cc
+add_executable(libtxt_test
+        test/main.cc
+        test/HbFontCacheTest.cc
         test/SparseBitSetTest.cpp
-        test/minikin_font_for_test.cc test/minikin_font_for_test.h test/FontLanguageListCacheTest.cc test/CmapCoverageTest.cc test/FontCollectionTest.cc test/WordBreakerTest.cc test/FontFamilyTest.cc)
-target_link_libraries(libtxt_test PRIVATE libtxt GTest::gtest)
+        test/minikin_font_for_test.cc
+        test/minikin_font_for_test.h
+        test/FontLanguageListCacheTest.cc
+        test/CmapCoverageTest.cc
+        test/FontCollectionTest.cc
+        test/WordBreakerTest.cc
+        test/FontFamilyTest.cc
+        )
+target_link_libraries(libtxt_test PRIVATE
+        libtxt
+        GTest::gtest
+        )
 add_dependencies(libtxt_test libtxt_fonts)
+
+add_executable(libtxt_benchmark
+        test/SparseBitSetBenchmark.cc)
+target_link_libraries(libtxt_benchmark PRIVATE
+        libtxt benchmark::benchmark)
 
 

@@ -4,7 +4,7 @@ set(PREFIX skia)
 set(CMAKE_CXX_STANDARD 17)
 if (MSVC)
     add_compile_options("/Zc:__cplusplus" "/utf-8")
-#"/fsanitize=address")
+    #"/fsanitize=address")
 endif ()
 
 find_package(PkgConfig)
@@ -17,7 +17,7 @@ find_package(harfbuzz CONFIG REQUIRED)
 find_package(ICU REQUIRED COMPONENTS uc dt in io)
 
 
-add_library(commons INTERFACE window.h )
+add_library(commons INTERFACE window.h)
 
 add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS ICU::dt ICU::in ICU::io freetype harfbuzz glfw skia skia::skia glad::glad fmt::fmt-header-only commons DEPS assets)
 add_subdirectory(scenes_example)
