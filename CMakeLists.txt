@@ -118,25 +118,6 @@ endfunction()
 add_custom_target(assets
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
         )
-#add_subdirectory(ScreenPlayCopy)
-#add_subdirectory(skia)
-#add_subdirectory(qt5)
-#add_subdirectory(qtquick2)
-#add_subdirectory(imgui_play)
-#add_subdirectory(range)
-#add_subdirectory(text_unicode_shape_render)
-#add_subdirectory(google_test)
-add_subdirectory(libtxt)
-add_subdirectory(win_os)
-## The gtest/gtest_main targets carry header search path
-## dependencies automatically when using CMake 2.8.11 or
-## later. Otherwise we have to add them here ourselves.
-#if (CMAKE_VERSION VERSION_LESS 2.8.11)
-#    include_directories("${gtest_SOURCE_DIR}/include")
-#endif()
-#
-#include_directories(~/github/boost)
-#set(SOURCE_FILES main.cpp string_algrithm.h boost_xpressive.cpp)
-#add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-#target_link_libraries(${PROJECT_NAME} gtest_main)
-#add_test(NAME ${PROJECT_NAME}_test COMMAND ${PROJECT_NAME})
+
+#add_subdirectory(cpp17_stl)
+add_subdirectory(cpp_language)
