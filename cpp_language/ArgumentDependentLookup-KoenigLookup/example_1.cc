@@ -7,6 +7,7 @@ namespace A {
     void g(X){std::cout << "calling A::g()\n";}
 };
 
+
 //void g(A::X){std::cout <<"calling ::g()\n";}
 int main(){
     A::X x1;
