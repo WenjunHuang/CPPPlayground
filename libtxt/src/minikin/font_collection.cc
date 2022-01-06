@@ -6,11 +6,14 @@
 #include <unicode/uchar.h>
 #include <mutex>
 #include "emoji.h"
+#include "font_language_list_cache.h"
 #include "log/log.h"
 #include "minikin_internal.h"
 
 namespace minikin {
 
+const uint32_t EMOJI_STYLE_VS = 0xFE0F;
+const uint32_t TEXT_STYLE_VS = 0xFE0E;
 // Special scores for the font fallback.
 const uint32_t kUnsupportedFontScore = 0;
 const uint32_t kFirstFontScore = UINT32_MAX;
@@ -41,8 +44,17 @@ static bool isStickyAllowed(uint32_t c) {
   }
   return false;
 }
+
 static bool isVariationSelector(uint32_t c) {
   return (0xFE00 <= c && c <= 0xFE0F) || (0xE0100 <= c && c <= 0xE01EF);
+}
+
+uint32_t FontCollection::next_id_ = 0;
+
+// libtxt: return a locale string for a language list ID
+std::string GetFontLocale(uint32_t langListId) {
+  const auto& langs = FontLanguageListCache::getById(langListId);
+  return langs.size() ? langs[0].getString() : "";
 }
 
 // Implement heuristic for choosing best-match font. Here are the rules:
@@ -79,6 +91,7 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(
     //        vs == 0 ? families_[family_vec_[i]] : families_[i]
   }
 }
+
 void FontCollection::itemize(const uint16_t* string,
                              size_t string_length,
                              FontStyle style,
@@ -153,6 +166,7 @@ void FontCollection::itemize(const uint16_t* string,
     run->end = nextUtf16Pos;  // exclusive
   } while (nextCh != kEndOfString);
 }
+
 uint32_t FontCollection::getId() const {
   return id_;
 }
@@ -166,14 +180,15 @@ std::shared_ptr<FontCollection> FontCollection::Create(
     return nullptr;
   return font_collection;
 }
+
 bool FontCollection::init(
     const std::vector<std::shared_ptr<FontFamily>>& typefaces) {
   std::scoped_lock lock(gMinikinLock);
   id_ = next_id_++;
   std::vector<uint32_t> lastChar;
   size_t nTypefaces = typefaces.size();
-
   const FontStyle defaultStyle;
+
   for (size_t i = 0; i < nTypefaces; i++) {
     const auto& family = typefaces[i];
     if (family->getClosestMatch(defaultStyle).font == nullptr) {
@@ -187,7 +202,7 @@ bool FontCollection::init(
     max_char_ = std::max(max_char_, coverage.length());
     lastChar.push_back(coverage.nextSetBit(0));
 
-    const std::unordered_set<AxisTag>& supportedAxes = family->supportedAxes();
+    const auto& supportedAxes = family->supportedAxes();
     supported_axes_.insert(supportedAxes.begin(), supportedAxes.end());
   }
   nTypefaces = families_.size();
@@ -199,8 +214,112 @@ bool FontCollection::init(
     ALOGE("Font collection may only have up to 254 font families.");
     return false;
   }
-
   size_t nPages = (max_char_ + kPageMask) >> kLogCharsPerPage;
+
+  // A font can have a glyph for a base code point and variation selector pair
+  // but no glyph for the base code point without variation selector. The family
+  // won't be listed in the range in this case.
+  for (size_t i = 0; i < nPages; i++) {
+    Range dummy;
+    ranges_.push_back(dummy);
+    auto range = &ranges_.back();
+    range->start = family_vec_.size();
+    for (size_t j = 0; j < nTypefaces; j++) {
+      if (lastChar[j] < (i + 1) << kLogCharsPerPage) {
+        const auto& family = families_[j];
+        family_vec_.push_back(static_cast<uint8_t>(j));
+        uint32_t nextChar =
+            family->getCoverage().nextSetBit((i + 1) << kLogCharsPerPage);
+        lastChar[j] = nextChar;
+      }
+    }
+    range->end = family_vec_.size();
+  }
+
+  if (family_vec_.size() >= 0xFFFF) {
+    ALOGE("Exceeded the maximum indexable cmap coverage.");
+    return false;
+  }
+  return true;
+}
+
+bool FontCollection::hasVariationSelector(uint32_t baseCodepoint,
+                                          uint32_t variationSelector) const {
+  if (!isVariationSelector(variationSelector)) {
+    return false;
+  }
+  if (baseCodepoint >= max_char_) {
+    return false;
+  }
+
+  std::scoped_lock lock(gMinikinLock);
+
+  // Currently mRanges can not be used here since it isn't aware of the
+  // variation sequence.
+  for (const auto & family : vs_family_vec_) {
+    if (family->hasGlyph(baseCodepoint, variationSelector)) {
+      return true;
+    }
+  }
+
+  // Even if there is no cmap format 14 sub-table entry for the given sequence,
+  // should return true for <char, text presentation selector> case since we
+  // have special fallback rule for the sequence. Note that we don't need to
+  // restrict this to already standardized variation sequences, since Unicode is
+  // adding variation sequences more frequently now and may even move towards
+  // allowing text and emoji variation selectors on any character.
+  if (variationSelector == TEXT_STYLE_VS) {
+    for (const auto& family : families_) {
+      if (!family->isColorEmojiFamily() && family->hasGlyph(baseCodepoint, 0)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+const std::shared_ptr<FontFamily>& FontCollection::findFallbackFont(
+    uint32_t ch,
+    uint32_t vs,
+    uint32_t langListId) const {
+  std::string locale = GetFontLocale(langListId);
+
+  const auto it = cached_fallback_families_.find(locale);
+  if (it != cached_fallback_families_.end()) {
+    for (const auto& fallbackFamily : it->second) {
+      if (calcCoverageScore(ch, vs, fallbackFamily)) {
+        return fallbackFamily;
+      }
+    }
+  }
+
+  const auto& fallback =
+      fallback_font_provider_->matchFallbackFont(ch, GetFontLocale(langListId));
+  if (fallback) {
+    cached_fallback_families_[locale].push_back(fallback);
+  }
+  return fallback;
+}
+
+// Calculates a font score based on variation sequence coverage.
+// - Returns kUnsupportedFontScore if the font doesn't support the variation
+// sequence or its base
+//   character.
+// - Returns kFirstFontScore if the font family is the first font family in the
+// collection and it
+//   supports the given character or variation sequence.
+// - Returns 3 if the font family supports the variation sequence.
+// - Returns 2 if the vs is a color variation selector (U+FE0F) and if the font
+// is an emoji font.
+// - Returns 2 if the vs is a text variation selector (U+FE0E) and if the font
+// is not an emoji font.
+// - Returns 1 if the variation selector is not specified or if the font family
+// only supports the
+//   variation sequence's base character.
+uint32_t FontCollection::calcCoverageScore(
+    uint32_t ch,
+    uint32_t vs,
+    const std::shared_ptr<FontFamily>& fontFamily) const {
+  return 0;
 }
 
 }  // namespace minikin

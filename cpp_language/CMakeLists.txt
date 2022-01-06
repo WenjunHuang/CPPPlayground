@@ -9,4 +9,6 @@
 #add_subdirectory(CPP1114)
 set(PREFIX cpp_language)
 find_package(doctest CONFIG REQUIRED)
-add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS doctest::doctest)
+find_package(GTest CONFIG REQUIRED)
+
+add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS doctest::doctest GTest::gtest)

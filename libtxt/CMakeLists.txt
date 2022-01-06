@@ -1,8 +1,8 @@
 set(CMAKE_CXX_STANDARD 17)
-if (MSVC)
+if(MSVC)
     add_compile_options("/Zc:__cplusplus" "/utf-8")
-    #"/fsanitize=address")
-endif ()
+    # "/fsanitize=address")
+endif()
 
 find_package(PkgConfig)
 find_package(fmt CONFIG REQUIRED)
@@ -14,11 +14,24 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(skia CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(benchmark CONFIG REQUIRED)
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(
+        Qt5
+        COMPONENTS Core Widgets
+        REQUIRED)
 
-
-set(DEPS harfbuzz freetype ICU::dt ICU::in ICU::io fmt::fmt spdlog::spdlog spdlog::spdlog_header_only skia::skia)
-add_library(libtxt STATIC src/minikin/SparseBitSet.cpp
+set(DEPS
+    harfbuzz
+    freetype
+    ICU::dt
+    ICU::in
+    ICU::io
+    fmt::fmt
+    spdlog::spdlog
+    spdlog::spdlog_header_only
+    skia::skia)
+add_library(
+        libtxt STATIC
+        src/minikin/SparseBitSet.cpp
         src/minikin/SparseBitSet.h
         src/minikin/font_family.cc
         src/minikin/font_family.h
@@ -27,25 +40,51 @@ add_library(libtxt STATIC src/minikin/SparseBitSet.cpp
         src/minikin/Hyphenator.cpp
         src/minikin/Hyphenator.h
         src/minikin/minikin_internal.h
-        src/minikin/hb_font_cache.cc src/minikin/hb_font_cache.h
+        src/minikin/hb_font_cache.cc
+        src/minikin/hb_font_cache.h
         src/log/log.cc
-        src/log/log.h src/minikin/minikin_internal.cc src/minikin/font_language_list_cache.cc src/minikin/font_language_list_cache.h src/minikin/font_language.cc src/minikin/font_language.h
-        src/utils/JenkinsHash.cpp src/minikin/font_utils.cc src/minikin/font_utils.h src/minikin/cmap_coverage.cc src/minikin/cmap_coverage.h src/minikin/grapheme_break.cc src/minikin/grapheme_break.h src/minikin/font_collection.cc src/minikin/font_collection.h src/minikin/line_breaker.cc src/minikin/line_breaker.h src/minikin/word_breaker.cc src/minikin/word_breaker.h src/minikin/emoji.cc src/minikin/emoji.h src/minikin/layout.cc src/minikin/layout.h)
+        src/log/log.h
+        src/minikin/minikin_internal.cc
+        src/minikin/font_language_list_cache.cc
+        src/minikin/font_language_list_cache.h
+        src/minikin/font_language.cc
+        src/minikin/font_language.h
+        src/utils/JenkinsHash.cpp
+        src/minikin/font_utils.cc
+        src/minikin/font_utils.h
+        src/minikin/cmap_coverage.cc
+        src/minikin/cmap_coverage.h
+        src/minikin/grapheme_break.cc
+        src/minikin/grapheme_break.h
+        src/minikin/font_collection.cc
+        src/minikin/font_collection.h
+        src/minikin/line_breaker.cc
+        src/minikin/line_breaker.h
+        src/minikin/word_breaker.cc
+        src/minikin/word_breaker.h
+        src/minikin/emoji.cc
+        src/minikin/emoji.h
+        src/minikin/layout.cc
+        src/minikin/layout.h)
 target_link_libraries(libtxt PUBLIC ${DEPS})
-target_include_directories(libtxt PUBLIC "${CMAKE_CURRENT_LIST_DIR}/src"
+target_include_directories(
+        libtxt PUBLIC "${CMAKE_CURRENT_LIST_DIR}/src"
         $<TARGET_PROPERTY:GTest::gtest,INCLUDE_DIRECTORIES>)
-target_compile_definitions(libtxt PRIVATE $<$<CONFIG:DEBUG>:ENABLE_RACE_DETECTION>)
+target_compile_definitions(libtxt
+                           PRIVATE $<$<CONFIG:DEBUG>:ENABLE_RACE_DETECTION>)
 
 add_executable(libtxt_render src/render/main.cc)
-target_link_libraries(libtxt_render PRIVATE libtxt Qt5::Widgets
-        Qt5::Core
-        ${DEPS})
+target_link_libraries(libtxt_render PRIVATE libtxt Qt5::Widgets Qt5::Core
+                      ${DEPS})
 
-add_custom_target(libtxt_fonts
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/fonts ${CMAKE_CURRENT_BINARY_DIR}/fonts)
+add_custom_target(
+        libtxt_fonts
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/fonts
+        ${CMAKE_CURRENT_BINARY_DIR}/fonts)
 
 # test
-add_executable(libtxt_test
+add_executable(
+        libtxt_test
         test/main.cc
         test/HbFontCacheTest.cc
         test/SparseBitSetTest.cpp
@@ -55,17 +94,9 @@ add_executable(libtxt_test
         test/CmapCoverageTest.cc
         test/FontCollectionTest.cc
         test/WordBreakerTest.cc
-        test/FontFamilyTest.cc
-        )
-target_link_libraries(libtxt_test PRIVATE
-        libtxt
-        GTest::gtest
-        )
+        test/FontFamilyTest.cc)
+target_link_libraries(libtxt_test PRIVATE libtxt GTest::gtest)
 add_dependencies(libtxt_test libtxt_fonts)
 
-add_executable(libtxt_benchmark
-        test/SparseBitSetBenchmark.cc)
-target_link_libraries(libtxt_benchmark PRIVATE
-        libtxt benchmark::benchmark)
-
-
+add_executable(libtxt_benchmark test/SparseBitSetBenchmark.cc)
+target_link_libraries(libtxt_benchmark PRIVATE libtxt benchmark::benchmark)

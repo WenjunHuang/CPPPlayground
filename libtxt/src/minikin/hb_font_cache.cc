@@ -47,7 +47,7 @@ hb_font_t* getHbFontLocked(const MinikinFont* minikinFont) {
   assertMinikinLocked();
   static hb_font_t* nullFaceFont = nullptr;
   if (minikinFont == nullptr) {
-    if (nullFaceFont == nullptr){
+    if (nullFaceFont == nullptr) {
       nullFaceFont = hb_font_create(nullptr);
     }
     return hb_font_reference(nullFaceFont);
