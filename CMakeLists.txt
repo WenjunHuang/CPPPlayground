@@ -134,3 +134,5 @@ add_custom_target(assets
 #add_subdirectory(leetcode)
 #add_subdirectory(qt5_core)
 add_subdirectory(cpp_std_library)
+add_subdirectory(qt5_core)
+add_subdirectory(tdd)
