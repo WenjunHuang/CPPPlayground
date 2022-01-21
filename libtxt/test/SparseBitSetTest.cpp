@@ -21,23 +21,54 @@
 
 namespace minikin {
 
-TEST(SparseBitSetTest, smallAmount) {
-  std::vector<uint32_t> range;
-  range.push_back(1);
-  range.push_back(2);
-//  for (uint32_t i = 1; i <= 128; ++i) {
-//    range.push_back(i);
+TEST(SparseBitSetTest, calcNumPages) {
+  std::vector<uint32_t> bigRangePage;
+  bigRangePage.push_back(SparseBitSet::kMaximumCapacity - 215);
+  bigRangePage.push_back(SparseBitSet::kMaximumCapacity - 1);
+  SparseBitSet sbt0(bigRangePage.data(), 1);
+
+  std::vector<uint32_t> singleInFirstPage;
+  singleInFirstPage.push_back(SparseBitSet::kPageMask / 5);
+  singleInFirstPage.push_back(SparseBitSet::kPageMask / 3);
+  EXPECT_EQ(1, SparseBitSet::calcNumPages(singleInFirstPage.data(), 1));
+  SparseBitSet sbs1(singleInFirstPage.data(), 1);
+  EXPECT_EQ(singleInFirstPage[0], sbs1.nextSetBit(0));
+
+  std::vector<uint32_t> singleRangeFromBegin;
+  singleRangeFromBegin.push_back(0 + SparseBitSet::kPageMask / 5);
+  singleRangeFromBegin.push_back(SparseBitSet::kPageMask +
+                                 SparseBitSet::kPageMask / 5);
+  EXPECT_EQ(2, SparseBitSet::calcNumPages(singleRangeFromBegin.data(), 1));
+
+  std::vector<uint32_t> singleRangeNotFromBegin;
+  singleRangeNotFromBegin.push_back(SparseBitSet::kPageMask * 3 +
+                                    SparseBitSet::kPageMask / 5);
+  singleRangeNotFromBegin.push_back(SparseBitSet::kPageMask * 4 +
+                                    SparseBitSet::kPageMask / 5);
+  EXPECT_EQ(3, SparseBitSet::calcNumPages(singleRangeNotFromBegin.data(), 1));
+
+  std::vector<uint32_t> twoRangesNotFromBeginAndNotContinue;
+  twoRangesNotFromBeginAndNotContinue.push_back(SparseBitSet::kPageMask * 3 +
+                                                SparseBitSet::kPageMask / 5);
+  twoRangesNotFromBeginAndNotContinue.push_back(SparseBitSet::kPageMask * 4 +
+                                                SparseBitSet::kPageMask / 5);
+  twoRangesNotFromBeginAndNotContinue.push_back(SparseBitSet::kPageMask * 5 +
+                                                SparseBitSet::kPageMask / 5);
+  twoRangesNotFromBeginAndNotContinue.push_back(SparseBitSet::kPageMask * 6 +
+                                                SparseBitSet::kPageMask / 5);
+  EXPECT_EQ(5, SparseBitSet::calcNumPages(
+                   twoRangesNotFromBeginAndNotContinue.data(), 2));
+}
+
+TEST(SparseBitSetTest, my) {
+  std::vector<uint32_t> data;
+  data.push_back(1231);
+  data.push_back(0xFFFFFc);
+  SparseBitSet sbs(data.data(), data.size() / 2);
+//  for (auto ch = 1231; ch < 0xFFFFFc; ch++) {
+//    ASSERT_TRUE(sbs.get(ch)) << ch;
 //  }
-  SparseBitSet bitset(range.data(), 1);
-//  for (uint32_t ch = 1; ch < 256; ch++) {
-//    ASSERT_TRUE(bitset.get(ch)) << ch;
-//  }
-//  ASSERT_FALSE(bitset.get(9391231));
-  ASSERT_TRUE(bitset.get(1));
-  ASSERT_FALSE(bitset.get(2));
-//  for (uint32_t ch = 129; ch < 256; ch++) {
-//    ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
-//  }
+  EXPECT_EQ(1231, sbs.nextSetBit(0));
 }
 
 TEST(SparseBitSetTest, randomTest) {
@@ -68,6 +99,18 @@ TEST(SparseBitSetTest, randomTest) {
   for (; ch < 0x1FFFFFF; ++ch) {
     ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
   }
+  EXPECT_EQ(range[0], bitset.nextSetBit(0));
 }
+
+uint32_t createBitVector(uint32_t from, uint32_t to) {
+  // 给定一个范围，0-31，返回对应的bit vector
+  if (from > to || to > 31)
+    return 0;
+  constexpr uint32_t kAllOnes = ~0;
+  constexpr const int kLogBitsPerEl = 5;
+  static const int kElMask = (1 << kLogBitsPerEl) - 1;  // 0x1F
+}
+
+TEST(SparseBitSetTest, setBitsAlgorithm) {}
 
 }  // namespace minikin

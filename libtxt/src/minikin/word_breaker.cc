@@ -224,7 +224,7 @@ ssize_t WordBreaker::wordStart() const {
     UChar32 c;
     ssize_t ix = result;
     U16_NEXT(text_, ix, current_, c);
-    const int32_t lb = u_getIntPropertyValue(c,UCHAR_LINE_BREAK);
+    const int32_t lb = u_getIntPropertyValue(c, UCHAR_LINE_BREAK);
     // strip leading punctuation, defined as OP and QU line breaking classes,
     // see UAX #14
     if (!(lb == U_LB_OPEN_PUNCTUATION || lb == U_LB_QUOTATION)) {
@@ -246,8 +246,15 @@ ssize_t WordBreaker::wordEnd() const {
     const int32_t gc_mask = U_GET_GC_MASK(c);
 
     // strip trailing space and punctuation
+    if ((gc_mask & (U_GC_ZS_MASK | U_GC_P_MASK)) == 0) {
+      break;
+    }
+    result = ix;
   }
-  return 0;
+  return result;
+}
+int WordBreaker::breakBadness() const {
+  return (in_email_or_url_ && current_ < scan_offset_) ? 1 : 0;
 }
 
 }  // namespace minikin

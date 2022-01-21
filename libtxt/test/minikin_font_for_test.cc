@@ -4,8 +4,10 @@
 
 #include "minikin_font_for_test.h"
 #include <skia/core/SkData.h>
+
 namespace minikin {
 static int uniqueId = 0;
+
 MinikinFontForTest::MinikinFontForTest(
     const std::string& font_path,
     int index,
@@ -18,11 +20,13 @@ MinikinFontForTest::MinikinFontForTest(
   if (!font_data_)
     throw std::exception("can not open font file");
 }
+
 float MinikinFontForTest::GetHorizontalAdvance(
     uint32_t glyph_id,
     const MinikinPaint& paint) const {
   return 10.0f;
 }
+
 void MinikinFontForTest::GetBounds(MinikinRect* bounds,
                                    uint32_t glyph_id,
                                    const MinikinPaint& paint) const {
@@ -31,11 +35,13 @@ void MinikinFontForTest::GetBounds(MinikinRect* bounds,
   bounds->mTop = 0.0f;
   bounds->mBottom = 0.0f;
 }
+
 std::shared_ptr<MinikinFont> MinikinFontForTest::CreateFontWithVariation(
     const std::vector<FontVariation>& vector) const {
   return std::shared_ptr<MinikinFont>(
       new MinikinFontForTest(font_path_, font_index_, variations_));
 }
+
 hb_face_t* MinikinFontForTest::CreateHarfBuzzFace() const {
   auto blob =
       hb_blob_create((const char*)font_data_->data(), font_data_->size(),

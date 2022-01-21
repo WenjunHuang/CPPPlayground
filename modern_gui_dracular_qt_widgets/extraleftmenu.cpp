@@ -25,7 +25,7 @@ struct ExtraLeftMenuPrivate : QFramePrivate {
         collapsed->assignProperty(q, "minimumWidth", 10);
         auto expanded      = new QState();
         auto preferredSize = q->sizeHint();
-        expanded->assignProperty(q, "minimumWidth", 254);
+        expanded->assignProperty(q, "minimumWidth", 300);
 
         auto animation1 = new QPropertyAnimation(q, "minimumWidth");
         animation1->setDuration(500);

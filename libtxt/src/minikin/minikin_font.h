@@ -73,18 +73,25 @@ typedef void (*MinikinDestroyFunc)(void* data);
 class MinikinFont {
  public:
   explicit MinikinFont(int32_t unique_id) : unique_id_(unique_id) {}
+
   virtual ~MinikinFont();
-  virtual float GetHorizontalAdvance(uint32_t glyph_id,
-                                     const MinikinPaint& paint) const = 0;
+
+  [[nodiscard]] virtual float GetHorizontalAdvance(
+      uint32_t glyph_id,
+      const MinikinPaint& paint) const = 0;
+
   virtual void GetBounds(MinikinRect* bounds,
                          uint32_t glyph_id,
                          const MinikinPaint& paint) const = 0;
 
-  virtual hb_face_t* CreateHarfBuzzFace() const { return nullptr; }
+  [[nodiscard]] virtual hb_face_t* CreateHarfBuzzFace() const {
+    return nullptr;
+  }
 
-  virtual const std::vector<minikin::FontVariation>& GetAxes() const = 0;
+  [[nodiscard]] virtual const std::vector<minikin::FontVariation>& GetAxes()
+      const = 0;
 
-  virtual std::shared_ptr<MinikinFont> CreateFontWithVariation(
+  [[nodiscard]] virtual std::shared_ptr<MinikinFont> CreateFontWithVariation(
       const std::vector<FontVariation>&) const {
     return nullptr;
   }

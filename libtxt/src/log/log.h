@@ -47,9 +47,14 @@
 #define ALOGW(message, ...) (spdlog::warn(message))
 #endif
 
-#ifndef ALOGE
-#define ALOGE(message, ...) (spdlog::error(message))
-#endif
+//#ifndef ALOGE
+//#define ALOGE(message, ...) (spdlog::error(message))
+//#endif
+
+template <typename MSG, typename... Args>
+void ALOGE(MSG message, Args&&... args) {
+  spdlog::error(message, std::forward<Args>(args)...);
+}
 
 #define android_errorWriteLog(tag, subTag) \
   __android_log_error_write(tag, subTag, -1, NULL, 0)

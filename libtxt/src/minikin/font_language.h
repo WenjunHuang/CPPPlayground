@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <gtest/gtest_prod.h>
 #include <harfbuzz/hb.h>
 #include <cstdint>
 #include <string>
@@ -40,6 +41,14 @@ class FontLanguage {
   // Parse from string
   FontLanguage(const char* buf, size_t length);
 
+  bool operator==(const FontLanguage& other) const {
+    return !isUnsupported() && isEqualScript(other) &&
+           language_ == other.language_ && region_ == other.region_ &&
+           emoji_style_ == other.emoji_style_;
+  }
+
+  bool operator!=(const FontLanguage& other) const { return !(*this == other); }
+
   [[nodiscard]] bool isUnsupported() const { return language_ == INVALID_CODE; }
   [[nodiscard]] EmojiStyle getEmojiStyle() const { return emoji_style_; }
   [[nodiscard]] hb_language_t getHbLanguage() const { return hbLanguage_; }
@@ -63,6 +72,8 @@ class FontLanguage {
   }
 
  private:
+  FRIEND_TEST(FontLanguage, parse);
+
   friend class FontLanguages;  // for FontLanguages constructor
 
   // ISO 15924 compliant script code. The 4 chars script code are packed into a

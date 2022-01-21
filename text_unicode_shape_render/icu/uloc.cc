@@ -16,7 +16,19 @@ int main(int argc, char** argv) {
 
 TEST(ULoc, Canonicalization) {
   char result[ULOC_FULLNAME_CAPACITY] = {'\0'};
+  char temp[ULOC_FULLNAME_CAPACITY] = {'\0'};
+
   UErrorCode uErr = U_ZERO_ERROR;
+  uloc_forLanguageTag("en-Latn-US", result, ULOC_FULLNAME_CAPACITY, nullptr,
+                      &uErr);
+  EXPECT_STREQ("en_Latn_US", result);
+
+  uloc_canonicalize("en", result, ULOC_FULLNAME_CAPACITY, &uErr);
+  uloc_addLikelySubtags(result, temp, ULOC_FULLNAME_CAPACITY, &uErr);
+  EXPECT_STREQ("en_Latn_US", temp);
+  uloc_toLanguageTag(temp, result, ULOC_FULLNAME_CAPACITY, false, &uErr);
+  EXPECT_STREQ("en-Latn-US", result);
+
   uloc_canonicalize("en_US@VARIANT", result, ULOC_FULLNAME_CAPACITY, &uErr);
   EXPECT_STREQ("en_US_VARIANT", result);
 
@@ -29,34 +41,35 @@ TEST(ULoc, Canonicalization) {
   uloc_canonicalize("zh-CN", result, ULOC_FULLNAME_CAPACITY, &uErr);
   EXPECT_STREQ("zh_CN", result);
 
-  uloc_canonicalize("he-IL-u-ca-hebrew-tz-jeruslm", result, ULOC_FULLNAME_CAPACITY, &uErr);
-  EXPECT_STREQ("zh_CN", result);
+  uloc_canonicalize("he-IL-u-ca-hebrew-tz-jeruslm", result,
+                    ULOC_FULLNAME_CAPACITY, &uErr);
+  EXPECT_STREQ("he_IL@calendar=hebrew;timezone=Asia/Jerusalem", result);
 
+  uloc_canonicalize("und", result, ULOC_FULLNAME_CAPACITY, &uErr);
+  EXPECT_STREQ("und", result);
 
-//  uErr = U_ZERO_ERROR;
-//  uloc_canonicalize("und-Zzzz",result,ULOC_FULLNAME_CAPACITY,&uErr);
-//  EXPECT_STREQ("und_Zzzz",result);
-
+  //  uErr = U_ZERO_ERROR;
+  //  uloc_canonicalize("und-Zzzz",result,ULOC_FULLNAME_CAPACITY,&uErr);
+  //  EXPECT_STREQ("und_Zzzz",result);
 }
 
-TEST(ULoc,AddLikelySubtags) {
+TEST(ULoc, AddLikelySubtags) {
   char likely[ULOC_FULLNAME_CAPACITY] = {'\0'};
   char result[ULOC_FULLNAME_CAPACITY] = {'\0'};
 
   UErrorCode uErr = U_ZERO_ERROR;
-  uloc_addLikelySubtags("zh_CN",likely,ULOC_FULLNAME_CAPACITY,&uErr);
-  EXPECT_STREQ("zh_Hans_CN",likely);
+  uloc_addLikelySubtags("zh_CN", likely, ULOC_FULLNAME_CAPACITY, &uErr);
+  EXPECT_STREQ("zh_Hans_CN", likely);
 
-  uloc_addLikelySubtags("und",likely,ULOC_FULLNAME_CAPACITY,&uErr);
-  EXPECT_STREQ("en_Latn_US",likely);
-
-  uErr = U_ZERO_ERROR;
-  uloc_toLanguageTag(likely,result,ULOC_FULLNAME_CAPACITY,false,&uErr);
-  EXPECT_STREQ("en-Latn-US",result);
+  uloc_addLikelySubtags("und", likely, ULOC_FULLNAME_CAPACITY, &uErr);
+  EXPECT_STREQ("en_Latn_US", likely);
 
   uErr = U_ZERO_ERROR;
-  uloc_toLanguageTag("he_IL@calendar=hebrew;timezone=Asia/Jerusalem",result,ULOC_FULLNAME_CAPACITY,false,&uErr);
-  EXPECT_STREQ("he-IL-u-ca-hebrew-tz-jeruslm",result);
+  uloc_toLanguageTag(likely, result, ULOC_FULLNAME_CAPACITY, false, &uErr);
+  EXPECT_STREQ("en-Latn-US", result);
 
-
+  uErr = U_ZERO_ERROR;
+  uloc_toLanguageTag("he_IL@calendar=hebrew;timezone=Asia/Jerusalem", result,
+                     ULOC_FULLNAME_CAPACITY, false, &uErr);
+  EXPECT_STREQ("he-IL-u-ca-hebrew-tz-jeruslm", result);
 }

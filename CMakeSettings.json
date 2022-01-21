@@ -1,0 +1,14 @@
+{
+  "configurations": [
+    {
+      "name": "x64-debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "cmakeCommandArgs": "-DCMAKE_TOOLCHAIN_FILE=C:/Users/rick/github/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "buildCommandArgs": "-v",
+      "addressSanitizerEnabled": true,
+      "inheritEnvironments": [ "msvc_x64" ]
+    }
+  ]
+}

@@ -8,18 +8,21 @@ find_package(harfbuzz CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(rapidcheck CONFIG REQUIRED)
 
 set(PREFIX text)
 add_custom_target(${PREFIX}_fonts
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/fonts ${CMAKE_CURRENT_BINARY_DIR}/fonts
-        )
+                  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/fonts ${CMAKE_CURRENT_BINARY_DIR}/fonts
+                  )
 add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS
-        freetype Qt5::Core Qt5::CorePrivate Qt5::Widgets
-        ICU::dt ICU::in ICU::io
-        harfbuzz
-        harfbuzz::harfbuzz
-        GTest::gtest
-        fmt::fmt
-        DEPS ${PREFIX}_fonts assets
-        INCLUDES ${Qt5Gui_PRIVATE_INCLUDE_DIRS})
+                        freetype Qt5::Core Qt5::CorePrivate Qt5::Widgets
+                        ICU::dt ICU::in ICU::io
+                        harfbuzz
+                        harfbuzz::harfbuzz
+                        GTest::gtest
+                        fmt::fmt
+                        rapidcheck
+                        rapidcheck_gmock
+                        DEPS ${PREFIX}_fonts assets
+                        INCLUDES ${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 add_subdirectory(icu)
