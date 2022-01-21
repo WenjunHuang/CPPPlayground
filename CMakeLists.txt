@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
 project(CPPPlayground)
 enable_testing()
-set(CMAKE_CXX_STANDARD 17)
-if (MSVC)
-    add_compile_options("/Zc:__cplusplus" "/utf-8" "/std:c++latest")
-endif ()
+set(CMAKE_CXX_STANDARD 20)
+#if (MSVC)
+#    add_compile_options("/Zc:__cplusplus" "/utf-8" "/std:c++latest")
+#endif ()
 if (APPLE)
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 endif ()
@@ -123,8 +123,9 @@ add_custom_target(assets
 #add_subdirectory(imgui_play)
 #add_subdirectory(range)
 #add_subdirectory(text_unicode_shape_render)
+add_subdirectory(coroutines)
 #add_subdirectory(google_test)
-add_subdirectory(libtxt)
+#add_subdirectory(libtxt)
 ## The gtest/gtest_main targets carry header search path
 ## dependencies automatically when using CMake 2.8.11 or
 ## later. Otherwise we have to add them here ourselves.
