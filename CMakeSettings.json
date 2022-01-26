@@ -1,14 +1,14 @@
 {
-  "configurations": [{
-    "name": "x86-Debug",
-    "generator": "Visual Studio 15 2017",
-    "configurationType" : "Debug",
-    "buildRoot":  "${env.LOCALAPPDATA}\\CMakeBuild\\${workspaceHash}\\build\\${name}",
-    "cmakeCommandArgs": "",
-    "buildCommandArgs": "-m -v:minimal",
-    "variables": [{
-      "name": "CMAKE_TOOLCHAIN_FILE",
-      "value": "D:\\src\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake"
-    }]
-  }]
+  "configurations": [
+    {
+      "name": "x64-debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "cmakeCommandArgs": "-DCMAKE_TOOLCHAIN_FILE=C:/Users/rick/github/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "buildCommandArgs": "-v",
+      "addressSanitizerEnabled": true,
+      "inheritEnvironments": [ "msvc_x64" ]
+    }
+  ]
 }

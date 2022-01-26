@@ -52,8 +52,11 @@ class SparseBitSet {
       return false;
     const uint32_t* bitmap = &mBitmaps[mIndices[ch >> kLogValuesPerPage]];
     uint32_t index = ch & kPageMask;
-    return (bitmap[index >> kLogBitsPerEl] & (kElFirst >> (index & kElMask))) !=
-           0;
+    auto result = (bitmap[index >> kLogBitsPerEl] & (kElFirst >> (index & kElMask))) !=
+                  0;
+    if(!result)
+      return result;
+    return result;
   }
 
   // One more than the maximum value in the set, or zero if empty

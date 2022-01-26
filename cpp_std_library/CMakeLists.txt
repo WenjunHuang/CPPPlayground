@@ -1,6 +1,8 @@
 set(CMAKE_CXX_STANDARD 17)
-set(PREFIX function_object)
+set(PREFIX cpp_std)
 
-find_package(Qt5 COMPONENTS Core REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS fmt::fmt GTest::gtest GTest::gmock)
 
-add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS Qt5::Core)
+add_subdirectory("iterator-pair algorithms")

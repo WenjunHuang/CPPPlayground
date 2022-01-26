@@ -62,14 +62,15 @@ TEST(SparseBitSetTest, calcNumPages) {
 
 TEST(SparseBitSetTest, my) {
   std::vector<uint32_t> data;
-  data.push_back(0);
-  data.push_back(3);
+  data.push_back(1231);
+  data.push_back(0xFFFFFc);
   SparseBitSet sbs(data.data(), data.size() / 2);
-  for (auto ch = 0; ch < 2; ch++) {
-    ASSERT_TRUE(sbs.get(ch)) << ch;
-  }
-  EXPECT_EQ(0, sbs.nextSetBit(1));
+//  for (auto ch = 1231; ch < 0xFFFFFc; ch++) {
+//    ASSERT_TRUE(sbs.get(ch)) << ch;
+//  }
+  EXPECT_EQ(1231, sbs.nextSetBit(0));
 }
+
 TEST(SparseBitSetTest, randomTest) {
   const uint32_t kTestRangeNum = 4096;
 
@@ -83,22 +84,22 @@ TEST(SparseBitSetTest, randomTest) {
 
   SparseBitSet bitset(range.data(), range.size() / 2);
 
-    uint32_t ch = 0;
-    for (size_t i = 0; i < range.size() / 2; ++i) {
-      uint32_t start = range[i * 2];
-      uint32_t end = range[i * 2 + 1];
+  uint32_t ch = 0;
+  for (size_t i = 0; i < range.size() / 2; ++i) {
+    uint32_t start = range[i * 2];
+    uint32_t end = range[i * 2 + 1];
 
-      for (; ch < start; ch++) {
-        ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
-      }
-      for (; ch < end; ch++) {
-        ASSERT_TRUE(bitset.get(ch)) << std::hex << ch;
-      }
-    }
-    for (; ch < 0x1FFFFFF; ++ch) {
+    for (; ch < start; ch++) {
       ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
     }
-    EXPECT_EQ(range[0],bitset.nextSetBit(0));
+    for (; ch < end; ch++) {
+      ASSERT_TRUE(bitset.get(ch)) << std::hex << ch;
+    }
+  }
+  for (; ch < 0x1FFFFFF; ++ch) {
+    ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
+  }
+  EXPECT_EQ(range[0], bitset.nextSetBit(0));
 }
 
 uint32_t createBitVector(uint32_t from, uint32_t to) {
@@ -109,6 +110,7 @@ uint32_t createBitVector(uint32_t from, uint32_t to) {
   constexpr const int kLogBitsPerEl = 5;
   static const int kElMask = (1 << kLogBitsPerEl) - 1;  // 0x1F
 }
+
 TEST(SparseBitSetTest, setBitsAlgorithm) {}
 
 }  // namespace minikin

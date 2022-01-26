@@ -9,5 +9,7 @@
 #add_subdirectory(CPP1114)
 set(CMAKE_CXX_STANDARD 20)
 set(PREFIX cpp_language)
-add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} )
-add_subdirectory(ArgumentDependentLookup-KoenigLookup)
+find_package(doctest CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+
+add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS doctest::doctest GTest::gtest)
