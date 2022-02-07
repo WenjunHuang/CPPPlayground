@@ -1,0 +1,26 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/material_petal.png</file>
+        <file>images/material_pink.png</file>
+        <file>images/material_poison.png</file>
+        <file>images/material_poisonbone.png</file>
+        <file>images/material_poisondragon_teeth.png</file>
+        <file>images/material_polymer_1_blue.png</file>
+        <file>images/material_polymer_1_orange.png</file>
+        <file>images/material_polymer_2_orange.png</file>
+        <file>images/material_polymer_2_purple.png</file>
+        <file>images/material_power_crystals_02.png</file>
+        <file>images/material_power_crystals_03.png</file>
+        <file>images/material_power_crystals_04.png</file>
+        <file>images/material_power_crystals_05.png</file>
+        <file>images/material_power_source_01.png</file>
+        <file>images/material_power_source_02.png</file>
+        <file>images/material_power_source_03.png</file>
+        <file>images/material_rabbitwool.png</file>
+        <file>images/material_rainbow_apple.png</file>
+        <file>images/material_rainwheat.png</file>
+        <file>images/material_recipe.png</file>
+        <file>images/material_red.png</file>
+        <file>images/material_redberries.png</file>
+    </qresource>
+</RCC>
