@@ -8,7 +8,13 @@ set(PREFIX qt)
 add_subdirectory(EventSystem)
 add_subdirectory(ShapeMakerDemo)
 add_subdirectory(QTableWidget)
+add_subdirectory(QTreeWidget)
+add_subdirectory(FileSystemModel)
+add_subdirectory(StringListModel)
+add_subdirectory(CustomModelsReadOnlyDemo)
+add_subdirectory(benchmark)
 
 add_single_file_targets(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS Qt5::Core Qt5::CorePrivate Qt5::Widgets Qt5::Network Qt5::Quick Qt5::Concurrent Qt5::QuickControls2
-        INCLUDES ${Qt5Gui_PRIVATE_INCLUDE_DIRS})
+                        INCLUDES ${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 #add_dir_target(PREFIX ${PREFIX} DIR ${CMAKE_CURRENT_SOURCE_DIR} LIBS Qt5::Core Qt5::CorePrivate Qt5::Widgets Qt5::Network Qt5::Quick Qt5::Concurrent Qt5::QuickControls2)
+

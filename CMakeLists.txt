@@ -119,7 +119,9 @@ add_custom_target(assets
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
         )
 #add_subdirectory(skia)
+add_subdirectory(benchmark)
 add_subdirectory(qt5)
+add_subdirectory(tdd)
 #add_subdirectory(imgui_play)
 #add_subdirectory(range)
 #add_subdirectory(text_unicode_shape_render)
