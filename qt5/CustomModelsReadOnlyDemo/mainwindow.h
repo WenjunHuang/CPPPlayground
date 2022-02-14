@@ -15,10 +15,13 @@ public:
 
     ~MainWindow();
 
+private slots:
+    void on_addPersonButton_clicked();
+    void on_removePersonButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     PersonModel *_model;
 
-    void on_addPersonButton_clicked();
 };
 

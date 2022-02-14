@@ -13,8 +13,15 @@
 
 class PersonModel : public QAbstractListModel {
 Q_OBJECT
+enum PersonRoles {
+    NamesRole = Qt::UserRole + 1,
+    FavoriteColorRole,
+    AgeRole
+};
 public:
     explicit PersonModel(QObject *parent = nullptr);
+
+    QHash<int, QByteArray> roleNames() const override;
 
     [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
 

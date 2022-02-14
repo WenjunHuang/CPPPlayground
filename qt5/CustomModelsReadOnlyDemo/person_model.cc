@@ -31,6 +31,18 @@ QVariant PersonModel::data(const QModelIndex &index, int role) const {
     return person->getNames();
   }
 
+  if (role == NamesRole) {
+    return person->getNames();
+  }
+
+  if (role == FavoriteColorRole) {
+    return person->getFavoriteColor();
+  }
+
+  if (role == AgeRole) {
+    return person->getAge();
+  }
+
   if (role == Qt::ToolTipRole) {
     return person->getNames() + " " + QString::number(index.row());
   }
@@ -51,10 +63,36 @@ bool PersonModel::setData(const QModelIndex &index, const QVariant &value, int r
       }
       break;
     }
+    case NamesRole: {
+      if (person->getNames() != value.toString()) {
+        person->setNames(value.toString());
+        somethingChanged = true;
+      }
+      break;
+    }
+    case AgeRole: {
+      if (person->getAge() != value.toInt()) {
+        person->setAge(value.toInt());
+        somethingChanged = true;
+      }
+      break;
+    }
+    case FavoriteColorRole: {
+      if (person->getFavoriteColor() != value.toString()) {
+        person->setFavoriteColor(value.toString());
+        somethingChanged = true;
+      }
+      break;
+    }
+    default:
+      break;
   }
 
-  if (somethingChanged)
+  if (somethingChanged) {
     emit dataChanged(index, index);
+    return true;
+  }
+  return false;
 }
 
 QVariant PersonModel::headerData(int section, Qt::Orientation orientation, int role) const {
@@ -89,4 +127,10 @@ void PersonModel::removePerson(QModelIndex index) {
   _persons.erase(_persons.begin() + index.row());
   endRemoveRows();
 
+}
+
+QHash<int, QByteArray> PersonModel::roleNames() const {
+  return {{NamesRole,         "names"},
+          {FavoriteColorRole, "favoriteColor"},
+          {AgeRole,           "age"}};
 }
