@@ -5,20 +5,20 @@
 #pragma once
 
 #include <QObject>
-#include <QAbstractListModel>
+#include <QAbstractTableModel>
 #include <vector>
 #include <memory>
 #include <QVariant>
 #include "person.h"
 
-class PersonModel : public QAbstractListModel {
+class PersonModel : public QAbstractTableModel {
 Q_OBJECT
-enum PersonRoles {
-    NamesRole = Qt::UserRole + 1,
-    FavoriteColorRole,
-    AgeRole
-};
 public:
+    enum PersonRoles {
+        NamesRole = Qt::UserRole + 1,
+        FavoriteColorRole,
+        AgeRole
+    };
     explicit PersonModel(QObject *parent = nullptr);
 
     QHash<int, QByteArray> roleNames() const override;
@@ -36,6 +36,14 @@ public:
     void addPerson(QString names,QString favoriteColor,int age);
 
     void removePerson(QModelIndex index);
+
+    bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex{}) override;
+
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex{}) override;
+
+    int columnCount(const QModelIndex &parent) const override;
+
+    bool hasChildren(const QModelIndex &parent) const override;
 
 private:
     std::vector<std::unique_ptr<Person>> _persons;

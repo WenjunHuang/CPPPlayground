@@ -50,6 +50,7 @@ t_str_finalize(GObject *object) {
 
   if (priv->string)
     g_free(priv->string);
+
   G_OBJECT_CLASS(t_str_parent_class)->finalize(object);
 }
 

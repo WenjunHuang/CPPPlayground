@@ -13,7 +13,7 @@ public:
 
     Person(QString name,
            QString favoriteColor,
-           int age);
+           int age,QObject *parent = nullptr);
 
     const QString &getNames() const;
 

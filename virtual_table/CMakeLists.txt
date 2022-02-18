@@ -1,0 +1,1 @@
+add_single_file_targets("virtual_table" DIR ${CMAKE_CURRENT_SOURCE_DIR})

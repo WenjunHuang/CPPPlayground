@@ -4,8 +4,7 @@
 
 #include "person.h"
 
-Person::Person(QObject *parent) : QObject{parent} {
-}
+Person::Person(QObject *parent) : QObject{parent}, _age{0} { }
 
 const QString &Person::getNames() const {
   return _names;
@@ -42,8 +41,12 @@ void Person::setAge(int age) {
   emit ageChanged(_age);
 }
 
-Person::Person(QString names, QString favoriteColor, int age) : _names(std::move(names)),
-                                                                _favoriteColor{std::move(favoriteColor)},
-                                                                _age{age} {
 
-}
+Person::Person(QString names,
+               QString favoriteColor,
+               int age,
+               QObject *parent) : QObject{parent},
+                                  _names(std::move(names)),
+                                  _favoriteColor{
+                                    std::move(favoriteColor)},
+                                  _age{age} {}

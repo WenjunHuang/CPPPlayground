@@ -3,19 +3,30 @@
 #include "ui_mainwindow.h"
 #include "person_model.h"
 #include <QMessageBox>
+#include "person_delegate.h"
 
 MainWindow::MainWindow(QWidget *parent) :
   QWidget(parent),
   ui(new Ui::MainWindow) {
   ui->setupUi(this);
+
+  auto personDelegate = new PersonDelegate{this};
   _model = new PersonModel{this};
 
   ui->listView->setModel(_model);
   ui->tableView->setModel(_model);
+  ui->tableView->setItemDelegateForColumn(2, personDelegate);
   ui->treeView->setModel(_model);
 
-  ui->tableView->setSelectionModel(ui->listView->selectionModel());
-  ui->treeView->setSelectionModel(ui->listView->selectionModel());
+  auto selectionModel = ui->listView->selectionModel();
+  ui->tableView->setSelectionModel(selectionModel);
+  ui->treeView->setSelectionModel(selectionModel);
+  ui->removePersonButton->setEnabled(!selectionModel->selection().isEmpty());
+
+  connect(selectionModel, &QItemSelectionModel::selectionChanged,
+          [this](const QItemSelection &selected, auto &deselected) {
+              ui->removePersonButton->setEnabled(!selected.isEmpty());
+          });
 }
 
 MainWindow::~MainWindow() {
