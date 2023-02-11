@@ -1,0 +1,2 @@
+add_executable(custom_startdelegate main.cc mainwindow.h mainwindow.cc mainwindow.ui star_editor.cc star_editor.h start_delegate.cc start_delegate.h)
+target_link_libraries(custom_startdelegate PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
